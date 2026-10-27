@@ -1,0 +1,20 @@
+{
+  "name": "e-commerce-multi-store-architecture",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Husyn0/E-commerce_multi-store_architecture.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Husyn0/E-commerce_multi-store_architecture/issues"
+  },
+  "homepage": "https://github.com/Husyn0/E-commerce_multi-store_architecture#readme"
+}
