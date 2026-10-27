@@ -1,8 +1,8 @@
 Product scope: a multi-tenant e-commerce application with two user-facing apps:
-Tenant Admin for store owners and Storefront for shoppers. There is no
-platform console, subscription management, plan billing, or platform operator UI.
-Tenant provisioning and recovery are controlled operationally through protected
-CLI/bootstrap procedures.
+Tenant Admin for store owners and Storefront for shoppers. Follow the canonical
+no-platform-layer rule in db-design.txt `_design_rules`; do not add a third
+frontend or cross-tenant control plane. Tenant provisioning, suspension, and
+recovery are controlled through protected env-gated CLI commands.
 
 apps/admin/ and apps/storefront/
                  │
@@ -10,7 +10,7 @@ apps/admin/ and apps/storefront/
                  ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ Laravel API                                                                  │
-│ Resolve tenant from trusted host; authenticate; authorize; tenant-scope data│
+│ Resolve tenant + host_type + status before auth; authorize; tenant-scope    │
 └─────────────────────────────────────────────────────────────────────────────┘
                  │
                  ▼
@@ -21,6 +21,7 @@ app/
 │   ├── Controllers/
 │   │   ├── Admin/
 │   │   │   ├── AuthController.php
+│   │   │   ├── PasswordResetController.php
 │   │   │   ├── ProductController.php
 │   │   │   ├── CategoryController.php
 │   │   │   ├── InventoryController.php
@@ -45,48 +46,129 @@ app/
 │       ├── RequireTenantAdmin.php
 │       └── EnforceConfiguredVerification.php
 ├── Services/
+│   ├── Tenant/
+│   │   └── TenantManager.php          # request context current()/requireStatus()
 │   ├── Payment/
 │   │   ├── PaymentGatewayInterface.php
 │   │   ├── DemoPaymentGateway.php
 │   │   └── StripePaymentGateway.php
-│   ├── Verification/
-│   │   ├── VerificationServiceInterface.php
-│   │   ├── DemoVerificationService.php
-│   │   └── RealVerificationService.php
-│   └── Tenant/
-│       └── TenantManager.php
+│   └── Verification/
+│       ├── VerificationServiceInterface.php
+│       ├── DemoVerificationService.php
+│       └── RealVerificationService.php
 ├── Console/Commands/
-│   └── ProvisionTenant.php
+│   ├── ProvisionTenant.php
+│   ├── SuspendTenant.php
+│   ├── RecoverTenant.php
+│   ├── ResetTenantAdminPassword.php
+│   └── PruneTenantData.php
 ├── Models/                  # Tenant-scoped models defined in db-design.txt
 └── Providers/
     └── PaymentServiceProvider.php
 
 Request and tenancy rules:
-- Storefront host and Admin host resolve to the same tenant record. Admin hostname
-  uses a platform-controlled subdomain; a tenant custom domain is for the public
-  storefront only.
-- Trust forwarded host/protocol headers only from configured reverse proxies and
-  accept hosts only from the platform's domain allowlist or verified custom-domain
-  mapping. Do not treat an arbitrary Host header as a tenant identifier.
-- An Admin JWT tenant_id must match the tenant resolved from the Admin host.
-  Reject missing/unknown hosts and all host/token mismatches; never accept a
-  client-supplied tenant_id as authority.
+- Resolve hosts in the strict order and from environment-only domains/allowlists
+  defined in db-design.txt `_design_rules`; include `host_type` in tenant context.
+  Derive tenant Admin and Storefront subdomains from configured base domains.
+  A custom domain resolves to Storefront only when env-allowlisted and exactly
+  equal to `tenants.custom_domain`. Unknown hosts return 404, never fail open.
+- Trust forwarded host/protocol headers only from configured Laravel
+  `TrustProxies`. Admin routes reject `host_type=storefront`; Storefront routes
+  reject `host_type=admin`. An Admin JWT tenant_id must match resolved tenant.
+  Never treat an arbitrary Host header or client tenant_id as authority.
+- Middleware order is ResolveTenantFromHost (including tenant status), then
+  host-type/status rejection, then authentication, authorization, and controller.
+  Suspended Admin requests receive 403 and suspended Storefront requests 503
+  before auth runs; Admin login on a suspended tenant returns 403 (not 401, no
+  credential-existence signal). GET /health/ready and the payment webhook route
+  bypass this tenant-status gate. Suspended-tenant Storefront 503s are rendered
+  by the Nuxt error page, not by Laravel, and are never cacheable.
 - Resolve tenant context before model access. Every query and mutation, including
   nested relations, must be tenant-scoped. Enforce same-tenant foreign keys in
   the database where supported.
-- V1 Admin routes require the tenant's admin role. Customer routes never grant
-  Admin access. Staff management is deferred until onboarding is designed.
-- Use short-lived access credentials and revocable refresh sessions; store only
-  refresh-token hashes. Cookie-based sessions require Secure, HttpOnly,
-  SameSite, and CSRF protections appropriate to the deployment.
-- The provisioning command must be protected, idempotent, and transactional:
-  create the tenant, initial admin, and settings together; never print passwords
-  or reusable secrets. Restrict command execution to deployment operators and
-  record tenant creation, suspension, and recovery in the tenant audit log.
-- Verify payment webhook signatures before processing. Persist provider event IDs
-  for deduplication and make event handling safe to retry. Resolve webhook tenant
-  from the verified provider account/event mapping, not from an untrusted request
-  host.
+- Only `customer` and `admin` roles exist. Storefront customer and all Admin data
+  access is tenant-scoped; no cross-tenant customer lookup is permitted.
+- Admin auth uses in-memory short-lived JWT access plus hashed refresh sessions
+  in `user_sessions`; Storefront uses an opaque cookie session in `user_sessions`.
+  Cookies are Secure, HttpOnly, SameSite-configured, and protected against CSRF.
+  Refresh requires a double-submit CSRF token; all cookie-session routes validate
+  CSRF. Requests authenticated by the Authorization header are CSRF-exempt.
+  Webhook signature verification replaces browser CSRF and the webhook route is
+  explicitly CSRF-exempt. Refresh updates `user_sessions.last_used_at`;
+  `PruneTenantData` revokes sessions idle beyond `SESSION_IDLE_TTL`. Rotating
+  `SESSION_TOKEN_PEPPER` invalidates all sessions (planned global sign-out).
+- Provision, suspend, recover, and CLI password-reset commands are env-gated,
+  transactional, and audited with `actor_id=NULL`, `source=cli`, and
+  `metadata.operator_ref`. Never print reusable secrets. Admin can read tenant
+  status but cannot change it. ProvisionTenant sets a cryptographically random
+  unusable initial admin password; the operator must run
+  `tenant:reset-admin-password` to initiate the OTP reset. SuspendTenant changes
+  status and revokes every active user_session in the same transaction. The
+  reset command sends OTP via the configured provider; if delivery is broken,
+  an interactive TTY run may display a one-time OTP once to the operator's
+  terminal. Non-TTY execution with a broken delivery provider fails with a clear
+  error and never writes the OTP to stdout or logs. v1 reset is OTP-only; there
+  is no signed-link reset path.
+- The shared `POST /api/webhooks/payment` route verifies signatures, resolves
+  tenants from non-null Stripe connected-account settings or a signed demo
+  tenant_id, rejects unknown accounts/types before insert, and deduplicates
+  provider events by `UNIQUE(tenant_id, provider, provider_event_id)`. It
+  accepts tenant `payment_intent.*`, `charge.*`, and `refund.*` events only.
+  It processes webhooks for suspended tenants and stores
+  `suspended_at_receipt` as a boolean on the event row. Demo signatures use
+  HMAC-SHA-256 of the raw body with `DEMO_WEBHOOK_SECRET`, covering tenant_id;
+  demo `provider_event_id` values include tenant scope. Redelivery of a known
+  event: status in {pending, processing} returns 200 without re-enqueue;
+  processed returns 200; failed resets to pending and re-enqueues bounded by
+  attempts. Unknown-tenant events are logged without tenant_id and are not
+  stored. Rate-limit by source IP and provider. Webhook event rows are never
+  deleted; only `payload` is redacted after retention.
+- Password reset uses one-time email/SMS OTPs for Admin and Storefront; the
+  Admin includes ForgotPassword.vue and ResetPassword.vue. The CLI fallback
+  is `tenant:reset-admin-password` and starts the same OTP/reset flow without
+  printing a reusable password/token. Codes are 6 to 8 digits, expire within
+  10 minutes, allow max_attempts attempts, are invalidated on new issuance for
+  the same (tenant, identifier, purpose), and are rate-limited by identifier
+  and IP. OTPs are never logged.
+- A suspended tenant's Storefront returns 503 and Admin returns 403 before
+  authentication; webhooks and GET /health/ready continue. Health readiness
+  reports global default-driver readiness and per-tenant driver readiness
+  without exposing credentials.
+- Driver/provider configuration is CLI-managed and read-only in Admin.
+  Boot-time production guards check global default drivers only. A tenant's
+  demo/log driver returns 503 only for operations requiring that payment/email/
+  SMS capability. GET /health/ready bypasses the tenant-status gate and reports
+  global and per-tenant driver readiness without credentials; Admin shows a
+  warning banner.
+- PruneTenantData is global by default and supports `--tenant` to narrow scope.
+  It prunes expired carts, verification codes, human verifications, sessions
+  (including idle-beyond-`SESSION_IDLE_TTL`), and checkout idempotency records,
+  and nulls webhook payload only after `WEBHOOK_PAYLOAD_RETENTION_DAYS`. It never
+  deletes audit rows, orders, or `payment_webhook_events` rows.
+- TenantManager exposes only request-context `current()` and `requireStatus()`.
+  `requireStatus()` throws `TenantSuspendedException`, mapped to 403 for
+  host_type=admin and 503 for host_type=storefront. Controllers do not
+  re-implement the check. Host resolution, authentication, and arbitrary tenant
+  querying remain separate.
+- EnforceConfiguredVerification returns 422 for incomplete required verification
+  on register/checkout only, and reads tenant settings from the resolved
+  context. It runs after ResolveTenantFromHost and before the controller on
+  those routes. Requests carry `human_verification_token` and, when required,
+  `email_verification_code` and/or `phone_verification_code`.
+- Web actions write `audit_logs.source=web` and `audit_logs.host_type` from the
+  request context; CLI actions write `source=cli`, `actor_id=NULL`, and
+  `metadata.operator_ref`; webhook actions write `source=webhook` only when a
+  valid event causes an order/payment/refund state change.
+- Every mutating Admin endpoint writes exactly one audit row per the v1 action
+  vocabulary in `db-design.txt` `_design_rules`. Validation failures,
+  authorization failures, and no-op updates do not write audit rows.
+- Checkout uses tenant-scoped Idempotency-Key records with principal binding
+  (user or guest cart token), a canonical request hash over the fixed semantic
+  field set, 24-hour expiry, single-transaction insert/order/update/commit, and
+  DuplicateKey + `order_id IS NULL` reselect handling with `SELECT ... FOR
+  UPDATE`. A different principal or a hash mismatch returns HTTP 409. Expired-key
+  races are handled by delete+insert uniqueness with the same reselect rule.
+  The exact contract is in `db-design.txt` `_design_rules`.
 - Checkout recalculates prices and availability server-side. Payment/refund calls
   need idempotency and explicit state transitions; never infer payment success
   from a browser redirect.

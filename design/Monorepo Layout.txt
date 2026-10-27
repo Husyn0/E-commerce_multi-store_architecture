@@ -3,7 +3,7 @@ e-commerce/
 │   ├── admin/            # Tenant Admin SPA for store owners
 │   └── storefront/       # Customer storefront; SSR/prerender public catalog pages
 ├── packages/
-│   ├── ui/               # Shared accessible Vue components
+│   ├── ui/               # Shared accessible Vue components; framework-agnostic
 │   ├── styles/           # Shared tokens and SCSS
 │   ├── api-client/       # Typed API client; tenant context is server-validated
 │   └── types/            # Shared API contracts, not direct DB mirrors
@@ -12,6 +12,17 @@ e-commerce/
 
 Scope:
 - Two user-facing applications only: tenant Admin and customer Storefront.
-- No platform console, subscriptions, plans, or platform billing application.
-- Tenants represent stores and provide data isolation, store configuration, and host resolution.
-- Tenant provisioning and recovery are operational CLI/bootstrap procedures, not a third frontend.
+- Follow the canonical no-platform-layer rule in db-design.txt `_design_rules`;
+  do not introduce a third app or platform domain.
+- Tenants represent stores and provide data isolation, store configuration, and
+  host resolution.
+- Tenant provisioning and recovery are operational CLI/bootstrap procedures, not
+  a third frontend.
+- `packages/ui` components use props/events only; they do not depend on Nuxt
+  auto-imports, `useFetch`, or `useRoute`. Nuxt-specific adapters live in
+  `apps/storefront`.
+- `packages/types` contracts are versioned by API major and generated from
+  OpenAPI; hand-maintained types must remain aligned to that schema.
+- `packages/api-client` never infers tenant from the browser host and never sends
+  a tenant header; the server resolves the tenant from the request host. The
+  client may read the resolved tenant from `/api/*/tenant` for display only.

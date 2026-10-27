@@ -6,7 +6,7 @@ apps/admin/                            # Tenant Admin SPA
 │   │   └── index.js                 # all app routes require tenant auth except login/reset
 │   ├── stores/
 │   │   ├── auth.js                  # current admin identity/session
-│   │   ├── tenant.js                # host-resolved current store + theme
+│   │   ├── tenant.js                # tenant context from /api/admin/tenant
 │   │   ├── products.js
 │   │   ├── orders.js
 │   │   └── notifications.js
@@ -16,7 +16,8 @@ apps/admin/                            # Tenant Admin SPA
 │   ├── views/
 │   │   ├── auth/
 │   │   │   ├── Login.vue
-│   │   │   └── ForgotPassword.vue
+│   │   │   ├── ForgotPassword.vue
+│   │   │   └── ResetPassword.vue
 │   │   ├── dashboard/Dashboard.vue
 │   │   ├── products/
 │   │   │   ├── ProductList.vue
@@ -44,19 +45,51 @@ apps/admin/                            # Tenant Admin SPA
 │   ├── composables/
 │   │   ├── useAuth.js
 │   │   └── usePagination.js
-│   └── api/index.js                 # /api/admin/*
+│   └── api/index.js                 # /api/admin/*; SPA never parses Host
 ├── package.json
 └── vite.config.js
 
 Scope:
-- Admin manages only its resolved tenant's products, orders, customers, and settings.
-- There is no platform control panel, subscription/plan management, or global customer view.
-- Do not show Shipping or Static Pages screens until corresponding persistence and
-  calculation/content rules are designed.
-- Staff invitations are out of v1 until a secure invitation and expiry model is
-  designed. Do not expose a dead-end staff-management screen.
-- General settings edit only fields present in db-design.txt. Domain verification
-  and custom-domain self-service are not part of this design yet.
+- Admin manages only its resolved tenant's products, orders, customers, and
+  settings.
+- Follow the canonical no-platform-layer rule in db-design.txt `_design_rules`;
+  do not add platform, cross-tenant, or global customer screens.
+- Do not show Shipping or Static Pages screens until corresponding persistence
+  and calculation/content rules are designed.
+- There are no Staff or Invitation views/tables in v1.
+- General settings expose only tenant-owned fields from db-design.txt.
+  Custom-domain allowlisting is deployment environment configuration; there is
+  no domain, custom-domain, or domain-verification UI.
+- Payment/provider/verification driver settings and tenant status are read-only
+  in Admin and changed only through the env-gated CLI. Show a prominent warning
+  banner when demo payment/verification or log email/SMS drivers are configured.
+- The Admin host must resolve `host_type=admin`; reject storefront host context.
+  The Admin SPA never parses Host or derives tenant identity from browser
+  location; load tenant identity/status using GET /api/admin/tenant.
+- Keep short-lived access JWTs in memory only, use the HttpOnly refresh cookie
+  backed by `user_sessions`, and use tenant-scoped email/SMS OTP for password
+  reset through ForgotPassword.vue and ResetPassword.vue.
+- Admin session refresh uses a double-submit CSRF token; cookie-authenticated
+  endpoints require CSRF validation. Bearer-token requests are exempt.
+- Payments.vue and Verification.vue are read-only displays with no edit
+  controls; mask stripe_account_id. General.vue edits only tenants.name,
+  tenants.default_locale, theme_config, and the require_*_verification flags.
+  default_currency, provider/driver settings, status, and domains are immutable
+  or CLI-managed.
+- AuditController/AuditLog.vue expose
+  GET /api/admin/audit-logs?action=&entity_type=&actor_id=&source=&from=&to=&cursor=&limit=.
+  `source` filters on the first-class audit_logs.source enum column, not on JSON
+  metadata. Date filters are inclusive UTC ISO-8601; pagination uses an opaque
+  cursor and `limit` (default 25, max 100), ordered by `(created_at DESC, id
+  DESC)`. Responses include `next_cursor`; all filters are tenant-scoped.
+- When a request is blocked because the tenant is suspended, show a blocked
+  screen and refresh GET /api/admin/tenant periodically; when status returns
+  active, restore the normal login flow. Do not retain stale auth sessions
+  across suspension.
+- Admin login on a suspended tenant returns 403 (not 401); the blocked screen is
+  shown without leaking credential state.
 - Dashboard sales figures are derived from persisted order totals and must label
-  their date range and currency. Inventory follows the simple-product/variant
-  source-of-truth rule in db-design.txt.
+  their reporting timezone, date range, and currency. Count only
+  payment_status=succeeded and status!=cancelled. Inventory follows the
+  simple-product/variant source-of-truth rule in db-design.txt. Order responses
+  provide refunded_total_cents; never infer refund totals from payment_status.

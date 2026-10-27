@@ -11,6 +11,8 @@ apps/storefront/                         # Public customer storefront, SSR
 │   │   ├── address.vue
 │   │   ├── payment.vue
 │   │   └── success.vue
+│   ├── orders/
+│   │   └── lookup.vue                  # guest order lookup + OTP
 │   ├── auth/
 │   │   ├── login.vue
 │   │   ├── register.vue
@@ -39,26 +41,53 @@ apps/storefront/                         # Public customer storefront, SSR
 │   ├── useTenant.ts                    # tenant resolved from request host
 │   └── useCart.ts
 ├── server/
-│   └── api/                            # optional SSR proxy; no direct DB access
+│   └── api/                            # SSR proxy; no direct DB access
 ├── package.json
 └── README.md                           # app-specific development and deployment notes
 
 Scope and behavior:
 - Public product/category pages are server-rendered for search indexing. Hydrate
   interactive cart and account behavior on the client.
-- Each request resolves the store from a trusted configured host/domain mapping.
-  Unknown or suspended stores return a proper unavailable/not-found response.
+- Resolve each request using the host order and environment-only allowlists in
+  db-design.txt `_design_rules`. The request context includes `tenant_id` and
+  `host_type=storefront`; reject an Admin host. Unknown hosts return 404 and
+  suspended tenants return 503.
 - Catalog displays published, active products only. Product variants inherit the
   product currency; availability follows db-design.txt.
-- Guest and signed-in carts are supported. Checkout always recalculates prices and
-  stock on the server; stored cart prices are not authoritative.
+- Guest and signed-in carts are supported. Checkout always recalculates prices
+  and stock on the server; stored cart prices are not authoritative.
+- Guest carts use the opaque, HttpOnly cookie token contract in db-design.txt;
+  guest cart and order lookups are strictly tenant-scoped. Guest orders require
+  order number plus a verified one-time code sent to the order email.
+- Guest order lookup is available at orders/lookup.vue. It uses
+  purpose=guest_order_lookup and the tenant/IP rate limits in db-design.txt;
+  responses do not reveal whether an order or email exists.
 - Checkout v1 supports address, configured payment, and confirmation. Until tax,
-  shipping, and discount rules exist, those charges are explicitly zero/not offered.
+  shipping, and discount rules exist, those charges are explicitly zero/not
+  offered.
 - `require_email_verification` gates registered-customer account flows. Guest
-  checkout does not require account registration or email verification; the guest
-  email is used for order communication. Guest-email verification would require a
-  separate explicit policy and flow.
+  checkout does not require account registration or email verification; the
+  guest email is used for order communication. Guest-email verification would
+  require a separate explicit policy and flow.
 - Payment details must use the provider's secure hosted/tokenized fields; never
   send or store raw card numbers or security codes in this application.
+- Storefront customer authentication uses a revocable opaque cookie session;
+  tenant-scoped route/API authorization must not accept Admin credentials or
+  resolve customers across tenants.
+- Cookie-session requests require CSRF validation; bearer-token API calls are
+  exempt. `cart_items.unit_price_cents` is informational only and is never sent
+  as an authoritative checkout amount.
+- `useTenant` hydrates tenant and store configuration from the Nuxt SSR payload
+  on first load and does not re-resolve on client route changes. Each tenant is
+  a distinct host; client-side tenant switching is not supported.
+- SSR proxy cache key is (tenant_id, host_type=storefront, path). Vary is not
+  used in v1 because there is a single tenant currency and public catalog pages
+  are not personalized. Personalized routes (account/*, cart, checkout,
+  orders/lookup) are never shared-cached. 4xx and 5xx responses are never
+  cached.
+- The SSR API proxy has a 2-second upstream timeout and does not retry during
+  render. The Storefront error page renders a branded 503 for suspended tenants;
+  the SSR proxy does not treat that 503 as a cacheable catalog response.
 - Product reviews, newsletter signup, and editable static pages are not included:
   no persistence or API contract for these features is defined.
+- Follow the canonical no-platform-layer rule in db-design.txt `_design_rules`.
