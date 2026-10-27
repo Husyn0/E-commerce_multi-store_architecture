@@ -1,0 +1,65 @@
+app/
+├── Http/
+│   ├── Controllers/
+│   │   ├── Platform/                 # FRONTEND 1 — super_admin only
+│   │   │   ├── AuthController.php
+│   │   │   ├── TenantController.php
+│   │   │   ├── PlanController.php
+│   │   │   ├── BillingController.php
+│   │   │   ├── WebhookController.php
+│   │   │   ├── HealthController.php
+│   │   │   └── ImpersonateController.php
+│   │   ├── Admin/                    # FRONTEND 2 — tenant admin/staff
+│   │   │   ├── AuthController.php
+│   │   │   ├── ProductController.php
+│   │   │   ├── CategoryController.php
+│   │   │   ├── OrderController.php
+│   │   │   ├── CustomerController.php
+│   │   │   ├── RefundController.php
+│   │   │   ├── SettingsController.php
+│   │   │   ├── ThemeController.php
+│   │   │   ├── StaffController.php
+│   │   │   └── AuditController.php
+│   │   └── Storefront/               # FRONTEND 3 — public / customer
+│   │       ├── AuthController.php
+│   │       ├── CatalogController.php
+│   │       ├── CartController.php
+│   │       ├── CheckoutController.php
+│   │       ├── AccountController.php
+│   │       └── VerificationController.php
+│   └── Middleware/
+│       ├── ResolveTenantFromHost.php     # Storefront + Admin: tenant from Host
+│       ├── ResolveTenantFromJwt.php      # Admin: tenant from JWT claim
+│       ├── RequireSuperAdmin.php         # Platform console
+│       └── RequireTenantRole.php         # Admin: role check (admin/staff)
+├── Services/
+│   ├── Payment/                          # Interface + Demo + Stripe (unchanged)
+│   ├── Verification/                     # Email/SMS/human check (unchanged)
+│   ├── Tenant/
+│   │   ├── TenantManager.php             # current tenant, connection resolution
+│   │   ├── Provisioner.php               # creates tenant + settings + owner user
+│   │   └── Impersonation.php             # short-lived admin tokens
+│   └── Platform/
+│       └── MetricsService.php            # dashboard KPIs
+├── Models/                               # matches confirmed DB exactly
+│   ├── Tenant.php
+│   ├── TenantSetting.php
+│   ├── User.php
+│   ├── UserSession.php
+│   ├── VerificationCode.php
+│   ├── HumanVerification.php
+│   ├── PaymentMethod.php
+│   ├── PaymentWebhookEvent.php
+│   ├── Category.php
+│   ├── Product.php
+│   ├── ProductImage.php
+│   ├── ProductVariant.php
+│   ├── Cart.php
+│   ├── CartItem.php
+│   ├── Address.php
+│   ├── Order.php
+│   ├── OrderItem.php
+│   ├── Refund.php
+│   └── AuditLog.php
+└── Providers/
+    └── PaymentServiceProvider.php        # binds interface → demo/stripe

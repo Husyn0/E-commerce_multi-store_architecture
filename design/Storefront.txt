@@ -1,0 +1,54 @@
+apps/storefront/
+├── src/
+│   ├── main.js
+│   ├── App.vue
+│   ├── router/
+│   │   └── index.js
+│   ├── stores/
+│   │   ├── tenant.js             # theme_config, store info
+│   │   ├── auth.js               # customer session
+│   │   ├── cart.js               # server-backed cart
+│   │   └── checkout.js
+│   ├── layouts/
+│   │   ├── StoreLayout.vue       # Header + footer
+│   │   ├── AccountLayout.vue     # Sidebar for /account/*
+│   │   └── CheckoutLayout.vue    # Minimal, no distractions
+│   ├── views/
+│   │   ├── home/Home.vue
+│   │   ├── catalog/
+│   │   │   ├── Category.vue
+│   │   │   ├── Search.vue
+│   │   │   └── ProductDetail.vue
+│   │   ├── cart/Cart.vue
+│   │   ├── checkout/
+│   │   │   ├── Address.vue
+│   │   │   ├── Payment.vue
+│   │   │   └── Success.vue
+│   │   ├── auth/
+│   │   │   ├── Login.vue
+│   │   │   ├── Register.vue
+│   │   │   ├── VerifyEmail.vue
+│   │   │   ├── VerifyPhone.vue
+│   │   │   ├── ForgotPassword.vue
+│   │   │   └── ResetPassword.vue
+│   │   ├── account/
+│   │   │   ├── Overview.vue
+│   │   │   ├── Orders.vue
+│   │   │   ├── OrderDetail.vue
+│   │   │   ├── Addresses.vue
+│   │   │   ├── PaymentMethods.vue
+│   │   │   └── Settings.vue
+│   │   └── static/Page.vue
+│   ├── components/
+│   │   ├── ProductCard.vue
+│   │   ├── CartDrawer.vue
+│   │   ├── VariantSelector.vue
+│   │   ├── OTPInput.vue
+│   │   ├── TurnstileWidget.vue
+│   │   └── StripeCardForm.vue
+│   ├── composables/
+│   │   ├── useTenant.js          # loads theme_config
+│   │   └── useCart.js
+│   └── api/index.js              # /api/storefront/* (public, tenant by host)
+├── package.json
+└── vite.config.js

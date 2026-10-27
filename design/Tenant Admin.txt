@@ -1,0 +1,54 @@
+apps/admin/
+├── src/
+│   ├── main.js
+│   ├── App.vue
+│   ├── router/
+│   │   └── index.js              # All routes require tenant auth
+│   ├── stores/                   # Pinia
+│   │   ├── auth.js               # tenant admin session
+│   │   ├── tenant.js             # current tenant + theme_config
+│   │   ├── products.js
+│   │   ├── orders.js
+│   │   └── notifications.js
+│   ├── layouts/
+│   │   ├── AdminLayout.vue       # Sidebar + topbar shell
+│   │   └── AuthLayout.vue
+│   ├── views/
+│   │   ├── auth/
+│   │   │   ├── Login.vue
+│   │   │   └── ForgotPassword.vue
+│   │   ├── dashboard/
+│   │   │   └── Dashboard.vue
+│   │   ├── products/
+│   │   │   ├── ProductList.vue
+│   │   │   ├── ProductEdit.vue   # Create + edit share one form
+│   │   │   ├── CategoryTree.vue
+│   │   │   └── Inventory.vue
+│   │   ├── orders/
+│   │   │   ├── OrderList.vue
+│   │   │   ├── OrderDetail.vue
+│   │   │   └── RefundList.vue
+│   │   ├── customers/
+│   │   │   ├── CustomerList.vue
+│   │   │   └── CustomerDetail.vue
+│   │   ├── settings/
+│   │   │   ├── General.vue
+│   │   │   ├── Payments.vue
+│   │   │   ├── Shipping.vue
+│   │   │   ├── Verification.vue
+│   │   │   ├── Staff.vue
+│   │   │   └── AuditLog.vue
+│   │   ├── appearance/
+│   │   │   └── ThemeEditor.vue   # Live preview + theme_config
+│   │   └── pages/
+│   │       └── StaticPages.vue
+│   ├── components/               # Admin-specific
+│   │   ├── DataTable.vue
+│   │   ├── VariantMatrix.vue
+│   │   ├── ImageUploader.vue
+│   │   └── ThemePreview.vue
+│   ├── composables/
+│   └── api/
+│       └── index.js              # Calls /api/admin/* (tenant-scoped)
+├── package.json
+└── vite.config.js

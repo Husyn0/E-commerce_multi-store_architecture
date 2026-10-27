@@ -1,0 +1,11 @@
+your-platform/
+├── apps/
+│   ├── console/          # FRONTEND 1 — Platform Console (you)
+│   ├── admin/            # FRONTEND 2 — Tenant Admin
+│   └── storefront/       # FRONTEND 3 — Customer storefront
+├── packages/
+│   ├── ui/               # Shared Vue components (Button, Input, Table…)
+│   ├── styles/           # Shared SCSS design system (abstract/, base/, components/)
+│   ├── api-client/       # Shared axios wrapper + typed endpoints
+│   └── types/            # Shared TS types mirroring the DB schema
+├── backend-laravel/      # Primary backend
