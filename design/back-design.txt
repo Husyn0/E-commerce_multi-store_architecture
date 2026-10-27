@@ -1,29 +1,49 @@
+Product scope: a multi-tenant e-commerce application with two user-facing apps:
+Tenant Admin for store owners and Storefront for shoppers. There is no
+platform console, subscription management, plan billing, or platform operator UI.
+Tenant provisioning and recovery are controlled operationally through protected
+CLI/bootstrap procedures.
+
+apps/admin/ and apps/storefront/
+                 │
+                 │ /api/admin/*       /api/storefront/*
+                 ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Laravel API                                                                  │
+│ Resolve tenant from trusted host; authenticate; authorize; tenant-scope data│
+└─────────────────────────────────────────────────────────────────────────────┘
+                 │
+                 ▼
+          MySQL (tenant_id)
+
 app/
 ├── Http/
 │   ├── Controllers/
-│   │   ├── Admin/                    # FRONTEND 1
+│   │   ├── Admin/
 │   │   │   ├── AuthController.php
 │   │   │   ├── ProductController.php
 │   │   │   ├── CategoryController.php
+│   │   │   ├── InventoryController.php
 │   │   │   ├── OrderController.php
 │   │   │   ├── CustomerController.php
 │   │   │   ├── RefundController.php
-│   │   │   ├── SettingsController.php   # includes verification toggles
+│   │   │   ├── SettingsController.php
 │   │   │   ├── ThemeController.php
-│   │   │   ├── StaffController.php
 │   │   │   └── AuditController.php
-│   │   └── Storefront/               # FRONTEND 2
-│   │       ├── AuthController.php
-│   │       ├── CatalogController.php
-│   │       ├── CartController.php
-│   │       ├── CheckoutController.php
-│   │       ├── AccountController.php
-│   │       └── VerificationController.php
+│   │   ├── Storefront/
+│   │   │   ├── AuthController.php
+│   │   │   ├── CatalogController.php
+│   │   │   ├── CartController.php
+│   │   │   ├── CheckoutController.php
+│   │   │   ├── AccountController.php
+│   │   │   └── VerificationController.php
+│   │   └── Webhooks/
+│   │       └── PaymentWebhookController.php
 │   └── Middleware/
-│       ├── ResolveTenantFromHost.php     # Storefront: tenant from Host
-│       ├── ResolveTenantFromJwt.php      # Admin: tenant from JWT claim
-│       ├── RequireTenantRole.php         # Admin: admin/staff gate
-│       └── EnsureEmailVerified.php       # Storefront: checkout gate
+│       ├── ResolveTenantFromHost.php
+│       ├── VerifyAdminTenantClaim.php
+│       ├── RequireTenantAdmin.php
+│       └── EnforceConfiguredVerification.php
 ├── Services/
 │   ├── Payment/
 │   │   ├── PaymentGatewayInterface.php
@@ -36,7 +56,37 @@ app/
 │   └── Tenant/
 │       └── TenantManager.php
 ├── Console/Commands/
-│   └── ProvisionTenant.php               # operator CLI, not a GUI
-├── Models/                               # matches schema exactly
+│   └── ProvisionTenant.php
+├── Models/                  # Tenant-scoped models defined in db-design.txt
 └── Providers/
     └── PaymentServiceProvider.php
+
+Request and tenancy rules:
+- Storefront host and Admin host resolve to the same tenant record. Admin hostname
+  uses a platform-controlled subdomain; a tenant custom domain is for the public
+  storefront only.
+- Trust forwarded host/protocol headers only from configured reverse proxies and
+  accept hosts only from the platform's domain allowlist or verified custom-domain
+  mapping. Do not treat an arbitrary Host header as a tenant identifier.
+- An Admin JWT tenant_id must match the tenant resolved from the Admin host.
+  Reject missing/unknown hosts and all host/token mismatches; never accept a
+  client-supplied tenant_id as authority.
+- Resolve tenant context before model access. Every query and mutation, including
+  nested relations, must be tenant-scoped. Enforce same-tenant foreign keys in
+  the database where supported.
+- V1 Admin routes require the tenant's admin role. Customer routes never grant
+  Admin access. Staff management is deferred until onboarding is designed.
+- Use short-lived access credentials and revocable refresh sessions; store only
+  refresh-token hashes. Cookie-based sessions require Secure, HttpOnly,
+  SameSite, and CSRF protections appropriate to the deployment.
+- The provisioning command must be protected, idempotent, and transactional:
+  create the tenant, initial admin, and settings together; never print passwords
+  or reusable secrets. Restrict command execution to deployment operators and
+  record tenant creation, suspension, and recovery in the tenant audit log.
+- Verify payment webhook signatures before processing. Persist provider event IDs
+  for deduplication and make event handling safe to retry. Resolve webhook tenant
+  from the verified provider account/event mapping, not from an untrusted request
+  host.
+- Checkout recalculates prices and availability server-side. Payment/refund calls
+  need idempotency and explicit state transitions; never infer payment success
+  from a browser redirect.

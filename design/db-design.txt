@@ -4,8 +4,7 @@
     "name": "string",
     "subdomain": "string UNIQUE",
     "custom_domain": "string NULLABLE UNIQUE",
-    "status": "enum(active, suspended, trial)",
-    "plan": "enum(free, pro, enterprise)",
+    "status": "enum(active, suspended)",
     "default_currency": "string(3)",
     "default_locale": "string(5)",
     "created_at": "timestamp",
@@ -35,7 +34,7 @@
     "password_hash": "string",
     "first_name": "string NULLABLE",
     "last_name": "string NULLABLE",
-    "role": "enum(customer, staff, admin)",
+    "role": "enum(customer, admin)",
     "status": "enum(active, suspended, deleted)",
     "last_login_at": "timestamp NULLABLE",
     "created_at": "timestamp",
@@ -73,14 +72,15 @@
   "human_verifications": {
     "id": "uuid PK",
     "tenant_id": "uuid FK -> tenants.id",
-    "session_token": "string UNIQUE",
-    "provider": "enum(demo, turnstile, hcaptcha, recaptcha)",
+    "session_token_hash": "string",
+    "provider": "enum(demo, turnstile, hcaptcha)",
     "action": "enum(register, checkout, login, contact)",
     "passed": "boolean",
     "ip_address": "string NULLABLE",
     "expires_at": "timestamp",
     "created_at": "timestamp",
-    "INDEX": ["tenant_id", "session_token", "expires_at"]
+    "UNIQUE": ["tenant_id", "session_token_hash"],
+    "INDEX": ["tenant_id", "expires_at"]
   },
   "payment_methods": {
     "id": "uuid PK",
@@ -138,7 +138,7 @@
     "published_at": "timestamp NULLABLE",
     "created_at": "timestamp",
     "updated_at": "timestamp",
-    "UNIQUE": ["tenant_id", "slug"],
+    "UNIQUE": [["tenant_id", "slug"], ["tenant_id", "sku"]],
     "INDEX": ["tenant_id", "category_id", "is_active", "published_at"]
   },
   "product_images": {
@@ -169,13 +169,13 @@
     "id": "uuid PK",
     "tenant_id": "uuid FK -> tenants.id",
     "user_id": "uuid FK -> users.id NULLABLE",
-    "session_token": "string NULLABLE",
+    "session_token_hash": "string NULLABLE",
     "currency": "string(3)",
     "expires_at": "timestamp NULLABLE",
     "created_at": "timestamp",
     "updated_at": "timestamp",
-    "INDEX": ["tenant_id", "user_id"],
-    "INDEX": ["tenant_id", "session_token"]
+    "UNIQUE": ["tenant_id", "session_token_hash"],
+    "INDEX": [["tenant_id", "user_id"], ["tenant_id", "session_token_hash"]]
   },
   "cart_items": {
     "id": "uuid PK",
@@ -183,16 +183,18 @@
     "cart_id": "uuid FK -> carts.id",
     "product_id": "uuid FK -> products.id",
     "variant_id": "uuid FK -> product_variants.id NULLABLE",
+    "variant_key": "generated string (variant UUID or 'none')",
     "quantity": "int",
     "unit_price_cents": "int",
     "created_at": "timestamp",
     "updated_at": "timestamp",
+    "UNIQUE": ["tenant_id", "cart_id", "product_id", "variant_key"],
     "INDEX": ["tenant_id", "cart_id"]
   },
   "addresses": {
     "id": "uuid PK",
     "tenant_id": "uuid FK -> tenants.id",
-    "user_id": "uuid FK -> users.id NULLABLE",
+    "user_id": "uuid FK -> users.id",
     "label": "string NULLABLE",
     "recipient_name": "string",
     "phone": "string NULLABLE",
@@ -213,10 +215,11 @@
     "tenant_id": "uuid FK -> tenants.id",
     "order_number": "string",
     "user_id": "uuid FK -> users.id NULLABLE",
-    "status": "enum(pending, paid, processing, shipped, delivered, cancelled, refunded)",
+    "status": "enum(pending, processing, shipped, delivered, cancelled)",
     "payment_status": "enum(requires_payment, processing, succeeded, failed, refunded)",
     "payment_provider": "enum(demo, stripe)",
     "payment_intent_id": "string NULLABLE",
+    "checkout_idempotency_key": "string",
     "subtotal_cents": "int",
     "tax_cents": "int DEFAULT 0",
     "shipping_cents": "int DEFAULT 0",
@@ -231,9 +234,8 @@
     "paid_at": "timestamp NULLABLE",
     "created_at": "timestamp",
     "updated_at": "timestamp",
-    "UNIQUE": ["tenant_id", "order_number"],
-    "INDEX": ["tenant_id", "status", "created_at"],
-    "INDEX": ["tenant_id", "user_id"]
+    "UNIQUE": [["tenant_id", "order_number"], ["tenant_id", "payment_provider", "payment_intent_id"], ["tenant_id", "checkout_idempotency_key"]],
+    "INDEX": [["tenant_id", "status", "created_at"], ["tenant_id", "user_id"]]
   },
   "order_items": {
     "id": "uuid PK",
@@ -257,6 +259,7 @@
     "reason": "string NULLABLE",
     "status": "enum(pending, succeeded, failed)",
     "created_at": "timestamp",
+    "UNIQUE": ["tenant_id", "provider_refund_id"],
     "INDEX": ["tenant_id", "order_id"]
   },
   "audit_logs": {
@@ -269,7 +272,27 @@
     "metadata": "json NULLABLE",
     "ip_address": "string NULLABLE",
     "created_at": "timestamp",
-    "INDEX": ["tenant_id", "entity_type", "entity_id"],
-    "INDEX": ["tenant_id", "actor_id", "created_at"]
-  }
+    "INDEX": [["tenant_id", "entity_type", "entity_id"], ["tenant_id", "actor_id", "created_at"]]
+  },
+  "_design_rules": [
+    "There is no subscription, plan, billing, or platform-console domain. A tenant is a store boundary, not a subscription record.",
+    "Tenant lifecycle is provisioned operationally through a protected CLI/bootstrap process; active and suspended are operational states, not billing states.",
+    "Every tenant-owned foreign key must enforce that the referenced row has the same tenant_id. Prefer composite UNIQUE(tenant_id, id) keys and composite foreign keys; application queries must also always scope by tenant_id. This includes category parents, product categories, product images, variants, carts, users, addresses, orders, and audit actors.",
+    "Resolve the tenant from the trusted request host for both storefront and admin hosts. For authenticated admin requests, require the JWT tenant_id to match the host-resolved tenant; reject mismatches.",
+    "Normalize hostnames to lowercase and do not enable custom-domain self-service until domain ownership verification and routing are designed.",
+    "All product and variant stock values are non-negative. A product without variants uses products.stock. A product with variants uses only product_variants.stock; products.stock is ignored and kept at zero. Product SKU is optional but unique per tenant when present; variant SKU is required and unique per tenant.",
+    "V1 uses one tenant currency for all products, carts, and orders. Support only currencies with two minor-unit decimal places until money representation is upgraded; reject mismatches with tenants.default_currency.",
+    "Variant price inherits products.currency. Product and variant prices, order amounts, refund amounts, and quantities must be non-negative; cart and order quantities must be positive. When compare_at_price_cents is set, it must exceed price_cents.",
+    "For an order, status describes fulfillment: pending, processing, shipped, delivered, or cancelled. payment_status describes payment. A successful partial refund is recorded in refunds; refunded payment status means cumulative successful refunds equal the captured total. Partial refunds leave payment_status as succeeded.",
+    "V1 roles are customer and admin. Staff access is deferred until a secure invitation/onboarding flow and its persistence are designed.",
+    "require_email_verification gates registered customer account flows. Guest checkout remains available without account creation or email verification; the guest email is used for order communication.",
+    "Saved addresses belong to a user. Guest checkout addresses are kept only in the order snapshots, not as reusable address-book rows.",
+    "Each user may have at most one default payment method per tenant/provider. Payment-provider IDs must not be exposed as credentials.",
+    "Normalize email addresses before tenant-scoped uniqueness checks. Store guest-cart and human-verification bearer tokens as cryptographic hashes, not plaintext.",
+    "Use database constraints to prevent duplicate cart lines and duplicate provider payment/refund identifiers. Cart variant_key is generated as the variant UUID or the literal 'none' so nullable variant_id does not allow duplicate simple-product lines in MySQL.",
+    "The backend recalculates product prices, stock, shipping, tax, discounts, and totals at checkout. Cart item unit_price_cents is display-only and never trusted for order creation.",
+    "Create checkout orders and payment intents idempotently using the persisted tenant-scoped checkout_idempotency_key. Calculate total_cents as subtotal_cents + tax_cents + shipping_cents - discount_cents and ensure order-item sums match subtotal_cents.",
+    "Until shipping, tax, and promotion rules are designed, v1 must explicitly configure them as zero/not offered rather than show guessed charges or editable options.",
+    "Webhook processing must verify provider signatures, deduplicate by provider and provider_event_id, and be safe to retry. Store only the minimum payload needed and define retention/redaction for personal data."
+  ]
 }

@@ -1,10 +1,17 @@
-your-platform/
+e-commerce/
 ├── apps/
-│   ├── admin/            # FRONTEND 1 — Tenant Admin
-│   └── storefront/       # FRONTEND 2 — Customer Storefront
+│   ├── admin/            # Tenant Admin SPA for store owners
+│   └── storefront/       # Customer storefront; SSR/prerender public catalog pages
 ├── packages/
-│   ├── ui/               # Shared Vue components
-│   ├── styles/           # Shared SCSS design system
-│   ├── api-client/       # Shared axios wrapper
-│   └── types/            # Shared TS types mirroring DB
-├── backend-laravel/
+│   ├── ui/               # Shared accessible Vue components
+│   ├── styles/           # Shared tokens and SCSS
+│   ├── api-client/       # Typed API client; tenant context is server-validated
+│   └── types/            # Shared API contracts, not direct DB mirrors
+├── backend-laravel/      # Tenant-scoped API and payment/webhook processing
+└── design/               # Product, data, and application design documents
+
+Scope:
+- Two user-facing applications only: tenant Admin and customer Storefront.
+- No platform console, subscriptions, plans, or platform billing application.
+- Tenants represent stores and provide data isolation, store configuration, and host resolution.
+- Tenant provisioning and recovery are operational CLI/bootstrap procedures, not a third frontend.

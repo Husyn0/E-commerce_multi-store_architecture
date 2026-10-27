@@ -1,55 +1,64 @@
-apps/storefront/
-├── src/
-│   ├── main.js
-│   ├── App.vue
-│   ├── router/
-│   │   └── index.js
-│   ├── stores/
-│   │   ├── tenant.js             # theme_config, store info
-│   │   ├── auth.js               # customer session
-│   │   ├── cart.js
-│   │   └── checkout.js
-│   ├── layouts/
-│   │   ├── StoreLayout.vue       # Header + footer
-│   │   ├── AccountLayout.vue     # Sidebar for /account/*
-│   │   └── CheckoutLayout.vue    # Minimal
-│   ├── views/
-│   │   ├── home/Home.vue
-│   │   ├── catalog/
-│   │   │   ├── Category.vue
-│   │   │   ├── Search.vue
-│   │   │   └── ProductDetail.vue
-│   │   ├── cart/Cart.vue
-│   │   ├── checkout/
-│   │   │   ├── Address.vue
-│   │   │   ├── Payment.vue
-│   │   │   └── Success.vue
-│   │   ├── auth/
-│   │   │   ├── Login.vue
-│   │   │   ├── Register.vue
-│   │   │   ├── VerifyEmail.vue
-│   │   │   ├── VerifyPhone.vue
-│   │   │   ├── ForgotPassword.vue
-│   │   │   └── ResetPassword.vue
-│   │   ├── account/
-│   │   │   ├── Overview.vue
-│   │   │   ├── Orders.vue
-│   │   │   ├── OrderDetail.vue
-│   │   │   ├── Addresses.vue
-│   │   │   ├── PaymentMethods.vue
-│   │   │   └── Settings.vue
-│   │   └── static/Page.vue
-│   ├── components/
-│   │   ├── ProductCard.vue
-│   │   ├── CartDrawer.vue
-│   │   ├── VariantSelector.vue
-│   │   ├── OTPInput.vue
-│   │   ├── TurnstileWidget.vue
-│   │   └── StripeCardForm.vue
-│   ├── composables/
-│   │   ├── useTenant.js
-│   │   └── useCart.js
-│   └── api/
-│       └── index.js              # /api/storefront/*
+apps/storefront/                         # Public customer storefront, SSR
+├── app.vue
+├── nuxt.config.ts
+├── pages/
+│   ├── index.vue                       # Store home / published products
+│   ├── search.vue
+│   ├── categories/[slug].vue
+│   ├── products/[slug].vue
+│   ├── cart.vue
+│   ├── checkout/
+│   │   ├── address.vue
+│   │   ├── payment.vue
+│   │   └── success.vue
+│   ├── auth/
+│   │   ├── login.vue
+│   │   ├── register.vue
+│   │   ├── verify.vue
+│   │   ├── forgot-password.vue
+│   │   └── reset-password.vue
+│   └── account/
+│       ├── index.vue
+│       ├── orders/index.vue
+│       ├── orders/[id].vue
+│       ├── addresses.vue
+│       ├── payment-methods.vue
+│       └── settings.vue
+├── layouts/
+│   ├── store.vue                       # branded header + footer
+│   ├── account.vue
+│   └── checkout.vue                    # focused checkout shell
+├── components/
+│   ├── ProductCard.vue
+│   ├── CartDrawer.vue
+│   ├── VariantSelector.vue
+│   ├── OtpInput.vue
+│   ├── HumanVerification.vue
+│   └── SecurePaymentElement.vue        # provider-hosted/tokenized payment UI
+├── composables/
+│   ├── useTenant.ts                    # tenant resolved from request host
+│   └── useCart.ts
+├── server/
+│   └── api/                            # optional SSR proxy; no direct DB access
 ├── package.json
-└── vite.config.js
+└── README.md                           # app-specific development and deployment notes
+
+Scope and behavior:
+- Public product/category pages are server-rendered for search indexing. Hydrate
+  interactive cart and account behavior on the client.
+- Each request resolves the store from a trusted configured host/domain mapping.
+  Unknown or suspended stores return a proper unavailable/not-found response.
+- Catalog displays published, active products only. Product variants inherit the
+  product currency; availability follows db-design.txt.
+- Guest and signed-in carts are supported. Checkout always recalculates prices and
+  stock on the server; stored cart prices are not authoritative.
+- Checkout v1 supports address, configured payment, and confirmation. Until tax,
+  shipping, and discount rules exist, those charges are explicitly zero/not offered.
+- `require_email_verification` gates registered-customer account flows. Guest
+  checkout does not require account registration or email verification; the guest
+  email is used for order communication. Guest-email verification would require a
+  separate explicit policy and flow.
+- Payment details must use the provider's secure hosted/tokenized fields; never
+  send or store raw card numbers or security codes in this application.
+- Product reviews, newsletter signup, and editable static pages are not included:
+  no persistence or API contract for these features is defined.

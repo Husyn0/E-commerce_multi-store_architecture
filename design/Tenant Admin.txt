@@ -1,24 +1,23 @@
-apps/admin/
+apps/admin/                            # Tenant Admin SPA
 ├── src/
 │   ├── main.js
 │   ├── App.vue
 │   ├── router/
-│   │   └── index.js
+│   │   └── index.js                 # all app routes require tenant auth except login/reset
 │   ├── stores/
-│   │   ├── auth.js               # tenant admin session
-│   │   ├── tenant.js             # current tenant + theme_config
+│   │   ├── auth.js                  # current admin identity/session
+│   │   ├── tenant.js                # host-resolved current store + theme
 │   │   ├── products.js
 │   │   ├── orders.js
 │   │   └── notifications.js
 │   ├── layouts/
-│   │   ├── AdminLayout.vue       # Sidebar + topbar
+│   │   ├── AdminLayout.vue          # sidebar + top bar
 │   │   └── AuthLayout.vue
 │   ├── views/
 │   │   ├── auth/
 │   │   │   ├── Login.vue
 │   │   │   └── ForgotPassword.vue
-│   │   ├── dashboard/
-│   │   │   └── Dashboard.vue
+│   │   ├── dashboard/Dashboard.vue
 │   │   ├── products/
 │   │   │   ├── ProductList.vue
 │   │   │   ├── ProductEdit.vue
@@ -34,14 +33,9 @@ apps/admin/
 │   │   ├── settings/
 │   │   │   ├── General.vue
 │   │   │   ├── Payments.vue
-│   │   │   ├── Shipping.vue
 │   │   │   ├── Verification.vue
-│   │   │   ├── Staff.vue
 │   │   │   └── AuditLog.vue
-│   │   ├── appearance/
-│   │   │   └── ThemeEditor.vue
-│   │   └── pages/
-│   │       └── StaticPages.vue
+│   │   └── appearance/ThemeEditor.vue
 │   ├── components/
 │   │   ├── DataTable.vue
 │   │   ├── VariantMatrix.vue
@@ -50,7 +44,19 @@ apps/admin/
 │   ├── composables/
 │   │   ├── useAuth.js
 │   │   └── usePagination.js
-│   └── api/
-│       └── index.js              # /api/admin/*
+│   └── api/index.js                 # /api/admin/*
 ├── package.json
 └── vite.config.js
+
+Scope:
+- Admin manages only its resolved tenant's products, orders, customers, and settings.
+- There is no platform control panel, subscription/plan management, or global customer view.
+- Do not show Shipping or Static Pages screens until corresponding persistence and
+  calculation/content rules are designed.
+- Staff invitations are out of v1 until a secure invitation and expiry model is
+  designed. Do not expose a dead-end staff-management screen.
+- General settings edit only fields present in db-design.txt. Domain verification
+  and custom-domain self-service are not part of this design yet.
+- Dashboard sales figures are derived from persisted order totals and must label
+  their date range and currency. Inventory follows the simple-product/variant
+  source-of-truth rule in db-design.txt.
