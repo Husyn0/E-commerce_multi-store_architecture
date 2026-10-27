@@ -3,15 +3,15 @@ apps/admin/
 │   ├── main.js
 │   ├── App.vue
 │   ├── router/
-│   │   └── index.js              # All routes require tenant auth
-│   ├── stores/                   # Pinia
+│   │   └── index.js
+│   ├── stores/
 │   │   ├── auth.js               # tenant admin session
 │   │   ├── tenant.js             # current tenant + theme_config
 │   │   ├── products.js
 │   │   ├── orders.js
 │   │   └── notifications.js
 │   ├── layouts/
-│   │   ├── AdminLayout.vue       # Sidebar + topbar shell
+│   │   ├── AdminLayout.vue       # Sidebar + topbar
 │   │   └── AuthLayout.vue
 │   ├── views/
 │   │   ├── auth/
@@ -21,7 +21,7 @@ apps/admin/
 │   │   │   └── Dashboard.vue
 │   │   ├── products/
 │   │   │   ├── ProductList.vue
-│   │   │   ├── ProductEdit.vue   # Create + edit share one form
+│   │   │   ├── ProductEdit.vue
 │   │   │   ├── CategoryTree.vue
 │   │   │   └── Inventory.vue
 │   │   ├── orders/
@@ -39,16 +39,18 @@ apps/admin/
 │   │   │   ├── Staff.vue
 │   │   │   └── AuditLog.vue
 │   │   ├── appearance/
-│   │   │   └── ThemeEditor.vue   # Live preview + theme_config
+│   │   │   └── ThemeEditor.vue
 │   │   └── pages/
 │   │       └── StaticPages.vue
-│   ├── components/               # Admin-specific
+│   ├── components/
 │   │   ├── DataTable.vue
 │   │   ├── VariantMatrix.vue
 │   │   ├── ImageUploader.vue
 │   │   └── ThemePreview.vue
 │   ├── composables/
+│   │   ├── useAuth.js
+│   │   └── usePagination.js
 │   └── api/
-│       └── index.js              # Calls /api/admin/* (tenant-scoped)
+│       └── index.js              # /api/admin/*
 ├── package.json
 └── vite.config.js

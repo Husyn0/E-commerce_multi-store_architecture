@@ -1,26 +1,18 @@
 app/
 ├── Http/
 │   ├── Controllers/
-│   │   ├── Platform/                 # FRONTEND 1 — super_admin only
-│   │   │   ├── AuthController.php
-│   │   │   ├── TenantController.php
-│   │   │   ├── PlanController.php
-│   │   │   ├── BillingController.php
-│   │   │   ├── WebhookController.php
-│   │   │   ├── HealthController.php
-│   │   │   └── ImpersonateController.php
-│   │   ├── Admin/                    # FRONTEND 2 — tenant admin/staff
+│   │   ├── Admin/                    # FRONTEND 1
 │   │   │   ├── AuthController.php
 │   │   │   ├── ProductController.php
 │   │   │   ├── CategoryController.php
 │   │   │   ├── OrderController.php
 │   │   │   ├── CustomerController.php
 │   │   │   ├── RefundController.php
-│   │   │   ├── SettingsController.php
+│   │   │   ├── SettingsController.php   # includes verification toggles
 │   │   │   ├── ThemeController.php
 │   │   │   ├── StaffController.php
 │   │   │   └── AuditController.php
-│   │   └── Storefront/               # FRONTEND 3 — public / customer
+│   │   └── Storefront/               # FRONTEND 2
 │   │       ├── AuthController.php
 │   │       ├── CatalogController.php
 │   │       ├── CartController.php
@@ -28,38 +20,23 @@ app/
 │   │       ├── AccountController.php
 │   │       └── VerificationController.php
 │   └── Middleware/
-│       ├── ResolveTenantFromHost.php     # Storefront + Admin: tenant from Host
+│       ├── ResolveTenantFromHost.php     # Storefront: tenant from Host
 │       ├── ResolveTenantFromJwt.php      # Admin: tenant from JWT claim
-│       ├── RequireSuperAdmin.php         # Platform console
-│       └── RequireTenantRole.php         # Admin: role check (admin/staff)
+│       ├── RequireTenantRole.php         # Admin: admin/staff gate
+│       └── EnsureEmailVerified.php       # Storefront: checkout gate
 ├── Services/
-│   ├── Payment/                          # Interface + Demo + Stripe (unchanged)
-│   ├── Verification/                     # Email/SMS/human check (unchanged)
-│   ├── Tenant/
-│   │   ├── TenantManager.php             # current tenant, connection resolution
-│   │   ├── Provisioner.php               # creates tenant + settings + owner user
-│   │   └── Impersonation.php             # short-lived admin tokens
-│   └── Platform/
-│       └── MetricsService.php            # dashboard KPIs
-├── Models/                               # matches confirmed DB exactly
-│   ├── Tenant.php
-│   ├── TenantSetting.php
-│   ├── User.php
-│   ├── UserSession.php
-│   ├── VerificationCode.php
-│   ├── HumanVerification.php
-│   ├── PaymentMethod.php
-│   ├── PaymentWebhookEvent.php
-│   ├── Category.php
-│   ├── Product.php
-│   ├── ProductImage.php
-│   ├── ProductVariant.php
-│   ├── Cart.php
-│   ├── CartItem.php
-│   ├── Address.php
-│   ├── Order.php
-│   ├── OrderItem.php
-│   ├── Refund.php
-│   └── AuditLog.php
+│   ├── Payment/
+│   │   ├── PaymentGatewayInterface.php
+│   │   ├── DemoPaymentGateway.php
+│   │   └── StripePaymentGateway.php
+│   ├── Verification/
+│   │   ├── VerificationServiceInterface.php
+│   │   ├── DemoVerificationService.php
+│   │   └── RealVerificationService.php
+│   └── Tenant/
+│       └── TenantManager.php
+├── Console/Commands/
+│   └── ProvisionTenant.php               # operator CLI, not a GUI
+├── Models/                               # matches schema exactly
 └── Providers/
-    └── PaymentServiceProvider.php        # binds interface → demo/stripe
+    └── PaymentServiceProvider.php

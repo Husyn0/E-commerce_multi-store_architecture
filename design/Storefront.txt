@@ -7,12 +7,12 @@ apps/storefront/
 │   ├── stores/
 │   │   ├── tenant.js             # theme_config, store info
 │   │   ├── auth.js               # customer session
-│   │   ├── cart.js               # server-backed cart
+│   │   ├── cart.js
 │   │   └── checkout.js
 │   ├── layouts/
 │   │   ├── StoreLayout.vue       # Header + footer
 │   │   ├── AccountLayout.vue     # Sidebar for /account/*
-│   │   └── CheckoutLayout.vue    # Minimal, no distractions
+│   │   └── CheckoutLayout.vue    # Minimal
 │   ├── views/
 │   │   ├── home/Home.vue
 │   │   ├── catalog/
@@ -47,8 +47,9 @@ apps/storefront/
 │   │   ├── TurnstileWidget.vue
 │   │   └── StripeCardForm.vue
 │   ├── composables/
-│   │   ├── useTenant.js          # loads theme_config
+│   │   ├── useTenant.js
 │   │   └── useCart.js
-│   └── api/index.js              # /api/storefront/* (public, tenant by host)
+│   └── api/
+│       └── index.js              # /api/storefront/*
 ├── package.json
 └── vite.config.js
