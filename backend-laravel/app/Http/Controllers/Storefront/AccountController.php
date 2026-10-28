@@ -6,13 +6,86 @@ use App\Http\Controllers\TenantApiController;
 use App\Http\Resources\OrderResource;
 use App\Models\Address;
 use App\Models\Order;
+use App\Models\TenantSettings;
 use App\Models\User;
+use App\Services\Verification\VerificationCodeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 class AccountController extends TenantApiController
 {
+    public function requestEmailVerification(
+        Request $request,
+        VerificationCodeService $verificationCodes,
+    ): JsonResponse {
+        $user = $this->customer($request);
+        if ($user->email_verified_at !== null) {
+            return response()->json(['email_verified' => true])->header('Cache-Control', 'no-store');
+        }
+
+        $settings = TenantSettings::query()->forTenant($this->tenantId())->firstOrFail();
+        try {
+            $issued = $verificationCodes->issueEmail(
+                $settings,
+                $user->email,
+                'verify_email',
+                $user->id,
+                $request->ip(),
+            );
+        } catch (RuntimeException $exception) {
+            report($exception);
+
+            return response()->json(['message' => 'Email verification is temporarily unavailable.'], 503);
+        }
+
+        if (! $issued) {
+            return response()->json(['message' => 'Please wait before requesting another verification code.'], 429);
+        }
+
+        return response()->json([
+            'message' => 'If delivery is available, a verification code will be sent to your account email.',
+        ], 202)->header('Cache-Control', 'no-store');
+    }
+
+    public function verifyEmail(Request $request, VerificationCodeService $verificationCodes): JsonResponse
+    {
+        $input = $request->validate(['code' => ['required', 'digits:6']]);
+        $user = $this->customer($request);
+        if ($user->email_verified_at !== null) {
+            return response()->json(['email_verified' => true])->header('Cache-Control', 'no-store');
+        }
+
+        try {
+            $valid = $verificationCodes->consumeEmail(
+                $this->tenantId(),
+                $user->email,
+                'verify_email',
+                $input['code'],
+            );
+        } catch (RuntimeException $exception) {
+            report($exception);
+
+            return response()->json(['message' => 'Email verification is temporarily unavailable.'], 503);
+        }
+        if (! $valid) {
+            return response()->json(['message' => 'The verification code is invalid or expired.'], 422);
+        }
+
+        DB::transaction(function () use ($user): void {
+            $lockedUser = User::query()
+                ->where('tenant_id', $this->tenantId())
+                ->whereKey($user->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+            $lockedUser->email_verified_at ??= now();
+            $lockedUser->save();
+        });
+
+        return response()->json(['email_verified' => true])->header('Cache-Control', 'no-store');
+    }
+
     public function show(Request $request): JsonResponse
     {
         $user = $this->customer($request);

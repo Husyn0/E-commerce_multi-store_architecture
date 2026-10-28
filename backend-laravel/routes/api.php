@@ -9,6 +9,8 @@ use App\Http\Controllers\Admin\InventoryController as AdminInventoryController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PasswordResetController as AdminPasswordResetController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\ProductImageController as AdminProductImageController;
+use App\Http\Controllers\Admin\ProductVariantController as AdminProductVariantController;
 use App\Http\Controllers\Admin\RefundController as AdminRefundController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\ThemeController as AdminThemeController;
@@ -17,6 +19,9 @@ use App\Http\Controllers\Storefront\AuthController as StorefrontAuthController;
 use App\Http\Controllers\Storefront\CartController;
 use App\Http\Controllers\Storefront\CatalogController;
 use App\Http\Controllers\Storefront\CheckoutController;
+use App\Http\Controllers\Storefront\GuestOrderLookupController;
+use App\Http\Controllers\Storefront\PasswordResetController as StorefrontPasswordResetController;
+use App\Http\Controllers\Storefront\PaymentMethodController;
 use App\Http\Controllers\Storefront\VerificationController;
 use App\Http\Controllers\Webhooks\PaymentWebhookController;
 use App\Http\Middleware\AuthenticateStorefrontSession;
@@ -67,6 +72,18 @@ Route::middleware([
 ])->prefix('admin')->group(function (): void {
     Route::get('/dashboard', AdminDashboardController::class)->name('admin.dashboard');
     Route::apiResource('products', AdminProductController::class);
+    Route::post('/products/{productId}/images', [AdminProductImageController::class, 'store'])
+        ->name('admin.products.images.store');
+    Route::patch('/products/{productId}/images/{imageId}', [AdminProductImageController::class, 'update'])
+        ->name('admin.products.images.update');
+    Route::delete('/products/{productId}/images/{imageId}', [AdminProductImageController::class, 'destroy'])
+        ->name('admin.products.images.destroy');
+    Route::post('/products/{productId}/variants', [AdminProductVariantController::class, 'store'])
+        ->name('admin.products.variants.store');
+    Route::patch('/products/{productId}/variants/{variantId}', [AdminProductVariantController::class, 'update'])
+        ->name('admin.products.variants.update');
+    Route::delete('/products/{productId}/variants/{variantId}', [AdminProductVariantController::class, 'destroy'])
+        ->name('admin.products.variants.destroy');
     Route::apiResource('categories', AdminCategoryController::class);
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('admin.orders.index');
     Route::get('/orders/{orderId}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
@@ -128,18 +145,32 @@ Route::middleware([
     AuthenticateStorefrontSession::class.':optional',
 ])->prefix('storefront')->group(function (): void {
     Route::get('/cart', [CartController::class, 'show'])->name('storefront.cart.show');
+    Route::get('/payment-config', [PaymentMethodController::class, 'configuration'])
+        ->name('storefront.payment.configuration');
     Route::post('/auth/register', [StorefrontAuthController::class, 'register'])
         ->middleware([VerifyStorefrontCsrf::class, 'throttle:5,1', EnforceConfiguredVerification::class.':register'])
         ->name('storefront.auth.register');
     Route::post('/auth/login', [StorefrontAuthController::class, 'login'])
         ->middleware([VerifyStorefrontCsrf::class, 'throttle:10,1'])
         ->name('storefront.auth.login');
+    Route::post('/auth/password-reset/request', [StorefrontPasswordResetController::class, 'requestCode'])
+        ->middleware([VerifyStorefrontCsrf::class, 'throttle:5,1'])
+        ->name('storefront.auth.password-reset.request');
+    Route::post('/auth/password-reset', [StorefrontPasswordResetController::class, 'reset'])
+        ->middleware([VerifyStorefrontCsrf::class, 'throttle:10,1'])
+        ->name('storefront.auth.password-reset');
     Route::post('/verification/email', [VerificationController::class, 'issueEmail'])
         ->middleware([VerifyStorefrontCsrf::class, 'throttle:5,1'])
         ->name('storefront.verification.email');
     Route::post('/verification/human', [VerificationController::class, 'verifyHuman'])
         ->middleware([VerifyStorefrontCsrf::class, 'throttle:10,1'])
         ->name('storefront.verification.human');
+    Route::post('/orders/lookup/request', [GuestOrderLookupController::class, 'requestCode'])
+        ->middleware([VerifyStorefrontCsrf::class, 'throttle:5,1'])
+        ->name('storefront.orders.lookup.request');
+    Route::post('/orders/lookup', [GuestOrderLookupController::class, 'lookup'])
+        ->middleware([VerifyStorefrontCsrf::class, 'throttle:10,1'])
+        ->name('storefront.orders.lookup');
     Route::post('/cart/items', [CartController::class, 'add'])
         ->middleware([VerifyStorefrontCsrf::class, 'throttle:30,1'])
         ->name('storefront.cart.items.store');
@@ -163,6 +194,12 @@ Route::middleware([
     Route::post('/auth/logout', [StorefrontAuthController::class, 'logout'])
         ->middleware(VerifyStorefrontCsrf::class)
         ->name('storefront.auth.logout');
+    Route::post('/account/email-verification/request', [AccountController::class, 'requestEmailVerification'])
+        ->middleware([VerifyStorefrontCsrf::class, 'throttle:5,1'])
+        ->name('storefront.account.email-verification.request');
+    Route::post('/account/email-verification', [AccountController::class, 'verifyEmail'])
+        ->middleware([VerifyStorefrontCsrf::class, 'throttle:10,1'])
+        ->name('storefront.account.email-verification');
     Route::get('/account', [AccountController::class, 'show'])->name('storefront.account.show');
     Route::patch('/account', [AccountController::class, 'update'])
         ->middleware(VerifyStorefrontCsrf::class)
@@ -170,6 +207,20 @@ Route::middleware([
     Route::get('/account/orders', [AccountController::class, 'orders'])->name('storefront.account.orders');
     Route::get('/account/orders/{orderId}', [AccountController::class, 'order'])
         ->name('storefront.account.orders.show');
+    Route::get('/account/payment-methods', [PaymentMethodController::class, 'index'])
+        ->name('storefront.payment-methods.index');
+    Route::post('/account/payment-methods/setup-intent', [PaymentMethodController::class, 'setupIntent'])
+        ->middleware([VerifyStorefrontCsrf::class, 'throttle:5,1'])
+        ->name('storefront.payment-methods.setup-intent');
+    Route::post('/account/payment-methods', [PaymentMethodController::class, 'store'])
+        ->middleware([VerifyStorefrontCsrf::class, 'throttle:10,1'])
+        ->name('storefront.payment-methods.store');
+    Route::patch('/account/payment-methods/{paymentMethodId}/default', [PaymentMethodController::class, 'makeDefault'])
+        ->middleware(VerifyStorefrontCsrf::class)
+        ->name('storefront.payment-methods.default');
+    Route::delete('/account/payment-methods/{paymentMethodId}', [PaymentMethodController::class, 'destroy'])
+        ->middleware(VerifyStorefrontCsrf::class)
+        ->name('storefront.payment-methods.destroy');
     Route::post('/account/addresses', [AccountController::class, 'storeAddress'])
         ->middleware(VerifyStorefrontCsrf::class)
         ->name('storefront.account.addresses.store');

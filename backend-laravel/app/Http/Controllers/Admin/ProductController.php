@@ -106,19 +106,14 @@ class ProductController extends TenantApiController
 
     public function destroy(string $productId, Request $request, AuditLogger $auditLogger): JsonResponse|Response
     {
-        $product = Product::query()->forTenant($this->tenantId())->findOrFail($productId);
-        $hasVariantCartItems = $product->variants()->whereHas('cartItems')->exists();
-        $hasVariantOrderItems = $product->variants()->whereHas('orderItems')->exists();
-        if ($product->cartItems()->exists()
-            || $product->orderItems()->exists()
-            || $hasVariantCartItems
-            || $hasVariantOrderItems) {
-            return response()->json([
-                'message' => 'This product has dependent records. Deactivate it instead.',
-            ], 409);
-        }
-
-        DB::transaction(function () use ($auditLogger, $product, $request): void {
+        $blocked = DB::transaction(function () use ($auditLogger, $productId, $request): bool {
+            $product = Product::query()
+                ->forTenant($this->tenantId())
+                ->lockForUpdate()
+                ->findOrFail($productId);
+            if ($product->cartItems()->exists() || $product->variants()->whereHas('cartItems')->exists()) {
+                return true;
+            }
             $id = $product->id;
             $product->variants()->delete();
             $product->images()->delete();
@@ -132,7 +127,14 @@ class ProductController extends TenantApiController
                 $id,
                 $request,
             );
+
+            return false;
         });
+        if ($blocked) {
+            return response()->json([
+                'message' => 'This product is in an active cart. Deactivate it instead.',
+            ], 409);
+        }
 
         return response()->noContent();
     }

@@ -16,29 +16,11 @@ Storefront. Run each server in its own terminal and leave the terminals open.
 - Ensure the tenant hostnames resolve to localhost. Example local hosts:
   `shop.admin.localhost` and `shop.storefront.localhost`.
 
-  ## Create the initial local Admin login
+## Reset the local Admin password
 
-  A tenant and Admin account have been provisioned for local development:
-
-  - Store: **Demo Shop**
-  - Admin URL: `http://shop.admin.localhost:5173`
-  - Admin email: 
-  ```
-  admin@example.test
-  ```
-  - Tenant ID: `6b6641e4-180a-42dc-9ec8-488d802f7bf2`
-  - OTP
-  ```
-  927652
-  ```
-  - Password:
-  ```
-  @password123
-  ```
-
-  The initial password is intentionally random and unusable; no reusable
-  password is stored or printed. To set your own password, first start the
-  backend, then open a TTY terminal:
+If you need to reset the provisioned local Admin account, first start the
+backend, then run the lifecycle command in a TTY terminal. Do not put OTPs or
+passwords in this file:
 
   ```sh
   cd backend-laravel
@@ -46,20 +28,19 @@ Storefront. Run each server in its own terminal and leave the terminals open.
     php artisan tenant:reset-admin-password 6b6641e4-180a-42dc-9ec8-488d802f7bf2 admin@example.test
   ```
 
-  Copy the one-time code shown in that terminal into the Admin app's **I have a
-  reset code** page, choose a password, then sign in with `admin@example.test`.
-  The code expires after 10 minutes. Keep it private and do not paste it into
-  logs, chat, or source files.
+Copy the one-time code shown in that terminal into the Admin app's **I have a
+reset code** page, choose a password, then sign in with the provisioned Admin
+email. The code expires after 10 minutes. Keep it private.
 
-  The reset command must run in an interactive terminal because it deliberately
-  refuses to print OTPs to non-TTY output. The lifecycle gate is enabled only for
-  that command invocation; it is not enabled persistently in `.env`.
+The reset command must run in an interactive terminal because it deliberately
+refuses to print OTPs to non-TTY output. The lifecycle gate is enabled only for
+that command invocation; it is not enabled persistently in `.env`.
 
-  The local `.env` now has generated `SESSION_TOKEN_PEPPER` and
-  `VERIFICATION_CODE_PEPPER` values, plus `CACHE_STORE=file`,
-  `SESSION_DRIVER=file`, and `QUEUE_CONNECTION=sync`, which work with the
-  imported schema without Laravel cache/session/job tables. If the backend
-  server was already running, restart it so it loads these settings.
+The local `.env` now has generated `SESSION_TOKEN_PEPPER` and
+`VERIFICATION_CODE_PEPPER` values, plus `CACHE_STORE=file`, `SESSION_DRIVER=file`,
+and `QUEUE_CONNECTION=sync`, which work with the imported schema without
+Laravel cache/session/job tables. If the backend server was already running,
+restart it so it loads these settings.
 
 ## 1. Start the Laravel backend
 
@@ -99,11 +80,12 @@ In Terminal 3, from the repository root:
 npm run dev:storefront
 ```
 
-Open the Vite/Nuxt dev URL using a configured tenant Storefront hostname, for
-example:
+Set `STOREFRONT_API_ORIGIN` for the Nuxt server-side proxy if Laravel is at a
+different origin. The local default is `http://127.0.0.1:8000`. Open the Nuxt
+URL using a configured tenant Storefront hostname, for example:
 
 ```text
-http://shop.store.localhost:3000
+http://shop.storefront.localhost:3000
 ```
 
 Use the port printed by Nuxt if it selects a different one. The Storefront

@@ -1,6 +1,6 @@
 {
   "name": "ecommerce-multistore",
-  "private":true,
+  "private": true,
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -24,5 +24,9 @@
   "bugs": {
     "url": "https://github.com/Husyn0/E-commerce_multi-store_architecture/issues"
   },
-  "homepage": "https://github.com/Husyn0/E-commerce_multi-store_architecture#readme"
+  "homepage": "https://github.com/Husyn0/E-commerce_multi-store_architecture#readme",
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "typescript": "~5.9.3"
+  }
 }
