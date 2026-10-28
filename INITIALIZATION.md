@@ -1,8 +1,11 @@
 # Project initialization
 
-This repository currently contains design documents only. The commands below
-scaffold the three application ends; they do not implement the API, UI, tenancy,
-authentication, payment, or other behavior described in `design/`.
+The monorepo scaffolds and MySQL schema are in place. The Laravel API includes
+tenant-host resolution and status gates, Admin authentication and management
+APIs, Storefront catalog/cart/guest checkout, payment webhooks, Admin refund
+initiation, OTP/account flows, server-side human-verification endpoints, and
+env-gated tenant lifecycle/data-pruning commands. The frontend applications
+are not complete.
 
 ## Prerequisites
 
@@ -30,18 +33,20 @@ package directory placeholders:
 mkdir -p packages/ui packages/styles packages/api-client packages/types
 ```
 
-## 2. Initialize the Laravel API
+## 2. Laravel API setup and current implementation
 
 ```sh
-composer create-project laravel/laravel backend-laravel
 cd backend-laravel
-php artisan key:generate
+composer install
 ```
 
-Configure the backend `.env` for the database created from
+The Laravel project is already scaffolded in `backend-laravel/`; do not recreate
+it. Configure `.env` for the database created from
 [`database/schema.mysql.sql`](./database/schema.mysql.sql). Set trusted-proxy
 configuration for the actual deployment; do not trust arbitrary forwarded
-headers.
+headers. The sample config uses file-based sessions/cache and synchronous jobs
+because this schema does not include Laravel's default sessions/cache/jobs
+tables.
 
 ```dotenv
 APP_ENV=local
@@ -58,24 +63,118 @@ DB_PASSWORD=your_local_database_password
 ADMIN_BASE_DOMAIN=admin.localhost
 STOREFRONT_BASE_DOMAIN=store.localhost
 CUSTOM_DOMAIN_ALLOWLIST=
+TRUSTED_PROXIES=
 
-SESSION_TOKEN_PEPPER=replace_with_a_random_32_byte_or_longer_secret
-VERIFICATION_CODE_PEPPER=replace_with_a_different_random_secret
-DEMO_WEBHOOK_SECRET=replace_with_a_random_secret
+SESSION_DRIVER=file
+CACHE_STORE=file
+QUEUE_CONNECTION=sync
+
+SESSION_TOKEN_PEPPER=
+VERIFICATION_CODE_PEPPER=
+DEMO_WEBHOOK_SECRET=
+TURNSTILE_SECRET=
+HCAPTCHA_SECRET=
+STRIPE_SECRET=
+STRIPE_WEBHOOK_SECRET=
+DEFAULT_PAYMENT_DRIVER=demo
+DEFAULT_VERIFICATION_DRIVER=demo
+DEFAULT_HUMAN_CHECK_DRIVER=demo
+DEFAULT_EMAIL_PROVIDER=log
+DEFAULT_SMS_PROVIDER=log
 WEBHOOK_PAYLOAD_RETENTION_DAYS=30
 SESSION_IDLE_TTL=1209600
+TENANT_LIFECYCLE_CLI_ENABLED=false
+TENANT_CLI_OPERATOR_REF=
 ```
 
-Use independent randomly generated secrets for each pepper/secret, store them
-only in environment/secret-management configuration, and never commit `.env`.
-`SESSION_IDLE_TTL` is expressed in seconds.
+The secret entries above are intentionally blank in the sample. Generate
+independent random values for the active flows and store them only in
+environment/secret-management configuration; never commit `.env`. The cart,
+Admin refresh-session, and demo webhook flows fail closed if their required
+secrets are missing. Checkout also returns 503 until the selected tenant
+payment driver and its webhook secret are configured. `SESSION_IDLE_TTL` is
+expressed in seconds.
 Use an empty allowlist in local development unless custom-domain routing is
 specifically being tested.
 
-Create and implement the Laravel API according to `design/back-design.txt` and
-`design/db-design.txt`. The SQL schema is the database bootstrap; do not run
-Laravel migrations that recreate the same tables unless they are adapted to
-this schema.
+Implemented API routes:
+
+- `GET /health/ready` checks database readiness and does not require a tenant.
+- `GET /api/admin/tenant` resolves the admin host and returns tenant bootstrap
+  fields, including status, so a suspended Admin screen can poll for recovery.
+- Admin auth: `POST /api/admin/auth/login`, `/refresh`, and `/logout`.
+- Admin catalog and operations: product/category management, inventory,
+  customers, orders, settings/theme, audit-log reads, and
+  `POST /api/admin/orders/{orderId}/refunds`.
+- Storefront reads: tenant bootstrap and published catalog/category endpoints.
+- Guest commerce: `GET /api/storefront/cart`, cart item add/update/delete, and
+  `POST /api/storefront/checkout`. Initialize a cart first to receive the
+  HttpOnly cart cookie and CSRF cookie; mutating cookie requests require the
+  matching `X-CSRF-TOKEN` header. Checkout requires `Idempotency-Key`.
+- Storefront customer flows: email verification-code issuance, registration,
+  login/logout, profile, tenant-scoped addresses with transactional defaults,
+  and authenticated order history.
+- Admin password reset: OTP request and reset endpoints on the Admin host.
+- `POST /api/webhooks/payment` verifies Stripe or demo signatures, deduplicates
+  events, and reconciles tenant payment/refund events.
+
+Stripe checkout creates a PaymentIntent on the tenant's configured connected
+account using `Stripe-Account`; no platform/application fee is charged. Admin
+refunds are sent to that same tenant account. This is shopper-to-store payment
+processing, not developer revenue handling. With blank payment secrets or a
+missing tenant Stripe account, payment operations correctly fail closed.
+
+Cart sign-in merge adopts a guest cart when no signed-in cart exists; otherwise
+it adds quantities for matching lines and returns a validation error if current
+stock would be exceeded. The merge is audited as `cart.merged`. Guest order
+lookup is explicitly out of scope for v1; orders are available to signed-in
+customers only. Human-verification endpoints support Turnstile/hCaptcha and a
+local/testing-only demo token (`demo-pass`); configure provider secrets and a
+matching frontend widget before enabling those tenant drivers. Phone OTP is
+not wired yet. Demo
+payments and demo webhooks are disabled in production. Do not treat the backend
+as production-complete until these flows, provider configuration, frontend
+apps, and end-to-end MySQL/webhook tests are finished.
+
+Tenant provisioning and lifecycle commands are disabled by default. To enable
+them for a controlled CLI session, set `TENANT_LIFECYCLE_CLI_ENABLED=true` and
+set `TENANT_CLI_OPERATOR_REF` to the operator's non-secret identifier. The
+commands write audit rows with `actor_id=NULL`, `source=cli`, and
+`metadata.operator_ref`; suspension revokes every tenant user session in the
+same transaction. Provisioning generates an unusable random Admin password
+and never displays it; the Admin must request an OTP through the Admin password
+reset endpoint. `tenant:reset-admin-password` is a TTY-only fallback for broken
+email delivery. It creates an audited, rate-limited 10-minute OTP and displays
+it only in the interactive terminal; it does not write the OTP to application
+logs. Share the code with the Admin through a secure channel.
+`tenant:prune-data` defaults to all tenants; pass `--tenant=TENANT_UUID` to
+narrow its scope. The daily scheduled prune removes expired carts, codes,
+human verifications, sessions and checkout idempotency records, and only
+nulls webhook payloads older than `WEBHOOK_PAYLOAD_RETENTION_DAYS`; it never
+deletes audit rows or webhook event rows. The lifecycle CLI gate and operator
+reference must remain enabled for scheduled pruning to run.
+
+```sh
+cd backend-laravel
+php artisan tenant:provision "Shop name" shopname USD en --admin-email=admin@example.test
+php artisan tenant:suspend TENANT_UUID
+php artisan tenant:recover TENANT_UUID
+php artisan tenant:reset-admin-password TENANT_UUID admin@example.test
+php artisan tenant:prune-data --dry-run
+```
+
+Tenant URLs follow `<tenant-subdomain>.<ADMIN_BASE_DOMAIN>` and
+`<tenant-subdomain>.<STOREFRONT_BASE_DOMAIN>`. A custom domain resolves only
+when it is in `CUSTOM_DOMAIN_ALLOWLIST` and exactly matches
+`tenants.custom_domain`. Unknown hosts return 404. Suspended Admin hosts are
+blocked with 403; suspended Storefront hosts return uncached 503. Configure
+`TRUSTED_PROXIES` with explicit proxy addresses/CIDRs only.
+
+Keep changes aligned with `design/back-design.txt` and `design/db-design.txt`.
+The SQL schema is the database bootstrap. Do not run Laravel's default
+migrations against the imported database; the Composer setup scripts no longer
+run migrations automatically. Run `cd backend-laravel && php artisan test
+--compact` for the current automated test suite.
 
 ## 3. Initialize the Admin SPA
 
@@ -166,8 +265,8 @@ cannot be deleted until those cart lines are removed.
 ## 7. Local development order
 
 1. Start MySQL and import the schema.
-2. Configure the Laravel `.env`, implement tenant/host middleware, then start
-   Laravel with `php artisan serve --host=127.0.0.1 --port=8000`.
+2. Configure Laravel `.env`, then start the API with
+   `php artisan serve --host=127.0.0.1 --port=8000`.
 3. Start Admin and Storefront in separate terminals using the root npm scripts.
 4. Configure local hostnames/DNS and trusted proxies consistently before testing
    host-based tenant resolution. Unknown hosts must remain rejected.

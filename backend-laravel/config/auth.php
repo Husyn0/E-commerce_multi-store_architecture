@@ -20,6 +20,8 @@ return [
         'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
     ],
 
+    'access_token_ttl' => (int) env('ADMIN_ACCESS_TOKEN_TTL', 600),
+
     /*
     |--------------------------------------------------------------------------
     | Authentication Guards
@@ -40,6 +42,10 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
+            'provider' => 'users',
+        ],
+        'tenant-jwt' => [
+            'driver' => 'tenant-jwt',
             'provider' => 'users',
         ],
     ],
