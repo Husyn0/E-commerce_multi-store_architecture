@@ -28,6 +28,13 @@ class OrderResource extends JsonResource
             'shipping_address' => $this->shipping_address_snapshot,
             'billing_address' => $this->billing_address_snapshot,
             'items' => OrderItemResource::collection($this->whenLoaded('items')),
+            'refunds' => $this->whenLoaded('refunds', fn () => $this->refunds->map(fn ($refund) => [
+                'id' => $refund->id,
+                'amount_cents' => (int) $refund->amount_cents,
+                'status' => $refund->status,
+                'reason' => $refund->reason,
+                'created_at' => $refund->created_at,
+            ])),
             'created_at' => $this->created_at,
             'paid_at' => $this->paid_at,
         ];

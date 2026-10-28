@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AuditController as AdminAuditController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\InventoryController as AdminInventoryController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\PasswordResetController as AdminPasswordResetController;
@@ -64,6 +65,7 @@ Route::middleware([
     'auth:tenant-jwt',
     'tenant.admin',
 ])->prefix('admin')->group(function (): void {
+    Route::get('/dashboard', AdminDashboardController::class)->name('admin.dashboard');
     Route::apiResource('products', AdminProductController::class);
     Route::apiResource('categories', AdminCategoryController::class);
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('admin.orders.index');

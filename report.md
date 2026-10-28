@@ -137,9 +137,11 @@ against the imported schema.
    rate-limited lookup using `guest_order_lookup` OTPs. The backend has no
    lookup endpoint and `INITIALIZATION.md` says guest lookup is out of scope.
    Resolve this design/documentation conflict and implement the chosen contract.
-4. **Dashboard and readiness:** no Admin dashboard endpoint/UI exists. The
-   current `/health/ready` checks only database connectivity; design also calls
-   for global and per-tenant driver readiness without exposing credentials.
+4. **Dashboard and readiness:** the Admin dashboard endpoint and Overview UI
+   are now implemented with tenant-scoped seven-day UTC sales totals that
+   exclude cancelled and non-succeeded orders. The current `/health/ready`
+   still checks only database connectivity; design also calls for global and
+   per-tenant driver readiness without exposing credentials.
 5. **Driver warning/status UX:** settings API returns `driver_warning` and
    `/api/admin/tenant` exposes status, but the Admin warning banner and
    suspended/recovered status screen are not implemented.
