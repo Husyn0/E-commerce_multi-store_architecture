@@ -57,10 +57,7 @@ class PruneTenantData extends Command
                     $query->where('expires_at', '<=', $now)->orWhereNotNull('revoked_at');
                 }),
             ),
-            'expired checkout idempotency records deleted' => $this->prune(
-                'checkout_idempotency_records',
-                fn (Builder $query) => $query->where('expires_at', '<=', $now),
-            ),
+            'expired checkout idempotency records deleted' => $this->pruneExpiredCheckoutIdempotencyRecords($now),
             'old webhook payloads redacted' => $this->redactWebhookPayloads($cutoff),
         ];
 
@@ -102,6 +99,35 @@ class PruneTenantData extends Command
         });
 
         return $redacted;
+    }
+
+    private function pruneExpiredCheckoutIdempotencyRecords(Carbon $now): int
+    {
+        $query = $this->scopedQuery('checkout_idempotency_records')
+            ->where('expires_at', '<=', $now);
+
+        if ($this->option('dry-run')) {
+            return $query->count();
+        }
+
+        $deleted = 0;
+        $query->orderBy('id')->chunkById(500, function ($rows) use (&$deleted, $now): void {
+            $ids = $rows->pluck('id');
+            $deleted += DB::transaction(function () use ($ids, $now): int {
+                $expiredRecords = DB::table('checkout_idempotency_records')
+                    ->whereIn('id', $ids)
+                    ->where('expires_at', '<=', $now);
+
+                $expiredRecords->update(['order_id' => null]);
+
+                return DB::table('checkout_idempotency_records')
+                    ->whereIn('id', $ids)
+                    ->where('expires_at', '<=', $now)
+                    ->delete();
+            });
+        });
+
+        return $deleted;
     }
 
     private function scopedQuery(string $table): Builder

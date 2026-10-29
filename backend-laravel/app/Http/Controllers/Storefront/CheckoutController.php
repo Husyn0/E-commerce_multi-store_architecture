@@ -134,6 +134,8 @@ class CheckoutController extends TenantApiController
                     ->first();
 
                 if ($record !== null && $record->expires_at->isPast()) {
+                    $record->order_id = null;
+                    $record->save();
                     $record->delete();
                     $record = null;
                 }

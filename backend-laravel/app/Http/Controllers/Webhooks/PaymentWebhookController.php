@@ -140,6 +140,10 @@ class PaymentWebhookController
             return response()->json(['status' => 'duplicate']);
         }
 
+        if ($event?->status === 'failed') {
+            return response()->json(['status' => 'failed'], 500);
+        }
+
         return response()->json(['status' => $event === null ? 'duplicate' : 'processed']);
     }
 

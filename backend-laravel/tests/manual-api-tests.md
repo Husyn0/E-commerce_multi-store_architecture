@@ -35,7 +35,7 @@ Start a shell and set the test values (replace example values as needed):
 export ADMIN_BASE='http://shop.admin.localhost:8000'
 export STORE_BASE='http://shop.store.localhost:8000'
 export ADMIN_EMAIL='admin@example.test'
-export ADMIN_PASSWORD='replace-with-admin-password'
+export ADMIN_PASSWORD='@password123'
 export CUSTOMER_EMAIL='customer@example.test'
 export CUSTOMER_PASSWORD='replace-with-customer-password'
 export ADMIN_JAR='/tmp/shop-admin.cookies'

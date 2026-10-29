@@ -28,6 +28,8 @@ passwords in this file:
     php artisan tenant:reset-admin-password 6b6641e4-180a-42dc-9ec8-488d802f7bf2 admin@example.test
   ```
 
+
+
 Copy the one-time code shown in that terminal into the Admin app's **I have a
 reset code** page, choose a password, then sign in with the provisioned Admin
 email. The code expires after 10 minutes. Keep it private.

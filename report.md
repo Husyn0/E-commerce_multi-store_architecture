@@ -6,13 +6,127 @@
 scaffolds, and `INITIALIZATION.md`. This review made no implementation or
 design changes; this report is the only file written for this request.
 
+## Current-session handoff — 2026-10-28
+
+This update supersedes the older statements below wherever they say that the
+Storefront is still only a Nuxt welcome screen, or that password reset,
+guest-order lookup, saved-payment-method APIs, and product image/variant CRUD
+are absent. Those backend/API additions and initial Storefront pages/proxy are
+now present. The rest of the review is retained as historical analysis and
+still needs to be checked against the current tree before treating it as
+current fact.
+
+### Work completed in the latest implementation pass
+
+- Added customer OTP password-reset endpoints; successful reset revokes the
+  customer's active Storefront sessions.
+- Added authenticated email-verification request/confirm endpoints.
+- Added tenant-scoped guest order lookup request/confirm endpoints using
+  `guest_order_lookup` email OTP.
+- Added Stripe saved-payment-method endpoints: payment configuration,
+  SetupIntent creation and verification, list, make-default, and removal.
+  SetupIntent completion validates tenant/user metadata and the payment
+  method's Stripe customer association. Raw card data is not handled.
+- Added Admin product image create/update/delete and variant
+  create/update/delete endpoints. Variant attribute combinations are compared
+  canonically; active-cart references block deletion.
+- Updated product deletion to lock the product and check product/variant cart
+  references in the same transaction. Historical order references continue to
+  depend on the imported database FK behavior; do not assume the documented
+  `SET NULL` behavior until that schema gap is resolved.
+- Registered the new endpoints in `backend-laravel/routes/api.php`; configured
+  `STRIPE_PUBLISHABLE_KEY`.
+- Added initial Storefront pages/components and a Nuxt server-side API proxy.
+  The proxy only accepts `storefront/` routes, uses the incoming `Host` (not a
+  client-supplied `x-forwarded-host`) to preserve tenant resolution, forwards
+  only Storefront cookies, and uses a 2-second timeout with no retries.
+- Fixed expired checkout idempotency cleanup to clear the nullable order
+  reference before deleting the row, both when a key is reused and during
+  pruning. This preserves the restrictive FK while allowing expiry cleanup.
+- Changed failed webhook processing to return HTTP 500 after recording the
+  failed attempt, allowing the provider's redelivery policy to retry it. Failed
+  events still stop being retried after the existing five-attempt limit.
+- Traced the Storefront 404 configuration: the root page and tenant API route
+  exist. The local backend domain is `storefront.localhost`, so the local
+  tenant URL must include that suffix (for example,
+  `http://shop.storefront.localhost:3000`) and a tenant with the `shop`
+  subdomain must exist. No browser check was run.
+
+### Validation performed (no tests)
+
+No test files were created and no tests were run, as requested.
+
+- `backend-laravel/vendor/bin/pint --dirty --format agent` passed for the
+  current PHP changes.
+- `php -l` passed for the changed CheckoutController, PruneTenantData command,
+  and PaymentWebhookController; `git diff --check` passed. Behavior remains
+  unverified because no tests or browser checks were run.
+- PHP syntax lint passed for the changed PHP controllers.
+- Pint check passed for the changed controllers after formatting the modified
+  `AccountController`.
+- `php artisan route:list --path=storefront --except-vendor` succeeded and
+  reported 33 Storefront routes.
+- Storefront `npm run typecheck` passed. It emitted a warning that Node.js
+  22.19.0 is below the Nuxt-supported range (`^22.21.0 || ^24.11.0 ||
+  >=26.0.0`).
+- `git diff --check` passed.
+- PHP Language Server diagnostics include many magic Eloquent model-property
+  warnings in new controllers; these are static-analysis warnings and not PHP
+  syntax errors. Review any newly surfaced diagnostics while continuing work.
+
+### Current implementation gaps / caution
+
+- The new API endpoints do not yet have all matching Storefront UI flows:
+  customer registration, OTP password reset/email verification, guest-order
+  lookup, and saved-card management still need user-facing pages/components.
+- The Storefront checkout UI remains unavailable/incomplete; implement the
+  secure Stripe Payment Element flow before enabling card checkout. Do not send
+  raw card data through Laravel.
+- Do not infer completion from routes or type-check alone. The prior blocking
+  items in this report—including order-item snapshot/FK behavior, configured
+  phone/email verification at checkout, idle-session pruning, per-tenant
+  provider CLI operations/readiness, MySQL verification, Admin UI completeness,
+  and shared API packages—remain open unless explicitly re-verified and
+  resolved. The idempotency expiry and webhook failure-response changes above
+  have not been behaviorally verified.
+- Before this continuation, the worktree had pre-existing modifications to
+  `report.md` and `run.md`. Preserve those edits; the PHP changes listed above
+  are from this continuation.
+
+### Suggested continuation for the next session
+
+1. Read this handoff and the design contracts in `design/Storefront.txt`,
+   `design/back-design.txt`, and `design/db-design.txt`; treat the existing
+   blocking-gap list below as a starting point, not verified current truth.
+2. Inspect `git status --short`, then review the current backend routes,
+   controllers, models, schema, and Storefront pages before changing code.
+   Keep changes scoped and preserve dirty work.
+3. Continue backend correctness work: resolve checkout verification
+   requirements and the schema/order snapshot deletion mismatch. The
+   idempotency expiry/prune FK conflict and webhook failed-processing response
+   were addressed in the current continuation but remain unverified. Confirm
+   the actual imported schema, not just design text.
+4. Continue implementing the missing Storefront flows and secure checkout UI
+   against the existing API. Keep tenant host context, CSRF/cookie forwarding,
+   and no raw-card-data rules intact. Then fill the missing Admin screens and
+   operational/readiness gaps.
+5. The user explicitly asked not to create or run tests in the implementation
+   request. Respect that unless the user changes the instruction. Use
+   non-test validation (PHP lint, Pint, route listing, frontend type-check/build
+   if requested, and `git diff --check`) and clearly label behavior that remains
+   unverified.
+6. Update this `report.md` after material progress: date the handoff, record
+   precise files/features changed and commands/results, distinguish verified
+   facts from open questions, and remove or mark superseded claims rather than
+   silently leaving conflicting status entries.
+
 ## Executive summary
 
-The backend has a substantial tenant-aware foundation and the main shopper
-checkout/payment path is implemented. It is **not yet design-complete or
-production-ready**. Several contracts are present only partially, the frontend
-apps are still starter screens, and the imported MySQL schema has not been
-verified end-to-end against the backend.
+At the time of the original review, the backend had a substantial
+tenant-aware foundation and the main shopper checkout/payment path was
+implemented, but it was **not design-complete or production-ready**. The
+imported MySQL schema has still not been verified end-to-end against the
+backend.
 
 The highest-risk issue is that completed checkout idempotency records cannot be
 deleted while their `order_id` foreign key points to an order. Both checkout's
@@ -41,6 +155,10 @@ the scheduled prune after the 24-hour idempotency window.
 
 ### 1. Expired checkout idempotency records cannot currently be deleted
 
+**Current continuation status:** the expired-key path and pruning command now
+clear `order_id` before deleting the row. PHP syntax and formatting checks
+passed, but the behavior has not been tested.
+
 `checkout_idempotency_records.order_id` has `ON DELETE RESTRICT`. Once checkout
 has created an order, the record references that order. The expiry branch in
 `CheckoutController` deletes the expired record directly, and
@@ -67,6 +185,10 @@ flow with the snapshot-retention contract, and verify historical order API
 responses after catalog rows are deleted.
 
 ### 3. Webhook processing failures are acknowledged as successes
+
+**Current continuation status:** a recorded processing failure now returns
+HTTP 500 so the provider may redeliver it. Existing failed-event handling
+limits processing to five attempts. This has not been tested.
 
 When a webhook state update throws a `QueryException`, the controller marks
 the row failed but returns the non-null event; the final response reports

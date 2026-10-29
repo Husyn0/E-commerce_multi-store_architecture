@@ -20,7 +20,7 @@ and Admin user. Response sets HttpOnly `admin_refresh` and readable
 `admin_csrf` cookies. Keep the access token private.
 
 ```sh
-export ADMIN_ACCESS_TOKEN='paste-access_token-from-login-response'
+export ADMIN_ACCESS_TOKEN='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOlwvXC9hcGkubG9jYWxob3N0Iiwic3ViIjoiZTk0YWMxMzEtZWQxYS00ZjY4LTlkMmEtODA2Mzg0ZjRjMzhkIiwidGlkIjoiNmI2NjQxZTQtMTgwYS00MmRjLTllYzgtNDg4ZDgwMmY3YmYyIiwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzkzMjg1NDE4LCJleHAiOjE3OTMyODYwMTh9.V7voGNlYwo7v0ZSDDAZwKc9xgut95R_00VIaUy9V-qM'
 export ADMIN_CSRF="$(awk '$6 == "admin_csrf" {print $7}' "$ADMIN_JAR")"
 ```
 
