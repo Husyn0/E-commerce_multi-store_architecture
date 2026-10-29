@@ -24,6 +24,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'tenant.admin' => RequireTenantAdmin::class,
         ]);
 
+        $middleware->redirectGuestsTo(
+            fn (Request $request) => $request->is('api/*') ? null : route('login'),
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

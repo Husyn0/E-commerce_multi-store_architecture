@@ -75,6 +75,15 @@ class TenantHostResolutionTest extends TestCase
             ->assertNotFound();
     }
 
+    public function test_unauthenticated_admin_api_request_without_accept_header_returns_json_401(): void
+    {
+        $this->bindTenants(['violet' => $this->tenant('violet')]);
+
+        $this->call('GET', 'https://violet.admin.example.test/api/admin/products')
+            ->assertUnauthorized()
+            ->assertExactJson(['message' => 'Unauthenticated.']);
+    }
+
     public function test_suspended_admin_is_blocked_but_can_read_recovery_status(): void
     {
         $this->bindTenants(['violet' => $this->tenant('violet', status: 'suspended')]);
