@@ -16,6 +16,10 @@ export interface StoreTenant {
     require_phone_verification: boolean
     human_check_driver: 'demo' | 'turnstile' | 'hcaptcha'
   }
+  password_recovery?: {
+    email_enabled: boolean
+    phone_enabled: boolean
+  }
 }
 
 export function useTenant() {

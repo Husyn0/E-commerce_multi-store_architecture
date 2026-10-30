@@ -13,6 +13,11 @@ return [
     'hcaptcha' => [
         'secret' => env('HCAPTCHA_SECRET'),
     ],
+    'twilio' => [
+        'account_sid' => env('TWILIO_ACCOUNT_SID'),
+        'auth_token' => env('TWILIO_AUTH_TOKEN'),
+        'from_number' => env('TWILIO_FROM_NUMBER'),
+    ],
 
     'stripe' => [
         'secret' => env('STRIPE_SECRET'),

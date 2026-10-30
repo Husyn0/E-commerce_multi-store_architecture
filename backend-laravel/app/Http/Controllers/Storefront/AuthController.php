@@ -9,12 +9,14 @@ use App\Models\UserSession;
 use App\Services\Storefront\StorefrontSessionCookies;
 use App\Services\Verification\VerificationCodeService;
 use App\Support\SessionTokenHasher;
+use App\Support\PhoneNumber;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
 
@@ -26,13 +28,23 @@ class AuthController extends TenantApiController
         VerificationCodeService $verificationCodes,
         StorefrontSessionCookies $cookies,
     ): JsonResponse {
+        if (is_string($request->input('phone')) && trim($request->input('phone')) !== '') {
+            $request->merge(['phone' => PhoneNumber::normalize($request->input('phone'))]);
+        }
         $input = $request->validate([
             'email' => ['required', 'email', 'max:254'],
             'password' => ['required', 'string', 'min:8', 'max:255', 'confirmed'],
             'first_name' => ['nullable', 'string', 'max:100'],
             'last_name' => ['nullable', 'string', 'max:100'],
+            'phone' => [
+                'nullable',
+                'string',
+                'max:32',
+                Rule::unique('users', 'phone')->where('tenant_id', $this->tenantId()),
+            ],
             'email_verification_code' => ['sometimes', 'digits:6'],
         ]);
+        $input['phone'] = $input['phone'] ?? null;
         $tenantId = $this->tenantId();
         $settings = TenantSettings::query()->forTenant($tenantId)->firstOrFail();
         if ($settings->require_phone_verification) {
@@ -71,6 +83,7 @@ class AuthController extends TenantApiController
                 $user->tenant_id = $tenantId;
                 $user->email = $email;
                 $user->email_verified_at = $settings->require_email_verification ? now() : null;
+                $user->phone = $input['phone'];
                 $user->password_hash = $input['password'];
                 $user->first_name = $input['first_name'] ?? null;
                 $user->last_name = $input['last_name'] ?? null;
@@ -179,6 +192,7 @@ class AuthController extends TenantApiController
             'first_name' => $user->first_name,
             'last_name' => $user->last_name,
             'email_verified' => $user->email_verified_at !== null,
+            'phone' => $user->phone,
         ];
     }
 }

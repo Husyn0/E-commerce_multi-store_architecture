@@ -142,6 +142,14 @@ Route::middleware([
             'require_phone_verification' => (bool) $settings->require_phone_verification,
             'human_check_driver' => $settings->human_check_driver,
         ],
+        'password_recovery' => [
+            'email_enabled' => in_array($settings->email_provider, ['smtp', 'postmark', 'ses'], true)
+                && config('mail.mailers.'.$settings->email_provider.'.transport') === $settings->email_provider,
+            'phone_enabled' => (bool) ($settings->sms_provider === 'twilio'
+                && config('services.twilio.account_sid')
+                && config('services.twilio.auth_token')
+                && config('services.twilio.from_number')),
+        ],
         'host_type' => $context->hostType,
     ]);
 });

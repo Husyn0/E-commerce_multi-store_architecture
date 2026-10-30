@@ -44,6 +44,7 @@ useSeoMeta({ title: 'Welcome back', description: 'Sign in to your store account.
 
 onMounted(() => {
   if (route.query.registered === '1') notice.value = 'Your account is ready. Sign in to continue.'
+  if (route.query.reset === '1') notice.value = 'Your password has been updated. Sign in with your new password.'
 })
 </script>
 
@@ -69,6 +70,7 @@ onMounted(() => {
           <span>Password</span>
           <input v-model="password" type="password" autocomplete="current-password" required placeholder="Your password">
         </label>
+        <NuxtLink class="auth-recovery-link" to="/auth/forgot-password">Forgot your password?</NuxtLink>
         <p v-if="error" class="error-box" role="alert">{{ error }}</p>
         <button class="button button--dark button--wide" type="submit" :disabled="busy">
           {{ busy ? 'Signing in…' : 'Sign in' }} <span v-if="!busy">→</span>

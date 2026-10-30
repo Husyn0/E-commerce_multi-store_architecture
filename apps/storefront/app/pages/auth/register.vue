@@ -4,6 +4,7 @@ interface Customer {
   email: string
   first_name: string | null
   last_name: string | null
+  phone: string | null
   email_verified: boolean
 }
 
@@ -18,6 +19,7 @@ const { cart, refresh } = useCart()
 const runtimeConfig = useRuntimeConfig()
 const firstName = ref('')
 const lastName = ref('')
+const phone = ref('')
 const email = ref('')
 const password = ref('')
 const passwordConfirmation = ref('')
@@ -141,6 +143,7 @@ async function register() {
       password_confirmation: passwordConfirmation.value,
       first_name: firstName.value.trim() || null,
       last_name: lastName.value.trim() || null,
+      phone: phone.value.trim() || null,
       ...(needsEmailVerification.value ? { email_verification_code: emailCode.value.trim() } : {}),
     })
     useState<Customer | null>('storefront-customer').value = result.user
@@ -179,6 +182,7 @@ onMounted(loadChallengeWidget)
           <label class="form-field"><span>First name <small>Optional</small></span><input v-model.trim="firstName" autocomplete="given-name" maxlength="100" /></label>
           <label class="form-field"><span>Last name <small>Optional</small></span><input v-model.trim="lastName" autocomplete="family-name" maxlength="100" /></label>
         </div>
+        <label class="form-field"><span>Phone number for account recovery <small>Optional</small></span><input v-model.trim="phone" type="tel" autocomplete="tel" maxlength="32" placeholder="+14155552671" /><small>Include your country code. You can also add a phone later in Account Settings.</small></label>
         <label class="form-field"><span>Email address</span><input v-model="email" type="email" autocomplete="email" required placeholder="you@example.com" /></label>
         <div v-if="needsEmailVerification" class="verification-code-row">
           <label class="form-field"><span>Email verification code</span><input v-model="emailCode" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required placeholder="6-digit code" /></label>

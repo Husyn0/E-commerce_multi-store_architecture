@@ -9,9 +9,11 @@ use App\Models\Order;
 use App\Models\TenantSettings;
 use App\Models\User;
 use App\Services\Verification\VerificationCodeService;
+use App\Support\PhoneNumber;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use RuntimeException;
 
 class AccountController extends TenantApiController
@@ -104,12 +106,28 @@ class AccountController extends TenantApiController
     public function update(Request $request): JsonResponse
     {
         $this->customer($request);
-        $this->rejectUnexpectedKeys($request, ['first_name', 'last_name']);
+        $this->rejectUnexpectedKeys($request, ['first_name', 'last_name', 'phone']);
+        if (is_string($request->input('phone')) && trim($request->input('phone')) !== '') {
+            $request->merge(['phone' => PhoneNumber::normalize($request->input('phone'))]);
+        }
         $data = $request->validate([
             'first_name' => ['sometimes', 'nullable', 'string', 'max:100'],
             'last_name' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'phone' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:32',
+                Rule::unique('users', 'phone')->where('tenant_id', $this->tenantId())->ignore($request->user()->id),
+            ],
         ]);
         $user = $request->user();
+        if (array_key_exists('phone', $data) && ($data['phone'] === null || trim($data['phone']) === '')) {
+            $data['phone'] = null;
+        }
+        if (array_key_exists('phone', $data) && $user->phone !== $data['phone']) {
+            $user->phone_verified_at = null;
+        }
         $user->fill($data);
         $user->save();
 

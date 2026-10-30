@@ -6,6 +6,7 @@ interface User {
   last_name: string | null
   phone: string | null
   email_verified: boolean
+  phone_verified: boolean
 }
 
 const api = useStorefrontApi()
@@ -15,11 +16,12 @@ if (error.value) {
   if (status === 401) await navigateTo('/auth/login?redirect=%2Faccount%2Fsettings')
   else throw createError({ statusCode: 503, statusMessage: 'Account settings are unavailable.' })
 }
-const form = reactive({ first_name: '', last_name: '' })
+const form = reactive({ first_name: '', last_name: '', phone: '' })
 watch(data, (value) => {
   if (value) {
     form.first_name = value.user.first_name || ''
     form.last_name = value.user.last_name || ''
+    form.phone = value.user.phone || ''
   }
 }, { immediate: true })
 const busy = ref(false)
@@ -62,6 +64,7 @@ useSeoMeta({ title: 'Your details', description: 'Update your customer profile.'
         <label class="form-field"><span>First name</span><input v-model="form.first_name" type="text" autocomplete="given-name" maxlength="100"></label>
         <label class="form-field"><span>Last name</span><input v-model="form.last_name" type="text" autocomplete="family-name" maxlength="100"></label>
       </div>
+      <label class="form-field"><span>Phone number for password recovery</span><input v-model.trim="form.phone" type="tel" autocomplete="tel" maxlength="32" placeholder="+14155552671"><small>Include your country code. A one-time code will be sent here if you choose phone recovery.</small></label>
       <p v-if="message" :class="failed ? 'error-box' : 'success-box'" role="status">{{ message }}</p>
       <div class="form-footer">
         <NuxtLink class="underlined-link" to="/account">Cancel</NuxtLink>

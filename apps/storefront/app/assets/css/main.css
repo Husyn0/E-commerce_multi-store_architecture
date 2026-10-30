@@ -236,6 +236,7 @@ img { display: block; max-width: 100%; }
 .auth-footnote { margin: 23px 0 0; color: #8a857c; font-size: 10px; }
 .auth-footnote span { color: var(--accent); }
 .auth-footnote a { color: var(--accent); font-weight: 650; text-decoration: underline; text-underline-offset: 3px; }
+.auth-recovery-link { justify-self: end; margin-top: -8px; color: var(--accent); font-size: 10px; text-decoration: underline; text-underline-offset: 3px; }
 .auth-panel--register { width: min(560px, 100%); }
 .auth-panel--register h1 { font-size: clamp(37px, 4.4vw, 49px); }
 .register-name-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -245,6 +246,12 @@ img { display: block; max-width: 100%; }
 .register-human-demo { display: flex; align-items: center; gap: 9px; color: #5e5850; font-size: 10px; }
 .register-human-demo input { width: 15px; height: 15px; accent-color: var(--accent); }
 .register-human-check { min-height: 66px; }
+.recovery-channel { display: flex; gap: 19px; margin: 0; padding: 0; border: 0; color: #5e5850; font-size: 10px; }
+.recovery-channel legend { margin-bottom: 9px; color: #5e5850; font-size: 10px; font-weight: 600; }
+.recovery-channel label { display: inline-flex; align-items: center; gap: 7px; }
+.recovery-channel input { accent-color: var(--accent); }
+.recovery-channel input:disabled + span { opacity: .5; }
+.recovery-hint { margin: -10px 0 0; color: var(--muted); font-size: 9px; }
 .error-box, .success-box { padding: 11px 13px; font-size: 10px; line-height: 1.6; }
 .error-box { border: 1px solid #ecd2cd; color: var(--danger); background: #fff8f6; }
 .success-box { border: 1px solid #d7e5d8; color: var(--success); background: #f5faf5; }
