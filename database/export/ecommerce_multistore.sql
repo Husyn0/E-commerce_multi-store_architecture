@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Oct 30, 2026 at 06:12 PM
+-- Generation Time: Oct 30, 2026 at 07:55 PM
 -- Server version: 8.0.46-0ubuntu0.24.04.4
 -- PHP Version: 8.3.6
 
@@ -31,14 +31,14 @@ CREATE TABLE `addresses` (
   `id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `tenant_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `user_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
-  `label` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `recipient_name` varchar(160) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `phone` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `line1` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `line2` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `city` varchar(120) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `state` varchar(120) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `postal_code` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `label` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `recipient_name` varchar(160) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `phone` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `line1` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `line2` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `city` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `state` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `postal_code` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `country_code` char(2) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
   `is_default_shipping` tinyint(1) NOT NULL DEFAULT '0',
   `is_default_billing` tinyint(1) NOT NULL DEFAULT '0',
@@ -65,15 +65,15 @@ CREATE TABLE `audit_logs` (
   `id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `tenant_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `actor_id` char(36) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
-  `action` varchar(120) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `entity_type` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `entity_id` char(36) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `source` enum('web','cli','webhook') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `host_type` enum('admin','storefront') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `action` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `entity_type` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `entity_id` char(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `source` enum('web','cli','webhook') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `host_type` enum('admin','storefront') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `metadata` json DEFAULT NULL,
-  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ip_address` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `audit_logs`
@@ -139,7 +139,59 @@ INSERT INTO `audit_logs` (`id`, `tenant_id`, `actor_id`, `action`, `entity_type`
 ('01a18df2-8f9c-705f-aed5-c50784c6d7c5', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'inventory.adjusted', 'product', '01a18df2-7459-73f3-ac4d-24dc3080cafd', 'web', 'admin', '{\"stock\": 5, \"previous_stock\": 0}', '127.0.0.1', '2026-10-30 17:54:06'),
 ('01a18df3-a85e-7150-850e-eea01d3719d0', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 17:55:18'),
 ('01a18df4-62f7-710a-97f4-9d95f3a0f67c', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 17:56:06'),
-('01a18df4-f960-7259-8789-b2a6ed9d644e', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 17:56:44');
+('01a18df4-f960-7259-8789-b2a6ed9d644e', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 17:56:44'),
+('01a18e08-7b00-704b-b89e-5b6fd9ad667b', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.created', 'product_image', '01a18e08-7aff-73ab-aa9f-d1f9a9486fc9', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 18:18:02'),
+('01a18e09-2d38-7332-b316-c3928f8fbcc2', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.created', 'product_image', '01a18e09-2d37-7394-b5b9-afb3dd88b13b', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 18:18:48'),
+('01a18e0c-c448-7168-b61b-0e0b1f8db17c', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.created', 'product_image', '01a18e0c-c447-7215-bb8e-06a979c80493', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 18:22:43'),
+('01a18e0c-c47e-721a-a3c5-8914e2abacd5', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.created', 'product_image', '01a18e0c-c47d-711d-a2f6-24d0c2e3950a', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 18:22:43'),
+('01a18e0c-c50f-72a9-9df7-667cf3fe4036', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.created', 'product_image', '01a18e0c-c50e-704f-936b-6c66e396728c', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 18:22:43'),
+('01a18e0c-c609-71ec-a36b-99ec8ba5d76c', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.created', 'product_image', '01a18e0c-c608-7294-b566-aa10ab8663a4', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 18:22:44'),
+('01a18e0c-c6d5-73ee-b80a-0e70d254986c', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.created', 'product_image', '01a18e0c-c6d4-7100-9473-2fbecb49862c', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 18:22:44'),
+('01a18e0c-c6ff-71e3-9eb7-41f6c1a89815', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.created', 'product_image', '01a18e0c-c6fe-72f6-876f-6954406ed358', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 18:22:44'),
+('01a18e0c-c749-71d2-8141-2720d88f1093', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.created', 'product_image', '01a18e0c-c748-724d-b1bb-34332d2bc0e3', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 18:22:44'),
+('01a18e0c-c7b6-70fd-a157-891faf56afec', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.created', 'product_image', '01a18e0c-c7b4-702a-b678-f84703147ee2', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 18:22:44'),
+('01a18e0c-c87b-72f5-9d1b-7d67959386b0', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.created', 'product_image', '01a18e0c-c87a-7110-8f36-a90f29f00b21', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 18:22:44'),
+('01a18e0c-c8b5-7070-aa7d-4ae97ea17a94', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.created', 'product_image', '01a18e0c-c8b4-7249-b552-6d4a85131e6d', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 18:22:44'),
+('01a18e1e-0d2e-7387-afed-eb94f9ea6032', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'category.image.updated', 'category', '01a18bf9-e431-738c-b5c5-5ae961ce7763', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 18:41:36'),
+('01a18e1e-7298-71f9-b52c-43338cea3d2e', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'category.image.updated', 'category', '01a18bf9-e431-738c-b5c5-5ae961ce7763', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 18:42:02'),
+('01a18e20-925b-737b-a21b-98b1c9fb7f95', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.created', 'product_image', '01a18e20-9259-71f6-a1f8-3703d976d7ae', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 18:44:21'),
+('01a18e20-e611-704b-b251-1c22fbf38fa9', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.created', 'product_image', '01a18e20-e610-7309-846a-11a9ec0f18e0', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 18:44:43'),
+('01a18e20-e643-7296-abd4-4cce0c7f7606', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.created', 'product_image', '01a18e20-e641-70c8-9fd1-e4a57e2fe33b', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 18:44:43'),
+('01a18e21-78db-7311-8eab-6b0055058826', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'category.updated', 'category', '01a18bf9-e431-738c-b5c5-5ae961ce7763', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 18:45:20'),
+('01a18e21-b866-70fd-9288-0f16dc54db73', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'category.image.updated', 'category', '01a18bf9-e431-738c-b5c5-5ae961ce7763', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 18:45:36'),
+('01a18e24-0fe6-73b9-9895-50ec11403316', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.created', 'product', '01a18e24-0fe4-7011-85b3-89c4ba72d0fd', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 18:48:10'),
+('01a18e24-102b-7343-aded-06b731927f9e', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.created', 'product_image', '01a18e24-102a-7019-97c0-c5da208f1aad', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 18:48:10'),
+('01a18e24-25e2-70ea-a7f7-f2914209ed79', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'inventory.adjusted', 'product', '01a18e24-0fe4-7011-85b3-89c4ba72d0fd', 'web', 'admin', '{\"stock\": 3, \"previous_stock\": 0}', '127.0.0.1', '2026-10-30 18:48:16'),
+('01a18e25-5a60-72da-882d-367a0c590ad9', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.created', 'product_image', '01a18e25-5a5f-71f7-8fdd-9aee07de6495', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 18:49:35'),
+('01a18e2f-4fe8-728e-bca5-5ce37d545022', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.created', 'product_image', '01a18e2f-4fe7-702f-826a-a8eafdbad17d', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:00:27'),
+('01a18e33-a00f-734a-8a28-8bc957bb7668', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'category.image.updated', 'category', '01a18d56-04b8-7100-8fe7-09fb3680dfe1', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:05:10'),
+('01a18e3f-22fd-738f-b05a-2e597fb211c1', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.created', 'product_image', '01a18e3f-22fc-70e5-9802-a5d379ad7020', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:17:44'),
+('01a18e3f-8d18-7136-bfcd-29418f9b8036', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.deleted', 'product_image', '01a18e0c-c447-7215-bb8e-06a979c80493', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:18:11'),
+('01a18e3f-9b36-7281-8567-1c01ca6c3b89', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.deleted', 'product_image', '01a18e09-2d37-7394-b5b9-afb3dd88b13b', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:18:15'),
+('01a18e3f-a881-7367-8411-1ca9c936f7ab', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.deleted', 'product_image', '01a18e0c-c47d-711d-a2f6-24d0c2e3950a', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:18:19'),
+('01a18e3f-b4c2-719c-a7b3-51a809c03c3e', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.deleted', 'product_image', '01a18e0c-c50e-704f-936b-6c66e396728c', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:18:22'),
+('01a18e3f-bffc-71f6-a16a-7237e6c67bc3', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.deleted', 'product_image', '01a18e0c-c608-7294-b566-aa10ab8663a4', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:18:25'),
+('01a18e3f-ca32-71e6-9920-7c38a237bdb6', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.deleted', 'product_image', '01a18e0c-c6d4-7100-9473-2fbecb49862c', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:18:27'),
+('01a18e3f-d7af-7342-8998-bbc38c258991', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.deleted', 'product_image', '01a18e0c-c6fe-72f6-876f-6954406ed358', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:18:31'),
+('01a18e3f-e210-7018-8ecc-5957dac0dbf7', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.deleted', 'product_image', '01a18e0c-c748-724d-b1bb-34332d2bc0e3', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:18:33'),
+('01a18e3f-edf8-70a6-8832-aae32937b0e4', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.deleted', 'product_image', '01a18e0c-c7b4-702a-b678-f84703147ee2', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:18:36'),
+('01a18e3f-f961-7305-a83e-47b9b19c4c58', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.deleted', 'product_image', '01a18e0c-c87a-7110-8f36-a90f29f00b21', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:18:39'),
+('01a18e40-06eb-702a-8adf-67fffcba03ba', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.deleted', 'product_image', '01a18e0c-c8b4-7249-b552-6d4a85131e6d', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:18:43'),
+('01a18e40-3b98-7356-b11b-af64f8928a33', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.created', 'product_image', '01a18e40-3b97-7068-bb57-5fd848727818', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:18:56'),
+('01a18e40-c380-710c-8a9a-43f66872c685', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.created', 'product_image', '01a18e40-c37f-71a5-8c9f-2f78e9bdf55a', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:19:31'),
+('01a18e41-1b1f-7209-9c68-d28ba48364b1', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.deleted', 'product_image', '01a18e08-7aff-73ab-aa9f-d1f9a9486fc9', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:19:53'),
+('01a18e41-a1bc-72bb-9d81-1c80de475c4a', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.created', 'product_image', '01a18e41-a1bb-73c8-9021-ed9cf6d929ca', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:20:28'),
+('01a18e42-6652-7368-b060-1077103a61ea', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.image.created', 'product_image', '01a18e42-6651-7325-9d5b-bc4b82591546', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:21:18'),
+('01a18e47-d2dd-7357-a6d5-a6d72e8a01a6', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:27:14'),
+('01a18e48-abb1-71ed-a2a4-7b23ce490e91', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:28:09'),
+('01a18e48-ee7b-7274-9a40-0f80930fd5cf', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:28:26'),
+('01a18e49-e3a5-73ca-bf6c-99c39752746d', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'category.image.updated', 'category', '01a18d4b-6801-7397-bd27-a515170b5ab2', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:29:29'),
+('01a18e4a-ee72-7242-a00f-d9b8b9950103', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'category.image.updated', 'category', '01a18be7-c794-71b5-818b-76c9ab8a4349', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:30:37'),
+('01a18e4b-b6b4-71ff-8024-187a29b8c74e', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'category.image.updated', 'category', '01a18bf8-05bb-720d-b9d0-ea46134e1585', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:31:29'),
+('01a18e4c-459b-7176-afe6-3f66b63ffb70', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'category.image.updated', 'category', '01a18bf9-e431-738c-b5c5-5ae961ce7763', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:32:05'),
+('01a18e52-11a4-7025-bf3f-b15fe5c2f54b', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:38:25'),
+('01a18e54-a890-7100-b6f0-381c4c8eb8bf', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'settings.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', '{\"fields\": [\"name\", \"default_locale\", \"require_email_verification\", \"require_phone_verification\"]}', '127.0.0.1', '2026-10-30 19:41:15'),
+('01a18e56-aacd-7164-b46d-5cdb395e57c5', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:43:26');
 
 -- --------------------------------------------------------
 
@@ -156,7 +208,7 @@ CREATE TABLE `carts` (
   `expires_at` timestamp NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `carts`
@@ -165,7 +217,7 @@ CREATE TABLE `carts` (
 INSERT INTO `carts` (`id`, `tenant_id`, `user_id`, `session_token_hash`, `currency`, `expires_at`, `created_at`, `updated_at`) VALUES
 ('01a1823b-06d5-7134-9ad0-58422c5d0dbf', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 0xbb9cd3b9c9e2420ffe6d3833cdb62407ab8865fd04e25420cfee07a72a3d375e, 'USD', '2026-11-27 09:17:48', '2026-10-28 09:17:48', '2026-10-28 09:17:48'),
 ('01a188a5-63df-73d6-9159-02d58db738b5', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 0x4b9a6fdb62db817e0ea244886df5f3e7f0a42fc1027a6d6f69253fed0d793884, 'USD', '2026-11-28 15:11:42', '2026-10-29 15:11:42', '2026-10-29 15:11:42'),
-('01a18be3-195c-727e-9121-b65092c31ea0', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d28-023e-70b9-96b0-4ffd51bdcb5d', NULL, 'USD', '2026-11-29 15:56:49', '2026-10-30 06:17:58', '2026-10-30 15:56:49'),
+('01a18be3-195c-727e-9121-b65092c31ea0', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d28-023e-70b9-96b0-4ffd51bdcb5d', NULL, 'USD', '2026-11-29 17:38:29', '2026-10-30 06:17:58', '2026-10-30 17:38:29'),
 ('01a18cf4-60f9-7114-a1eb-721a39c2c9ea', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 0x1889a49427998e31c3ad8cfbb1da80eb9835d9244277a862be1a0d769ced1468, 'USD', '2026-11-29 11:16:28', '2026-10-30 11:16:28', '2026-10-30 11:16:28');
 
 -- --------------------------------------------------------
@@ -185,7 +237,15 @@ CREATE TABLE `cart_items` (
   `unit_price_cents` bigint NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `cart_items`
+--
+
+INSERT INTO `cart_items` (`id`, `tenant_id`, `cart_id`, `product_id`, `variant_id`, `quantity`, `unit_price_cents`, `created_at`, `updated_at`) VALUES
+('01a18e2b-adbb-732a-9e85-9722ba3eea7a', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18be3-195c-727e-9121-b65092c31ea0', '01a18e24-0fe4-7011-85b3-89c4ba72d0fd', NULL, 1, 1000000, '2026-10-30 16:56:29', '2026-10-30 16:56:29'),
+('01a18e2b-bcc8-72b4-8240-4223d2a8687c', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18be3-195c-727e-9121-b65092c31ea0', '01a18df2-7459-73f3-ac4d-24dc3080cafd', NULL, 1, 5000, '2026-10-30 16:56:33', '2026-10-30 16:56:33');
 
 -- --------------------------------------------------------
 
@@ -197,10 +257,10 @@ CREATE TABLE `categories` (
   `id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `tenant_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `parent_id` char(36) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
-  `name` varchar(160) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `slug` varchar(180) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `icon` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `image_url` varchar(2048) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `name` varchar(160) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `slug` varchar(180) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `icon` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image_url` varchar(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `position` int NOT NULL DEFAULT '0',
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -211,12 +271,12 @@ CREATE TABLE `categories` (
 -- Dumping data for table `categories`
 --
 
-INSERT INTO `categories` (`id`, `tenant_id`, `parent_id`, `name`, `slug`, `position`, `is_active`, `created_at`, `updated_at`) VALUES
-('01a18be7-c794-71b5-818b-76c9ab8a4349', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 'computers', 'aa', 2, 1, '2026-10-30 06:23:05', '2026-10-30 12:52:01'),
-('01a18bf8-05bb-720d-b9d0-ea46134e1585', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18be7-c794-71b5-818b-76c9ab8a4349', 'accessories', 'bb', 3, 1, '2026-10-30 06:40:49', '2026-10-30 12:52:10'),
-('01a18bf9-e431-738c-b5c5-5ae961ce7763', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 'Electronics', 'ccccc', 0, 1, '2026-10-30 06:42:52', '2026-10-30 13:03:33'),
-('01a18d4b-6801-7397-bd27-a515170b5ab2', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d56-04b8-7100-8fe7-09fb3680dfe1', 'cocktail', 'drtdrtd', 1, 1, '2026-10-30 12:51:31', '2026-10-30 13:04:18'),
-('01a18d56-04b8-7100-8fe7-09fb3680dfe1', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 'Food', 'cdacda', 0, 1, '2026-10-30 13:03:07', '2026-10-30 13:03:07');
+INSERT INTO `categories` (`id`, `tenant_id`, `parent_id`, `name`, `slug`, `icon`, `image_url`, `position`, `is_active`, `created_at`, `updated_at`) VALUES
+('01a18be7-c794-71b5-818b-76c9ab8a4349', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 'computers', 'aa', NULL, 'http://127.0.0.1:8000/storage/tenants/6b6641e4-180a-42dc-9ec8-488d802f7bf2/categories/xAXZkcI08Li69HpqHHgGXzpVhpcNZ9QcsiszIEwy.jpg', 2, 1, '2026-10-30 06:23:05', '2026-10-30 17:30:37'),
+('01a18bf8-05bb-720d-b9d0-ea46134e1585', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18be7-c794-71b5-818b-76c9ab8a4349', 'accessories', 'bb', NULL, 'http://127.0.0.1:8000/storage/tenants/6b6641e4-180a-42dc-9ec8-488d802f7bf2/categories/Bn1Xl9litRFv1izABOmHYgt8YAnafOmTrfT277v4.jpg', 3, 1, '2026-10-30 06:40:49', '2026-10-30 17:31:29'),
+('01a18bf9-e431-738c-b5c5-5ae961ce7763', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 'Electronics', 'ccccc', NULL, 'http://127.0.0.1:8000/storage/tenants/6b6641e4-180a-42dc-9ec8-488d802f7bf2/categories/AXyW6s8D0Iq1vSO3lryfQDpSIvQqNaaYMAEOSMYh.jpg', 0, 1, '2026-10-30 06:42:52', '2026-10-30 17:32:05'),
+('01a18d4b-6801-7397-bd27-a515170b5ab2', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d56-04b8-7100-8fe7-09fb3680dfe1', 'cocktail', 'drtdrtd', NULL, 'http://127.0.0.1:8000/storage/tenants/6b6641e4-180a-42dc-9ec8-488d802f7bf2/categories/GD9vUm047a2g4ImZ7az47oT4pce8hBMqRCRBPLF9.jpg', 1, 1, '2026-10-30 12:51:31', '2026-10-30 17:29:29'),
+('01a18d56-04b8-7100-8fe7-09fb3680dfe1', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 'Food', 'cdacda', NULL, 'http://127.0.0.1:8000/storage/tenants/6b6641e4-180a-42dc-9ec8-488d802f7bf2/categories/ycJ4S4TpZvfKh79aw1quESJJPPd5lcDhnFLc6f57.jpg', 0, 1, '2026-10-30 13:03:07', '2026-10-30 17:05:10');
 
 -- --------------------------------------------------------
 
@@ -227,15 +287,15 @@ INSERT INTO `categories` (`id`, `tenant_id`, `parent_id`, `name`, `slug`, `posit
 CREATE TABLE `checkout_idempotency_records` (
   `id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `tenant_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
-  `idempotency_key` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `idempotency_key` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `request_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
-  `principal_type` enum('user','guest') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `principal_type` enum('user','guest') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `principal_id` char(36) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
   `guest_cart_token_hash` binary(32) DEFAULT NULL,
   `order_id` char(36) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
   `expires_at` timestamp NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -247,10 +307,10 @@ CREATE TABLE `human_verifications` (
   `id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `tenant_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `session_token_hash` binary(32) NOT NULL,
-  `provider` enum('demo','turnstile','hcaptcha') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `action` enum('register','checkout') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `provider` enum('demo','turnstile','hcaptcha') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `action` enum('register','checkout') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `passed` tinyint(1) NOT NULL,
-  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ip_address` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `expires_at` timestamp NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -274,11 +334,11 @@ CREATE TABLE `orders` (
   `tenant_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `order_number` char(26) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `user_id` char(36) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
-  `status` enum('pending','processing','shipped','delivered','cancelled') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
-  `payment_status` enum('requires_payment','processing','succeeded','failed','refunded') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'requires_payment',
-  `payment_provider` enum('demo','stripe') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `payment_intent_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `checkout_idempotency_key` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` enum('pending','processing','shipped','delivered','cancelled') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `payment_status` enum('requires_payment','processing','succeeded','failed','refunded') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'requires_payment',
+  `payment_provider` enum('demo','stripe') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payment_intent_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `checkout_idempotency_key` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `checkout_request_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `checkout_idempotency_expires_at` timestamp NOT NULL,
   `subtotal_cents` bigint NOT NULL,
@@ -289,13 +349,13 @@ CREATE TABLE `orders` (
   `currency` char(3) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
   `shipping_address_snapshot` json NOT NULL,
   `billing_address_snapshot` json NOT NULL,
-  `customer_email` varchar(254) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `customer_phone` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `notes` text COLLATE utf8mb4_unicode_ci,
+  `customer_email` varchar(254) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `customer_phone` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `notes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `paid_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -314,7 +374,7 @@ CREATE TABLE `order_items` (
   `unit_price_cents` bigint NOT NULL,
   `total_cents` bigint NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -326,17 +386,17 @@ CREATE TABLE `payment_methods` (
   `id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `tenant_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `user_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
-  `provider` enum('demo','stripe') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `provider_customer_id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `provider_payment_method_id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `card_brand` varchar(40) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `card_last4` char(4) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `provider` enum('demo','stripe') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `provider_customer_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `provider_payment_method_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `card_brand` varchar(40) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `card_last4` char(4) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `card_exp_month` tinyint UNSIGNED DEFAULT NULL,
   `card_exp_year` smallint UNSIGNED DEFAULT NULL,
   `is_default` tinyint(1) NOT NULL DEFAULT '0',
   `default_provider_guard` tinyint GENERATED ALWAYS AS ((case when `is_default` then 1 else NULL end)) STORED,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -347,14 +407,14 @@ CREATE TABLE `payment_methods` (
 CREATE TABLE `payment_webhook_events` (
   `id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `tenant_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
-  `provider` enum('demo','stripe') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `provider_event_id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `event_type` varchar(120) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `provider` enum('demo','stripe') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `provider_event_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `event_type` varchar(120) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `payload` json DEFAULT NULL,
   `suspended_at_receipt` tinyint(1) NOT NULL DEFAULT '0',
-  `status` enum('pending','processing','processed','failed') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `status` enum('pending','processing','processed','failed') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
   `attempts` int UNSIGNED NOT NULL DEFAULT '0',
-  `last_error` text COLLATE utf8mb4_unicode_ci,
+  `last_error` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `locked_at` timestamp NULL DEFAULT NULL,
   `processed_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
@@ -370,10 +430,10 @@ CREATE TABLE `products` (
   `id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `tenant_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `category_id` char(36) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
-  `title` varchar(240) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `slug` varchar(240) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `description` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `sku` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `title` varchar(240) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `slug` varchar(240) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sku` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `price_cents` bigint NOT NULL,
   `compare_at_price_cents` bigint DEFAULT NULL,
   `currency` char(3) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
@@ -383,7 +443,7 @@ CREATE TABLE `products` (
   `published_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `products`
@@ -395,7 +455,8 @@ INSERT INTO `products` (`id`, `tenant_id`, `category_id`, `title`, `slug`, `desc
 ('01a18d54-3600-73d4-8b9a-3c2df6b8fdbc', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d4b-6801-7397-bd27-a515170b5ab2', 'Avocado', 'fcf', 'Avocado cocktail with milk', NULL, 500, NULL, 'USD', 6, NULL, 1, '2026-10-30 13:00:00', '2026-10-30 13:01:08', '2026-10-30 13:01:28'),
 ('01a18dee-7b08-7359-826a-d300bed0e9f7', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18bf8-05bb-720d-b9d0-ea46134e1585', 'keyboard', 'hdrt', 'wireless keyboard', NULL, 1, NULL, 'USD', 5, NULL, 1, '2026-10-30 15:48:00', '2026-10-30 15:49:38', '2026-10-30 15:49:45'),
 ('01a18df0-47e1-72a6-a52b-c9c6b62301c6', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d56-04b8-7100-8fe7-09fb3680dfe1', 'potato', 'frw', 'fried potato with katchab', 'hyjgppppppppppppppppppppppp', 5165516, NULL, 'USD', 7, NULL, 1, '2026-10-30 15:51:00', '2026-10-30 15:51:36', '2026-10-30 15:52:02'),
-('01a18df2-7459-73f3-ac4d-24dc3080cafd', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d4b-6801-7397-bd27-a515170b5ab2', 'Strawberry Cocktail', 'fr', 'strawberry with banana and milk cocktail', 'yguu', 5000, NULL, 'USD', 5, NULL, 1, '2026-10-30 15:53:00', '2026-10-30 15:53:59', '2026-10-30 15:54:06');
+('01a18df2-7459-73f3-ac4d-24dc3080cafd', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d4b-6801-7397-bd27-a515170b5ab2', 'Strawberry Cocktail', 'fr', 'strawberry with banana and milk cocktail', 'yguu', 5000, NULL, 'USD', 5, NULL, 1, '2026-10-30 15:53:00', '2026-10-30 15:53:59', '2026-10-30 15:54:06'),
+('01a18e24-0fe4-7011-85b3-89c4ba72d0fd', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d56-04b8-7100-8fe7-09fb3680dfe1', 'kobab', 'yt', 'fried kobab', 'jhgy', 1000000, NULL, 'USD', 3, NULL, 1, '2026-10-30 16:47:00', '2026-10-30 16:48:10', '2026-10-30 16:48:16');
 
 -- --------------------------------------------------------
 
@@ -407,12 +468,29 @@ CREATE TABLE `product_images` (
   `id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `tenant_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `product_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
-  `url` varchar(2048) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `alt_text` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `media_type` enum('image','video') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'image',
+  `url` varchar(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `alt_text` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `media_type` enum('image','video') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'image',
   `position` int NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `product_images`
+--
+
+INSERT INTO `product_images` (`id`, `tenant_id`, `product_id`, `url`, `alt_text`, `media_type`, `position`, `created_at`) VALUES
+('01a18e20-9259-71f6-a1f8-3703d976d7ae', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18df0-47e1-72a6-a52b-c9c6b62301c6', 'http://127.0.0.1:8000/storage/tenants/6b6641e4-180a-42dc-9ec8-488d802f7bf2/products/4h4fMQD5MuNhsvw1IMM2BMjzsDeBGd1Z2JVGeIOA.jpg', NULL, 'image', 1, '2026-10-30 16:44:21'),
+('01a18e20-e610-7309-846a-11a9ec0f18e0', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18df0-47e1-72a6-a52b-c9c6b62301c6', 'http://127.0.0.1:8000/storage/tenants/6b6641e4-180a-42dc-9ec8-488d802f7bf2/products/qhnbfyQBBvSRJwtjNSzr52OOiD4KFL0EizUi0tiO.jpg', NULL, 'image', 2, '2026-10-30 16:44:43'),
+('01a18e20-e641-70c8-9fd1-e4a57e2fe33b', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18df0-47e1-72a6-a52b-c9c6b62301c6', 'http://127.0.0.1:8000/storage/tenants/6b6641e4-180a-42dc-9ec8-488d802f7bf2/products/0waDMScfn20WAAXXigUCwELMXOAHbWsnzfyD4c3X.jpg', NULL, 'image', 3, '2026-10-30 16:44:43'),
+('01a18e24-102a-7019-97c0-c5da208f1aad', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18e24-0fe4-7011-85b3-89c4ba72d0fd', 'http://127.0.0.1:8000/storage/tenants/6b6641e4-180a-42dc-9ec8-488d802f7bf2/products/eurYzniv7SNf76Lgfmh2bwviujz1KjaoFRlcqmwb.mp4', NULL, 'video', 1, '2026-10-30 16:48:10'),
+('01a18e25-5a5f-71f7-8fdd-9aee07de6495', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18e24-0fe4-7011-85b3-89c4ba72d0fd', 'http://127.0.0.1:8000/storage/tenants/6b6641e4-180a-42dc-9ec8-488d802f7bf2/products/ZBYHqTRThct6cKshDQwsNNg2ZwIxetWDrE7rev3K.jpg', NULL, 'image', 2, '2026-10-30 16:49:35'),
+('01a18e2f-4fe7-702f-826a-a8eafdbad17d', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18e24-0fe4-7011-85b3-89c4ba72d0fd', 'http://127.0.0.1:8000/storage/tenants/6b6641e4-180a-42dc-9ec8-488d802f7bf2/products/YON8HOZ4WTh7nAkgpVqrxYT5DPF3rCgpmfxHmlHd.jpg', NULL, 'image', 3, '2026-10-30 17:00:27'),
+('01a18e3f-22fc-70e5-9802-a5d379ad7020', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18dee-7b08-7359-826a-d300bed0e9f7', 'http://127.0.0.1:8000/storage/tenants/6b6641e4-180a-42dc-9ec8-488d802f7bf2/products/EJCRqSG3cRBRfU96ojPxYWkPAQprSZYaJHjhdfj3.jpg', NULL, 'image', 1, '2026-10-30 17:17:44'),
+('01a18e40-3b97-7068-bb57-5fd848727818', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18df2-7459-73f3-ac4d-24dc3080cafd', 'http://127.0.0.1:8000/storage/tenants/6b6641e4-180a-42dc-9ec8-488d802f7bf2/products/vrz5KpNrTXbVWRiLEJuFh1P62Y5xOrJgfA1czAMi.jpg', NULL, 'image', 1, '2026-10-30 17:18:56'),
+('01a18e40-c37f-71a5-8c9f-2f78e9bdf55a', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d54-3600-73d4-8b9a-3c2df6b8fdbc', 'http://127.0.0.1:8000/storage/tenants/6b6641e4-180a-42dc-9ec8-488d802f7bf2/products/D0tfqJ0CSHngvxnm0yvX1DZDwY7E0mMrRDHR30uo.jpg', NULL, 'image', 1, '2026-10-30 17:19:31'),
+('01a18e41-a1bb-73c8-9021-ed9cf6d929ca', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18bf4-71ed-738d-a6f9-05c2143f12d9', 'http://127.0.0.1:8000/storage/tenants/6b6641e4-180a-42dc-9ec8-488d802f7bf2/products/X2XhHYNsps8TZL0SZ9Gu61j92j0pVoMqwiAJKeFZ.jpg', NULL, 'image', 1, '2026-10-30 17:20:28'),
+('01a18e42-6651-7325-9d5b-bc4b82591546', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18c37-f258-7110-a592-aec93f3e2104', 'http://127.0.0.1:8000/storage/tenants/6b6641e4-180a-42dc-9ec8-488d802f7bf2/products/O0ZqjxAJ7RSa0tlpvP0ciyod6R0BxtmnMtaMUuQR.mp4', NULL, 'video', 1, '2026-10-30 17:21:18');
 
 -- --------------------------------------------------------
 
@@ -424,14 +502,14 @@ CREATE TABLE `product_variants` (
   `id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `tenant_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `product_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
-  `sku` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `name` varchar(160) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sku` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(160) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `attributes` json NOT NULL,
   `price_cents` bigint NOT NULL,
   `stock` int NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -443,12 +521,12 @@ CREATE TABLE `refunds` (
   `id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `tenant_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `order_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
-  `provider_refund_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `provider_refund_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `amount_cents` bigint NOT NULL,
-  `reason` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `status` enum('pending','succeeded','failed') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `reason` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` enum('pending','succeeded','failed') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -458,22 +536,22 @@ CREATE TABLE `refunds` (
 
 CREATE TABLE `tenants` (
   `id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
-  `name` varchar(160) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(160) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `subdomain` varchar(63) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
   `custom_domain` varchar(253) CHARACTER SET ascii COLLATE ascii_general_ci DEFAULT NULL,
-  `status` enum('active','suspended') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
+  `status` enum('active','suspended') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
   `default_currency` char(3) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
   `default_locale` varchar(5) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `tenants`
 --
 
 INSERT INTO `tenants` (`id`, `name`, `subdomain`, `custom_domain`, `status`, `default_currency`, `default_locale`, `created_at`, `updated_at`) VALUES
-('6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'Asil Shop', 'shop', NULL, 'active', 'USD', 'en', '2026-10-28 08:34:48', '2026-10-30 12:52:56');
+('6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'Shop', 'shop', NULL, 'active', 'USD', 'en', '2026-10-28 08:34:48', '2026-10-30 17:41:15');
 
 -- --------------------------------------------------------
 
@@ -485,12 +563,12 @@ CREATE TABLE `tenant_settings` (
   `id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `tenant_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `theme_config` json NOT NULL,
-  `payment_driver` enum('demo','stripe') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'demo',
-  `verification_driver` enum('demo','real') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'demo',
-  `human_check_driver` enum('demo','turnstile','hcaptcha') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'demo',
-  `email_provider` enum('log','smtp','postmark','ses') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'log',
-  `sms_provider` enum('log','twilio') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'log',
-  `stripe_account_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `payment_driver` enum('demo','stripe') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'demo',
+  `verification_driver` enum('demo','real') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'demo',
+  `human_check_driver` enum('demo','turnstile','hcaptcha') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'demo',
+  `email_provider` enum('log','smtp','postmark','ses') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'log',
+  `sms_provider` enum('log','twilio') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'log',
+  `stripe_account_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `require_email_verification` tinyint(1) NOT NULL DEFAULT '1',
   `require_phone_verification` tinyint(1) NOT NULL DEFAULT '0',
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -501,7 +579,7 @@ CREATE TABLE `tenant_settings` (
 --
 
 INSERT INTO `tenant_settings` (`id`, `tenant_id`, `theme_config`, `payment_driver`, `verification_driver`, `human_check_driver`, `email_provider`, `sms_provider`, `stripe_account_id`, `require_email_verification`, `require_phone_verification`, `updated_at`) VALUES
-('01a18213-a8a2-710b-8805-48af78d69710', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '{\"fonts\": {\"body\": \"Arial\", \"heading\": \"Times New Roman\"}, \"colors\": {\"text\": \"#242323\", \"accent\": \"#aa7d52\", \"primary\": \"#6b5b4b\", \"secondary\": \"#f0ece7\", \"background\": \"#ffffff\"}, \"logo_url\": null, \"layout_variant\": \"editorial\"}', 'demo', 'demo', 'demo', 'smtp', 'log', NULL, 1, 0, '2026-10-30 17:56:44');
+('01a18213-a8a2-710b-8805-48af78d69710', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '{\"fonts\": {\"body\": \"Arial\", \"heading\": \"Times New Roman\"}, \"colors\": {\"text\": \"#202a27\", \"accent\": \"#b77a52\", \"primary\": \"#315c55\", \"secondary\": \"#e7f0ec\", \"background\": \"#ffffff\"}, \"logo_url\": null, \"layout_variant\": \"editorial\"}', 'demo', 'demo', 'demo', 'smtp', 'log', NULL, 1, 0, '2026-10-30 19:43:26');
 
 -- --------------------------------------------------------
 
@@ -512,19 +590,19 @@ INSERT INTO `tenant_settings` (`id`, `tenant_id`, `theme_config`, `payment_drive
 CREATE TABLE `users` (
   `id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `tenant_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
-  `email` varchar(254) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(254) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `email_verified_at` timestamp NULL DEFAULT NULL,
-  `phone` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `phone` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `phone_verified_at` timestamp NULL DEFAULT NULL,
-  `password_hash` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `first_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `last_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `role` enum('customer','admin') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `status` enum('active','suspended','deleted') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
+  `password_hash` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `first_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `last_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `role` enum('customer','admin') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` enum('active','suspended','deleted') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
   `last_login_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `users`
@@ -532,7 +610,7 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `tenant_id`, `email`, `email_verified_at`, `phone`, `phone_verified_at`, `password_hash`, `first_name`, `last_name`, `role`, `status`, `last_login_at`, `created_at`, `updated_at`) VALUES
 ('01a18d28-023e-70b9-96b0-4ffd51bdcb5d', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'mr.hussein.ceng@gmail.com', '2026-10-30 12:12:51', '+96181121843', NULL, '$2y$12$WJlatnXjiBuS1QXXVPJ.7uqSoj5Zqt/OwY0Rk0uQqhzTnCV.gId7C', 'Husyn', 'Azzam', 'customer', 'active', '2026-10-30 12:34:27', '2026-10-30 12:12:51', '2026-10-30 16:05:34'),
-('e94ac131-ed1a-4f68-9d2a-806384f4c38d', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'admin@example.test', NULL, NULL, NULL, '$2y$12$1U6VQenOA.6.9.cYJC5FY.NzTPi41EU4odXp/DElocZsp7Hd67WDi', NULL, NULL, 'admin', 'active', '2026-10-30 16:07:51', '2026-10-28 08:34:49', '2026-10-30 16:07:51');
+('e94ac131-ed1a-4f68-9d2a-806384f4c38d', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'admin@example.test', NULL, NULL, NULL, '$2y$12$1U6VQenOA.6.9.cYJC5FY.NzTPi41EU4odXp/DElocZsp7Hd67WDi', NULL, NULL, 'admin', 'active', '2026-10-30 17:46:57', '2026-10-28 08:34:49', '2026-10-30 17:46:57');
 
 -- --------------------------------------------------------
 
@@ -544,10 +622,10 @@ CREATE TABLE `user_sessions` (
   `id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `tenant_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `user_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
-  `session_type` enum('admin_refresh','storefront') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `session_type` enum('admin_refresh','storefront') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `token_hash` binary(32) NOT NULL,
-  `user_agent` varchar(512) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `ip_address` varchar(45) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `user_agent` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ip_address` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `expires_at` timestamp NOT NULL,
   `last_used_at` timestamp NULL DEFAULT NULL,
   `revoked_at` timestamp NULL DEFAULT NULL,
@@ -603,7 +681,7 @@ INSERT INTO `user_sessions` (`id`, `tenant_id`, `user_id`, `session_type`, `toke
 ('01a18d12-a5d2-7026-9c5b-8f43c715ff28', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x49a6696dd4ebfc7bf9cac0a4d2c4df1e0f75fad21f34f7f03b72a7a27eb7047f, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 11:49:31', '2026-10-30 11:49:31', NULL, '2026-10-30 13:49:31'),
 ('01a18d13-19bf-7097-8a78-b031aa2a9b7c', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xc3f8aa48b0bf7cd54f3791b3a329a8300b6b52e426efd5cbf46c2fd480ead5c2, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 11:50:01', '2026-10-30 11:50:01', '2026-10-30 12:39:07', '2026-10-30 13:50:01'),
 ('01a18d28-0241-7244-90f7-f9db99117426', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d28-023e-70b9-96b0-4ffd51bdcb5d', 'storefront', 0x9fae64cf2daa93fd9d2d52bb59674ae10ba50acf0b43bc334f1976d66fb39982, 'node', '127.0.0.1', '2026-11-29 12:12:51', '2026-10-30 12:13:35', '2026-10-30 12:13:45', '2026-10-30 14:12:51'),
-('01a18d3b-c73f-71d2-97ad-91ba48c15827', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d28-023e-70b9-96b0-4ffd51bdcb5d', 'storefront', 0xe27e135c7be07a2e697462b790dc2e07ede984949dafe0b6213787d4c64c850f, 'node', '127.0.0.1', '2026-11-29 12:34:27', '2026-10-30 16:05:41', NULL, '2026-10-30 14:34:27'),
+('01a18d3b-c73f-71d2-97ad-91ba48c15827', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d28-023e-70b9-96b0-4ffd51bdcb5d', 'storefront', 0xe27e135c7be07a2e697462b790dc2e07ede984949dafe0b6213787d4c64c850f, 'node', '127.0.0.1', '2026-11-29 12:34:27', '2026-10-30 17:38:29', NULL, '2026-10-30 14:34:27'),
 ('01a18d40-0e71-733e-82ac-360b7cddac69', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x0e75254306ee6cedeaa942dc45029ee787ac9b2f2f1793e68cf1b3213273efb5, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 12:39:07', '2026-10-30 12:39:07', NULL, '2026-10-30 14:39:07'),
 ('01a18d40-816f-71ff-b9e3-a6b30f03f991', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x12984afcafef553929dc02878f54e5f8df804550190e897f2dacf453917fdda4, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 12:39:37', '2026-10-30 12:39:37', '2026-10-30 12:45:40', '2026-10-30 14:39:37'),
 ('01a18d49-b56d-7091-b65d-7b86b54592e4', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xf124a15a4fb158cb12e26b486527216d0090711873c5e09f7719340d5b57dcc6, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 12:49:40', '2026-10-30 12:49:40', '2026-10-30 13:06:51', '2026-10-30 14:49:40'),
@@ -611,7 +689,13 @@ INSERT INTO `user_sessions` (`id`, `tenant_id`, `user_id`, `session_type`, `toke
 ('01a18de3-8716-701d-afcb-fe8739d47e08', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x2f4080e6cc6ed50182dcbfda16e89ab2e95d159d4537887b0c84bd23cf7b17e8, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 15:37:41', '2026-10-30 15:37:41', NULL, '2026-10-30 17:37:41'),
 ('01a18dec-1d3a-7096-95a6-78fd3d3df098', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xccd6f540216380f443f03d804834a06a29b8e66752df9e52f1513f0ff5a7262f, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 15:47:03', '2026-10-30 15:47:03', '2026-10-30 16:03:42', '2026-10-30 17:47:03'),
 ('01a18dfb-5b19-7366-99a7-6846f254dc67', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xb0d99c182d9673bd5410fe790dd47d9ce2f8db64204c487f9c1454fa02654fbe, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 16:03:42', '2026-10-30 16:03:42', NULL, '2026-10-30 18:03:42'),
-('01a18dff-25d8-7214-9edf-2255c2fd702d', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x863b19b81bc2b992f24fe56597212d08a9ea0d519b479ea28476fbde598f547c, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 16:07:51', '2026-10-30 16:07:51', NULL, '2026-10-30 18:07:51');
+('01a18dff-25d8-7214-9edf-2255c2fd702d', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x863b19b81bc2b992f24fe56597212d08a9ea0d519b479ea28476fbde598f547c, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 16:07:51', '2026-10-30 16:07:51', '2026-10-30 16:22:43', '2026-10-30 18:07:51'),
+('01a18e0c-c3f7-727e-afcb-14d7228f34a5', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xefa2fd9333a4d6155b40f4c28e7b179fb2ed47f4141de728b4a821b1cb53bb04, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 16:22:43', '2026-10-30 16:22:43', '2026-10-30 17:37:49', '2026-10-30 18:22:43'),
+('01a18e51-85ba-7132-ba33-e689261d08a6', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x76034e8bca39fc9dc47edaec2b5270cbbfe24ed4ce225842f107551c90141f2f, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 17:37:49', '2026-10-30 17:37:49', NULL, '2026-10-30 19:37:49'),
+('01a18e51-e29e-716e-ad2c-6fc4316594c3', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xfd7f8773e2c8c6ba3d96fe8e5d7f7cfe91b587297e7ea9f01987412da867985c, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 17:38:13', '2026-10-30 17:38:13', '2026-10-30 17:39:43', '2026-10-30 19:38:13'),
+('01a18e54-7cfd-734c-8326-a50be6a9ef13', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x307bfe9f66a8445a72703d061764b41d4f7c96f9168af65f3032d9782424e934, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 17:41:04', '2026-10-30 17:41:04', '2026-10-30 17:46:43', '2026-10-30 19:41:04'),
+('01a18e59-ab97-70bc-b0a8-bdfdb3daf554', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x07eb47a19ec9bcebd1d4e30277121098adbaedde343b4a5b96079b15840bcddb, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 17:46:43', '2026-10-30 17:46:43', NULL, '2026-10-30 19:46:43'),
+('01a18e59-e2ae-726c-9911-cc203a81e722', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xd96d07d5eed9c0d49137b250334124b0ec19a7da6a01324dd2c708755fc910ce, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 17:46:57', '2026-10-30 17:46:57', NULL, '2026-10-30 19:46:57');
 
 -- --------------------------------------------------------
 
@@ -623,16 +707,16 @@ CREATE TABLE `verification_codes` (
   `id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `tenant_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `user_id` char(36) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
-  `identifier` varchar(254) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `channel` enum('email','sms') COLLATE utf8mb4_unicode_ci NOT NULL,
-  `purpose` enum('verify_email','verify_phone','login_2fa','password_reset','guest_order_lookup') COLLATE utf8mb4_unicode_ci NOT NULL,
+  `identifier` varchar(254) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `channel` enum('email','sms') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `purpose` enum('verify_email','verify_phone','login_2fa','password_reset','guest_order_lookup') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `code_hash` binary(32) NOT NULL,
   `expires_at` timestamp NOT NULL,
   `attempts` smallint UNSIGNED NOT NULL DEFAULT '0',
   `max_attempts` smallint UNSIGNED NOT NULL DEFAULT '5',
   `used_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `verification_codes`
