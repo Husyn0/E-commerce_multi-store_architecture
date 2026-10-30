@@ -351,11 +351,24 @@ img { display: block; max-width: 100%; }
 .checkout-complete { display: grid; justify-items: start; gap: 12px; max-width: 660px; padding: 30px; border: 1px solid var(--line); background: #fff; }
 .checkout-complete h2 { margin: 0; font-family: var(--serif); font-size: clamp(24px, 4vw, 34px); font-weight: 500; }
 .checkout-complete p { margin: 0 0 8px; color: var(--muted); font-size: 12px; line-height: 1.8; }
+.checkout-verification-note { display: grid; justify-items: start; gap: 10px; max-width: 760px; margin: -8px 0 22px; padding: 20px; border: 1px solid #e5ddcc; background: #fbf8f0; }
+.checkout-verification-note > strong { font-family: var(--serif); font-size: 20px; font-weight: 500; }
+.checkout-verification-note p { margin: 0; color: #71695f; font-size: 11px; line-height: 1.7; }
+.checkout-verification-note > div { display: flex; align-items: center; gap: 18px; }
+.verification-panel { display: grid; gap: 12px; padding: 17px; border: 1px solid var(--line); background: #fff; }
+.verification-panel > div:first-child { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.verification-panel > div:first-child > strong { font-size: 11px; font-weight: 600; }
+.verification-state { padding: 5px 8px; color: #765c3e; background: #f7f0e5; font-size: 9px; }
+.verification-state--verified { color: #356a4a; background: #edf4ed; }
+.verification-code-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 12px; }
+.verification-code-form .button { min-height: 44px; }
+.verification-message { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.7; }
 
 @media (max-width: 760px) {
   .checkout-form { grid-template-columns: 1fr; }
   .checkout-order-summary, .checkout-form > .button, .checkout-form > .error-box, .checkout-panel--payment { grid-column: 1; }
   .checkout-form > .button { grid-row: auto; }
+  .verification-code-form { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 900px) {

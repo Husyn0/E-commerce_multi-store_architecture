@@ -8,8 +8,8 @@ use App\Models\User;
 use App\Models\UserSession;
 use App\Services\Storefront\StorefrontSessionCookies;
 use App\Services\Verification\VerificationCodeService;
-use App\Support\SessionTokenHasher;
 use App\Support\PhoneNumber;
+use App\Support\SessionTokenHasher;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -47,10 +47,6 @@ class AuthController extends TenantApiController
         $input['phone'] = $input['phone'] ?? null;
         $tenantId = $this->tenantId();
         $settings = TenantSettings::query()->forTenant($tenantId)->firstOrFail();
-        if ($settings->require_phone_verification) {
-            return response()->json(['message' => 'Phone verification is not configured for registration.'], 503);
-        }
-
         $email = Str::lower(trim($input['email']));
         if ($settings->require_email_verification) {
             if (! isset($input['email_verification_code'])) {
@@ -124,7 +120,6 @@ class AuthController extends TenantApiController
             'password' => ['required', 'string', 'max:255'],
         ]);
         $tenantId = $this->tenantId();
-        $settings = TenantSettings::query()->forTenant($tenantId)->firstOrFail();
         $user = User::query()
             ->where('tenant_id', $tenantId)
             ->where('email', Str::lower(trim($credentials['email'])))
@@ -132,8 +127,7 @@ class AuthController extends TenantApiController
             ->where('status', 'active')
             ->first();
 
-        if ($user === null || ! Hash::check($credentials['password'], $user->password_hash)
-            || ($settings->require_email_verification && $user->email_verified_at === null)) {
+        if ($user === null || ! Hash::check($credentials['password'], $user->password_hash)) {
             return response()->json(['message' => 'The provided credentials are invalid.'], 422);
         }
 

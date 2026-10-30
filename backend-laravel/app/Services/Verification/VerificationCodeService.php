@@ -141,7 +141,8 @@ class VerificationCodeService
                 ->post("https://api.twilio.com/2010-04-01/Accounts/{$accountSid}/Messages.json", [
                     'From' => $fromNumber,
                     'To' => $phone,
-                    'Body' => "Your password reset code is {$code}. It expires in 10 minutes.",
+                    'Body' => ($purpose === 'verify_phone' ? 'Your phone verification code' : 'Your password reset code')
+                        ." is {$code}. It expires in 10 minutes.",
                 ])
                 ->throw();
         } catch (ConnectionException|RequestException $exception) {

@@ -9,6 +9,7 @@ use App\Tenancy\TenantManager;
 use Closure;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -41,22 +42,34 @@ class EnforceConfiguredVerification
                 return response()->json(['message' => 'Human verification is not configured.'], 503);
             }
 
-            $verification = HumanVerification::query()
-                ->forTenant($context->tenant->id)
-                ->where('session_token_hash', $tokenHash)
-                ->where('action', $action)
-                ->where('passed', true)
-                ->where('expires_at', '>', now())
-                ->first();
+            $verification = DB::transaction(function () use ($context, $tokenHash, $action, $settings, $request): ?HumanVerification {
+                $verification = HumanVerification::query()
+                    ->forTenant($context->tenant->id)
+                    ->where('session_token_hash', $tokenHash)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($verification === null
+                    || ! $verification->passed
+                    || $verification->action !== $action
+                    || $verification->expires_at->isPast()
+                    || $verification->provider !== $settings->human_check_driver
+                    || ($verification->ip_address !== null && $verification->ip_address !== $request->ip())) {
+                    return null;
+                }
+
+                $verification->passed = false;
+                $verification->save();
+
+                return $verification;
+            });
         } catch (QueryException $exception) {
             report($exception);
 
             return response()->json(['message' => 'Human verification is temporarily unavailable.'], 503);
         }
 
-        if ($verification === null
-            || $verification->provider !== $settings->human_check_driver
-            || ($verification->ip_address !== null && $verification->ip_address !== $request->ip())) {
+        if ($verification === null) {
             return response()->json(['message' => 'Complete human verification before continuing.'], 422);
         }
 

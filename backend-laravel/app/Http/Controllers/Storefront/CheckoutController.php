@@ -93,10 +93,26 @@ class CheckoutController extends TenantApiController
             return response()->json(['message' => 'Checkout is not configured.'], 503);
         }
 
+        if ($session->user === null) {
+            return response()->json(['message' => 'Sign in and verify your account before checkout.', 'code' => 'account_verification_required'], 401);
+        }
+        if ($session->user->email_verified_at === null || $session->user->phone_verified_at === null) {
+            return response()->json([
+                'message' => 'Verify your email address and phone number before placing an order.',
+                'code' => 'account_verification_required',
+                'email_verified' => $session->user->email_verified_at !== null,
+                'phone_verified' => $session->user->phone_verified_at !== null,
+            ], 403);
+        }
+
         $shipping = $this->normalizeAddress($input['shipping_address']);
+        $shipping['phone'] = $session->user->phone;
         $billing = isset($input['billing_address']) && $input['billing_address'] !== null
             ? $this->normalizeAddress($input['billing_address'])
             : $shipping;
+        if (is_array($input['billing_address'] ?? null)) {
+            $billing['phone'] = $session->user->phone;
+        }
         $currency = strtoupper($input['currency']);
         if (! $checkoutCurrency->supportsTwoMinorUnits($currency)) {
             throw ValidationException::withMessages(['currency' => 'This currency is not supported for checkout.']);
@@ -112,8 +128,8 @@ class CheckoutController extends TenantApiController
             'payment_method_id' => null,
             'payment_method' => $paymentMethod,
             'currency' => $currency,
-            'customer_email' => mb_strtolower(trim($input['customer_email'])),
-            'customer_phone' => $input['customer_phone'] ?? null,
+            'customer_email' => mb_strtolower(trim($session->user->email)),
+            'customer_phone' => $session->user->phone,
             'notes' => $input['notes'] ?? null,
         ];
         if (is_array($semanticRequest['billing_address'])) {

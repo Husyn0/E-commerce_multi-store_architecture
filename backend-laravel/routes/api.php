@@ -218,6 +218,12 @@ Route::middleware([
     Route::post('/account/email-verification', [AccountController::class, 'verifyEmail'])
         ->middleware([VerifyStorefrontCsrf::class, 'throttle:10,1'])
         ->name('storefront.account.email-verification');
+    Route::post('/account/phone-verification/request', [AccountController::class, 'requestPhoneVerification'])
+        ->middleware([VerifyStorefrontCsrf::class, 'throttle:5,1'])
+        ->name('storefront.account.phone-verification.request');
+    Route::post('/account/phone-verification', [AccountController::class, 'verifyPhone'])
+        ->middleware([VerifyStorefrontCsrf::class, 'throttle:10,1'])
+        ->name('storefront.account.phone-verification');
     Route::get('/account', [AccountController::class, 'show'])->name('storefront.account.show');
     Route::patch('/account', [AccountController::class, 'update'])
         ->middleware(VerifyStorefrontCsrf::class)

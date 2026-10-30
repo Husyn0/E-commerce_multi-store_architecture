@@ -88,6 +88,68 @@ class AccountController extends TenantApiController
         return response()->json(['email_verified' => true])->header('Cache-Control', 'no-store');
     }
 
+    public function requestPhoneVerification(Request $request, VerificationCodeService $verificationCodes): JsonResponse
+    {
+        $user = $this->customer($request);
+        if (! is_string($user->phone) || $user->phone === '') {
+            return response()->json(['message' => 'Add a phone number to your account before verifying it.'], 422);
+        }
+        if ($user->phone_verified_at !== null) {
+            return response()->json(['phone_verified' => true])->header('Cache-Control', 'no-store');
+        }
+
+        $settings = TenantSettings::query()->forTenant($this->tenantId())->firstOrFail();
+        try {
+            $issued = $verificationCodes->issueSms($settings, $user->phone, 'verify_phone', $user->id, $request->ip());
+        } catch (RuntimeException $exception) {
+            report($exception);
+
+            return response()->json(['message' => 'Phone verification is temporarily unavailable.'], 503);
+        }
+
+        if (! $issued) {
+            return response()->json(['message' => 'Please wait before requesting another verification code.'], 429);
+        }
+
+        return response()->json(['message' => 'A verification code was sent to your phone.'], 202)
+            ->header('Cache-Control', 'no-store');
+    }
+
+    public function verifyPhone(Request $request, VerificationCodeService $verificationCodes): JsonResponse
+    {
+        $input = $request->validate(['code' => ['required', 'digits:6']]);
+        $user = $this->customer($request);
+        if (! is_string($user->phone) || $user->phone === '') {
+            return response()->json(['message' => 'Add a phone number to your account before verifying it.'], 422);
+        }
+        if ($user->phone_verified_at !== null) {
+            return response()->json(['phone_verified' => true])->header('Cache-Control', 'no-store');
+        }
+
+        try {
+            $valid = $verificationCodes->consumeSms($this->tenantId(), $user->phone, 'verify_phone', $input['code']);
+        } catch (RuntimeException $exception) {
+            report($exception);
+
+            return response()->json(['message' => 'Phone verification is temporarily unavailable.'], 503);
+        }
+        if (! $valid) {
+            return response()->json(['message' => 'The verification code is invalid or expired.'], 422);
+        }
+
+        DB::transaction(function () use ($user): void {
+            $lockedUser = User::query()
+                ->where('tenant_id', $this->tenantId())
+                ->whereKey($user->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+            $lockedUser->phone_verified_at ??= now();
+            $lockedUser->save();
+        });
+
+        return response()->json(['phone_verified' => true])->header('Cache-Control', 'no-store');
+    }
+
     public function show(Request $request): JsonResponse
     {
         $user = $this->customer($request);

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 interface Account {
-  user: { id: string; email: string; first_name: string | null; last_name: string | null; phone?: string | null; email_verified: boolean }
+  user: { id: string; email: string; first_name: string | null; last_name: string | null; phone?: string | null; email_verified: boolean; phone_verified: boolean }
   addresses: unknown[]
 }
 
@@ -56,6 +56,7 @@ useSeoMeta({ title: 'My account', description: 'Manage your store account and or
         <h2>{{ data.user.first_name || 'Customer' }} {{ data.user.last_name || '' }}</h2>
         <p>{{ data.user.email }}</p>
         <p class="muted-copy">{{ data.user.email_verified ? 'Email verified' : 'Email not verified' }}</p>
+        <p class="muted-copy">{{ data.user.phone_verified ? 'Phone verified' : 'Phone not verified' }}</p>
         <NuxtLink class="account-card__link" to="/account/settings">Edit profile →</NuxtLink>
       </div>
       <div class="account-card">

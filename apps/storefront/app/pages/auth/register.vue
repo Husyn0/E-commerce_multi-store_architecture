@@ -10,6 +10,7 @@ interface Customer {
 
 interface ChallengeWidget {
   render: (target: string, options: Record<string, unknown>) => string
+  reset?: (widgetId?: string) => void
 }
 
 const api = useStorefrontApi()
@@ -119,9 +120,6 @@ async function register() {
   error.value = ''
   notice.value = ''
   try {
-    if (needsPhoneVerification.value) {
-      throw new Error('This store requires phone verification, which is not available for online registration yet.')
-    }
     if (!cart.value) await refresh()
 
     const responseToken = humanDriver.value === 'demo' ? 'demo-pass' : humanToken.value
@@ -175,7 +173,7 @@ onMounted(loadChallengeWidget)
       <h1>Make yourself at home.</h1>
       <p class="auth-copy">Create an account to keep track of your orders and make checkout easier.</p>
 
-      <p v-if="needsPhoneVerification" class="register-notice" role="status">This store requires phone verification. Online account creation is currently unavailable.</p>
+      <p v-if="needsPhoneVerification" class="register-notice" role="status">Verify your phone from Account Settings after creating your account. Orders are available once your phone is verified.</p>
       <p v-else-if="needsEmailVerification" class="register-notice" role="note">Email verification is required. You’ll need access to your inbox to finish creating your account.</p>
       <form class="auth-form" @submit.prevent="register">
         <div class="register-name-row">
@@ -196,7 +194,7 @@ onMounted(loadChallengeWidget)
         <p v-if="humanError" class="error-box" role="alert">{{ humanError }}</p>
         <p v-if="notice" class="success-box" role="status">{{ notice }}</p>
         <p v-if="error" class="error-box" role="alert">{{ error }}</p>
-        <button class="button button--dark button--wide" type="submit" :disabled="busy || needsPhoneVerification || Boolean(humanError)">
+        <button class="button button--dark button--wide" type="submit" :disabled="busy || Boolean(humanError)">
           {{ busy ? 'Creating account…' : 'Create account' }} <span v-if="!busy">→</span>
         </button>
       </form>
