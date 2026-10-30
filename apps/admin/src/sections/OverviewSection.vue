@@ -11,7 +11,6 @@ export default defineComponent({
 <template>
 
 
-  <template>
     <div v-if="loading" class="loading">Loading store activity…</div>
     <template v-else-if="dashboard">
       <div class="dashboard-grid">
@@ -54,5 +53,4 @@ export default defineComponent({
         </tbody></table></div>
       </section>
     </template>
-  </template>
 </template>

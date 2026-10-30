@@ -11,6 +11,11 @@ export interface StoreTenant {
     logo_url?: string | null
     layout_variant?: string
   }
+  registration?: {
+    require_email_verification: boolean
+    require_phone_verification: boolean
+    human_check_driver: 'demo' | 'turnstile' | 'hcaptcha'
+  }
 }
 
 export function useTenant() {

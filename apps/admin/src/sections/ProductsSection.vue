@@ -11,7 +11,6 @@ export default defineComponent({
 <template>
 
 
-  <template>
     <p class="notice product-capability-note">Product and category data is tenant-scoped. Inventory can be adjusted here. Product image upload and variant create/edit are not exposed by the current API; existing variant stock can still be managed.</p>
     <section v-if="showProductForm" class="card form-card">
       <div class="card-head"><span class="card-title">{{ productForm.id ? 'Edit product' : 'New product' }}</span></div>
@@ -58,5 +57,4 @@ export default defineComponent({
       </table></div>
       <div class="pagination"><span>Page {{ page }} of {{ lastPage }}</span><div class="inline-actions"><button class="button button--secondary button--small" :disabled="page <= 1 || loading" @click="loadSection(page - 1)">Previous</button><button class="button button--secondary button--small" :disabled="page >= lastPage || loading" @click="loadSection(page + 1)">Next</button></div></div>
     </section>
-  </template>
 </template>

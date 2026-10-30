@@ -74,7 +74,7 @@ onMounted(() => {
           {{ busy ? 'Signing in…' : 'Sign in' }} <span v-if="!busy">→</span>
         </button>
       </form>
-      <p class="auth-footnote">New to the store? <span>Account registration is coming soon.</span></p>
+      <p class="auth-footnote">New to the store? <NuxtLink to="/auth/register">Create an account</NuxtLink></p>
     </div>
   </section>
 </template>

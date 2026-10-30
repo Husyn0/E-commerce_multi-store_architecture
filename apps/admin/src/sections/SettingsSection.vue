@@ -11,7 +11,6 @@ export default defineComponent({
 <template>
 
 
-  <template>
     <div v-if="loading" class="loading">Loading settings…</div>
     <section v-else-if="settings" class="card">
       <div class="card-head"><span class="card-title">Store preferences</span></div>
@@ -27,5 +26,4 @@ export default defineComponent({
         <div class="form-actions"><button class="button" :disabled="busy">{{ busy ? 'Saving…' : 'Save settings' }}</button></div>
       </form>
     </section>
-  </template>
 </template>

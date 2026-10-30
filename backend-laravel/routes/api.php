@@ -128,6 +128,7 @@ Route::middleware([
 ])->get('/storefront/tenant', function (TenantManager $tenantManager) {
     $context = $tenantManager->current();
     $tenant = $context->tenant;
+    $settings = TenantSettings::query()->forTenant($tenant->id)->firstOrFail();
 
     return response()->json([
         'id' => $tenant->id,
@@ -135,7 +136,12 @@ Route::middleware([
         'status' => $tenant->status,
         'default_locale' => $tenant->default_locale,
         'default_currency' => $tenant->default_currency,
-        'theme_config' => TenantSettings::query()->forTenant($tenant->id)->value('theme_config') ?? [],
+        'theme_config' => $settings->theme_config ?? [],
+        'registration' => [
+            'require_email_verification' => (bool) $settings->require_email_verification,
+            'require_phone_verification' => (bool) $settings->require_phone_verification,
+            'human_check_driver' => $settings->human_check_driver,
+        ],
         'host_type' => $context->hostType,
     ]);
 });

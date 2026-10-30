@@ -4,7 +4,11 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   css: ['~/assets/css/main.css'],
   runtimeConfig: {
-    storefrontApiOrigin: process.env.STOREFRONT_API_ORIGIN || 'http://127.0.0.1:8000'
+    storefrontApiOrigin: process.env.STOREFRONT_API_ORIGIN || 'http://127.0.0.1:8000',
+    public: {
+      turnstileSiteKey: process.env.NUXT_PUBLIC_TURNSTILE_SITE_KEY || '',
+      hcaptchaSiteKey: process.env.NUXT_PUBLIC_HCAPTCHA_SITE_KEY || ''
+    }
   },
   routeRules: {
     '/api/backend/**': { cache: false }

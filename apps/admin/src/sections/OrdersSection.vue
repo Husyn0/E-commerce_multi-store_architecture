@@ -11,7 +11,6 @@ export default defineComponent({
 <template>
 
 
-  <template>
   <div class="order-filters">
     <label class="filter-label">Fulfillment
       <select v-model="filters.status" class="search-input"><option value="">All statuses</option><option v-for="status in ['pending','processing','shipped','delivered','cancelled']" :key="status" :value="status">{{ status }}</option></select>
@@ -74,5 +73,4 @@ export default defineComponent({
     </tbody></table></div>
     <div class="pagination"><span>Page {{ page }} of {{ lastPage }}</span><div class="inline-actions"><button class="button button--secondary button--small" :disabled="page <= 1" @click="loadSection(page - 1)">Previous</button><button class="button button--secondary button--small" :disabled="page >= lastPage" @click="loadSection(page + 1)">Next</button></div></div>
   </section>
-  </template>
 </template>

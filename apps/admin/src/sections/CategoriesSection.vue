@@ -11,7 +11,6 @@ export default defineComponent({
 <template>
 
 
-  <template>
     <section v-if="showCategoryForm" class="card form-card">
       <div class="card-head"><span class="card-title">{{ categoryForm.id ? 'Edit category' : 'New category' }}</span></div>
       <form class="card-body" @submit.prevent="saveCategory">
@@ -34,5 +33,4 @@ export default defineComponent({
       </tbody></table></div>
       <div class="pagination"><span>Page {{ page }} of {{ lastPage }}</span><div class="inline-actions"><button class="button button--secondary button--small" :disabled="page <= 1" @click="loadSection(page - 1)">Previous</button><button class="button button--secondary button--small" :disabled="page >= lastPage" @click="loadSection(page + 1)">Next</button></div></div>
     </section>
-  </template>
 </template>
