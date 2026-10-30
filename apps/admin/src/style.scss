@@ -141,6 +141,9 @@ a { color: inherit; }
 .status-pill--pending, .status-pill--processing, .status-pill--requires_payment { color: #8b6718; background: #fff4d8; }
 .status-pill--suspended, .status-pill--cancelled, .status-pill--failed, .status-pill--refunded { color: #9a3e36; background: #faeae8; }
 .pagination { display: flex; justify-content: space-between; align-items: center; padding: 13px 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
+.page-size-control { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 10px; white-space: nowrap; }
+.page-size-control .search-input { width: 68px; min-width: 68px; min-height: 32px; padding: 5px 7px; }
+.table-search-input { width: min(260px, 42vw); min-width: 180px; }
 .inline-actions { display: flex; gap: 8px; align-items: center; }
 .detail-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: var(--line); }
 .detail-item { padding: 13px 15px; background: #fff; }

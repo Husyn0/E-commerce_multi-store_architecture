@@ -24,7 +24,7 @@ export default defineComponent({
       <select v-model="filters.payment_status" class="search-input"><option value="">All payments</option><option v-for="status in ['requires_payment','processing','succeeded','failed','refunded']" :key="status" :value="status">{{ status.replaceAll('_', ' ') }}</option></select>
     </label>
     <button class="button button--secondary" type="button" @click="loadSection(1)">Apply filters</button>
-    <button class="text-button" type="button" @click="filters.status = ''; filters.payment_status = ''; loadSection(1)">Clear</button>
+    <button class="text-button" type="button" @click="filters.order_q = ''; filters.status = ''; filters.payment_status = ''; loadSection(1)">Clear</button>
   </div>
   <section v-if="selectedOrder" class="card detail-card">
     <div class="card-head"><div><span class="card-title">Order {{ selectedOrder.order_number }}</span><div class="metric-foot">Placed {{ new Date(selectedOrder.created_at).toLocaleString() }}</div></div><button class="button button--secondary button--small" type="button" @click="selectedOrder = null">Close details</button></div>

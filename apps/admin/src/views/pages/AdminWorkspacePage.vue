@@ -91,6 +91,9 @@ const description = computed(() => adminSections[section.value]?.[1] || '')
 const previewColors = computed(() => themeForm.colors)
 const auditCursor = ref(null)
 const nextAuditCursor = ref(null)
+const auditCursorHistory = ref([])
+const auditPage = ref(1)
+const auditLimit = ref(25)
 
 function resetFeedback() {
   error.value = ''
@@ -182,7 +185,7 @@ async function loadSection(nextPage = 1, preserveFeedback = false) {
           from: filters.from ? `${filters.from}T00:00:00.000Z` : '',
           to: filters.to ? `${filters.to}T23:59:59.999Z` : '',
           cursor: auditCursor.value,
-          limit: 25,
+          limit: auditLimit.value,
         },
       })
       rows.value = response.data || []
@@ -552,12 +555,28 @@ function changePageSize(name, value) {
 
 function filterAudit() {
   auditCursor.value = null
+  auditCursorHistory.value = []
+  auditPage.value = 1
   loadSection(1)
 }
 
 function nextAuditPage() {
+  auditCursorHistory.value.push(auditCursor.value)
   auditCursor.value = nextAuditCursor.value
+  auditPage.value += 1
   loadSection(1)
+}
+
+function previousAuditPage() {
+  if (auditPage.value <= 1) return
+  auditCursor.value = auditCursorHistory.value.pop() ?? null
+  auditPage.value -= 1
+  loadSection(1)
+}
+
+function changeAuditLimit(value) {
+  auditLimit.value = Number(value)
+  filterAudit()
 }
 
 function resetAuditFilters() {
@@ -616,6 +635,8 @@ watch(section, () => {
   selectedOrder.value = null
   selectedCustomer.value = null
   auditCursor.value = null
+  auditCursorHistory.value = []
+  auditPage.value = 1
   dashboard.value = null
   loadSection()
 }, { immediate: true })
@@ -625,11 +646,11 @@ provide('adminWorkspace', {
   themeForm, showProductForm, showCategoryForm, refundingOrder, refundAmount,
   refundReason, refundAttempt, categories, stockDrafts, dashboard, selectedOrder,
   selectedCustomer, filters, pageSizes, productForm, categoryForm, settingsForm, title,
-  description, previewColors, auditCursor, nextAuditCursor, resetFeedback,
+  description, previewColors, auditCursor, nextAuditCursor, auditPage, auditLimit, resetFeedback,
   loadSection, searchTable, changePageSize, removeProduct, removeProductImage, openOrder, openCustomer, editProduct, newProduct,
   newCategory, editCategory, saveProduct, saveCategory, removeCategory,
   saveSettings, saveTheme, formatLocalDateTime, updateOrderStatus, startRefund,
-  submitRefund, updateInventory, toggleCustomer, searchCustomers, filterAudit,
+  submitRefund, updateInventory, toggleCustomer, searchCustomers, filterAudit, previousAuditPage, changeAuditLimit,
   nextAuditPage, resetAuditFilters, money, formatAddress, productVisibility,
   orderStatusOptions,
 })
