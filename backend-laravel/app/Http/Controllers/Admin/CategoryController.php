@@ -9,6 +9,7 @@ use App\Services\AuditLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class CategoryController extends TenantApiController
@@ -122,6 +123,23 @@ class CategoryController extends TenantApiController
         return response()->noContent();
     }
 
+    public function uploadImage(Request $request, string $categoryId, AuditLogger $auditLogger): CategoryResource
+    {
+        $request->validate(['image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp,avif', 'max:10240']]);
+        $category = Category::query()->forTenant($this->tenantId())->findOrFail($categoryId);
+        $oldPath = $category->image_url ? parse_url($category->image_url, PHP_URL_PATH) : null;
+        $oldPath = is_string($oldPath) ? preg_replace('#^/storage/#', '', $oldPath) : null;
+        $path = $request->file('image')->store("tenants/{$this->tenantId()}/categories", 'public');
+        $category->image_url = Storage::disk('public')->url($path);
+        $category->save();
+        if ($oldPath && str_starts_with($oldPath, "tenants/{$this->tenantId()}/categories/")) {
+            Storage::disk('public')->delete($oldPath);
+        }
+        $auditLogger->web($this->tenantContext(), $request->user(), 'category.image.updated', 'category', $category->id, $request);
+
+        return new CategoryResource($category);
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -129,7 +147,7 @@ class CategoryController extends TenantApiController
     {
         if (array_diff(
             array_keys($request->all()),
-            ['parent_id', 'name', 'slug', 'position', 'is_active'],
+            ['parent_id', 'name', 'slug', 'position', 'is_active', 'icon', 'image_url'],
         ) !== []) {
             abort(422, 'The request contains fields that cannot be edited.');
         }
@@ -151,6 +169,8 @@ class CategoryController extends TenantApiController
             ],
             'position' => ['sometimes', 'integer', 'min:0'],
             'is_active' => ['sometimes', 'boolean'],
+            'icon' => ['sometimes', 'nullable', 'string', 'max:32'],
+            'image_url' => ['sometimes', 'nullable', 'url:http,https', 'max:2048'],
         ]);
     }
 

@@ -119,6 +119,14 @@ export const api = {
       headers: options.headers,
     })
   },
+  upload(path, body, options = {}) {
+    return send(path, {
+      method: 'POST',
+      body,
+      authenticated: options.authenticated,
+      csrf: options.csrf,
+    })
+  },
   patch(path, body, options = {}) {
     return send(path, {
       method: 'PATCH',

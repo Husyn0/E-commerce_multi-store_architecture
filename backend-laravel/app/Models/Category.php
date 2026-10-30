@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Category extends TenantModel
 {
+    protected $fillable = ['parent_id', 'name', 'slug', 'position', 'is_active', 'icon', 'image_url'];
+
     protected function casts(): array
     {
         return ['is_active' => 'boolean'];

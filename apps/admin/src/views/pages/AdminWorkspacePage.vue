@@ -72,8 +72,10 @@ const productForm = reactive({
   category_id: '',
   is_active: true,
   published_at: '',
+  media_files: [],
+  images: [],
 })
-const categoryForm = reactive({ id: '', parent_id: '', name: '', slug: '', position: 0, is_active: true })
+const categoryForm = reactive({ id: '', parent_id: '', name: '', slug: '', position: 0, is_active: true, icon: '', image_url: '', image_file: null })
 const settingsForm = reactive({
   name: '',
   default_locale: '',
@@ -237,6 +239,8 @@ function editProduct(product) {
     category_id: product.category_id || '',
     is_active: product.is_active,
     published_at: product.published_at || '',
+    media_files: [],
+    images: product.images || [],
   })
   showProductForm.value = true
 }
@@ -244,13 +248,13 @@ function editProduct(product) {
 function newProduct() {
   Object.assign(productForm, {
     id: '', title: '', slug: '', description: '', sku: '', price_cents: 0,
-    compare_at_price_cents: '', category_id: '', is_active: true, published_at: '',
+    compare_at_price_cents: '', category_id: '', is_active: true, published_at: '', media_files: [], images: [],
   })
   showProductForm.value = true
 }
 
 function newCategory() {
-  Object.assign(categoryForm, { id: '', parent_id: '', name: '', slug: '', position: 0, is_active: true })
+  Object.assign(categoryForm, { id: '', parent_id: '', name: '', slug: '', position: 0, is_active: true, icon: '', image_url: '', image_file: null })
   showCategoryForm.value = true
 }
 
@@ -262,6 +266,9 @@ function editCategory(category) {
     slug: category.slug,
     position: category.position,
     is_active: category.is_active,
+    icon: category.icon || '',
+    image_url: category.image_url || '',
+    image_file: null,
   })
   showCategoryForm.value = true
 }
@@ -286,11 +293,32 @@ async function saveProduct() {
     if (productForm.id) {
       await api.patch(`/admin/products/${productForm.id}`, body)
     } else {
-      await api.post('/admin/products', body)
+      const created = await api.post('/admin/products', body)
+      productForm.id = created.data?.id || created.id
+    }
+    for (const file of productForm.media_files) {
+      const form = new FormData()
+      form.append('file', file)
+      await api.upload(`/admin/products/${productForm.id}/images`, form)
     }
     showProductForm.value = false
     notice.value = 'Product saved.'
     await loadSection(page.value, true)
+  } catch (requestError) {
+    error.value = requestError.message
+  } finally {
+    busy.value = false
+  }
+}
+
+async function removeProductImage(image) {
+  if (!productForm.id || !window.confirm('Remove this product media?')) return
+  busy.value = true
+  resetFeedback()
+  try {
+    await api.delete(`/admin/products/${productForm.id}/images/${image.id}`)
+    productForm.images = productForm.images.filter((item) => item.id !== image.id)
+    notice.value = 'Product media removed.'
   } catch (requestError) {
     error.value = requestError.message
   } finally {
@@ -309,13 +337,20 @@ async function saveCategory() {
       slug: categoryForm.slug,
       position: Number(categoryForm.position),
       is_active: categoryForm.is_active,
+      icon: categoryForm.icon || null,
     }
     if (categoryForm.id) {
       await api.patch(`/admin/categories/${categoryForm.id}`, body)
     } else {
-      await api.post('/admin/categories', body)
+      const created = await api.post('/admin/categories', body)
+      categoryForm.id = created.data?.id || created.id
     }
-    Object.assign(categoryForm, { id: '', parent_id: '', name: '', slug: '', position: 0, is_active: true })
+    if (categoryForm.image_file) {
+      const form = new FormData()
+      form.append('image', categoryForm.image_file)
+      await api.upload(`/admin/categories/${categoryForm.id}/image`, form)
+    }
+    Object.assign(categoryForm, { id: '', parent_id: '', name: '', slug: '', position: 0, is_active: true, icon: '', image_url: '', image_file: null })
     showCategoryForm.value = false
     notice.value = updating ? 'Category updated.' : 'Category created.'
     await loadSection(1, true)
@@ -571,7 +606,7 @@ provide('adminWorkspace', {
   refundReason, refundAttempt, categories, stockDrafts, dashboard, selectedOrder,
   selectedCustomer, filters, productForm, categoryForm, settingsForm, title,
   description, previewColors, auditCursor, nextAuditCursor, resetFeedback,
-  loadSection, removeProduct, openOrder, openCustomer, editProduct, newProduct,
+  loadSection, removeProduct, removeProductImage, openOrder, openCustomer, editProduct, newProduct,
   newCategory, editCategory, saveProduct, saveCategory, removeCategory,
   saveSettings, saveTheme, formatLocalDateTime, updateOrderStatus, startRefund,
   submitRefund, updateInventory, toggleCustomer, searchCustomers, filterAudit,

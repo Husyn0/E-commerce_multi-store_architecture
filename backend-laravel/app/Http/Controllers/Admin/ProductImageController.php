@@ -10,6 +10,7 @@ use App\Services\AuditLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class ProductImageController extends TenantApiController
@@ -23,11 +24,20 @@ class ProductImageController extends TenantApiController
                 ->forTenant($this->tenantId())
                 ->lockForUpdate()
                 ->findOrFail($productId);
+            if ($request->hasFile('file')) {
+                $file = $request->file('file');
+                $data['media_type'] = str_starts_with((string) $file->getMimeType(), 'video/') ? 'video' : 'image';
+                $path = $file->store("tenants/{$this->tenantId()}/products", 'public');
+                $data['url'] = Storage::disk('public')->url($path);
+            } else {
+                $data['media_type'] = $data['media_type'] ?? 'image';
+            }
             $image = new ProductImage;
             $image->tenant_id = $this->tenantId();
             $image->product_id = $product->id;
             $image->url = $data['url'];
             $image->alt_text = $data['alt_text'] ?? null;
+            $image->media_type = $data['media_type'];
             $image->position = $data['position'] ?? ((int) $product->images()->max('position') + 1);
             $image->created_at = now();
             $image->save();
@@ -91,7 +101,12 @@ class ProductImageController extends TenantApiController
 
         DB::transaction(function () use ($auditLogger, $image, $request): void {
             $id = $image->id;
+            $path = parse_url($image->url, PHP_URL_PATH);
+            $path = is_string($path) ? preg_replace('#^/storage/#', '', $path) : null;
             $image->delete();
+            if ($path && str_starts_with($path, "tenants/{$this->tenantId()}/products/")) {
+                Storage::disk('public')->delete($path);
+            }
             $auditLogger->web(
                 $this->tenantContext(),
                 $request->user(),
@@ -112,19 +127,21 @@ class ProductImageController extends TenantApiController
      */
     private function validatedImage(Request $request, bool $partial = false): array
     {
-        $allowed = ['url', 'alt_text', 'position'];
+        $allowed = ['url', 'alt_text', 'position', 'media_type', 'file'];
         if (array_diff(array_keys($request->all()), $allowed) !== []) {
             abort(422, 'The request contains fields that cannot be edited.');
         }
         $required = $partial ? 'sometimes' : 'required';
         $data = $request->validate([
-            'url' => [$required, 'url:http,https', 'max:2048'],
+            'url' => [$request->hasFile('file') ? 'nullable' : $required, 'url:http,https', 'max:2048'],
+            'file' => ['sometimes', 'file', 'mimes:jpg,jpeg,png,webp,avif,mp4,webm,mov', 'max:25600'],
             'alt_text' => ['sometimes', 'nullable', 'string', 'max:255'],
             'position' => ['sometimes', 'integer', 'min:0', 'max:65535'],
+            'media_type' => ['sometimes', 'in:image,video'],
         ]);
 
         if ($partial && $data === []) {
-            throw ValidationException::withMessages(['image' => 'At least one image field must be provided.']);
+            throw ValidationException::withMessages(['media' => 'Choose a file or provide a media URL.']);
         }
 
         return $data;

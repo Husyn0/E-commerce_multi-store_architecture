@@ -25,9 +25,9 @@ use App\Http\Controllers\Storefront\PaymentMethodController;
 use App\Http\Controllers\Storefront\VerificationController;
 use App\Http\Controllers\Webhooks\PaymentWebhookController;
 use App\Http\Middleware\AuthenticateStorefrontSession;
-use App\Models\TenantSettings;
 use App\Http\Middleware\EnforceConfiguredVerification;
 use App\Http\Middleware\VerifyStorefrontCsrf;
+use App\Models\TenantSettings;
 use App\Tenancy\TenantManager;
 use Illuminate\Support\Facades\Route;
 
@@ -86,6 +86,8 @@ Route::middleware([
     Route::delete('/products/{productId}/variants/{variantId}', [AdminProductVariantController::class, 'destroy'])
         ->name('admin.products.variants.destroy');
     Route::apiResource('categories', AdminCategoryController::class);
+    Route::post('/categories/{categoryId}/image', [AdminCategoryController::class, 'uploadImage'])
+        ->name('admin.categories.image.store');
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('admin.orders.index');
     Route::get('/orders/{orderId}', [AdminOrderController::class, 'show'])->name('admin.orders.show');
     Route::post('/orders/{orderId}/refunds', [AdminRefundController::class, 'store'])

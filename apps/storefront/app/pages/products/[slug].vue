@@ -17,7 +17,7 @@ interface Product {
   compare_at_price_cents: number | null
   currency: string
   stock: number
-  images: { url: string; alt_text: string | null }[]
+  images: { id: string; url: string; alt_text: string | null; media_type?: 'image' | 'video' }[]
   variants: Variant[]
 }
 
@@ -74,7 +74,12 @@ useSeoMeta({
 <template>
   <section v-if="product" class="product-detail">
     <div class="product-detail__visual">
-      <img v-if="product.images[0]?.url" :src="product.images[0].url" :alt="product.images[0].alt_text || product.title">
+      <div v-if="product.images.length" class="product-detail__gallery">
+        <template v-for="media in product.images" :key="media.id">
+          <video v-if="media.media_type === 'video'" :src="media.url" controls playsinline preload="metadata" />
+          <img v-else :src="media.url" :alt="media.alt_text || product.title">
+        </template>
+      </div>
       <div v-else class="product-placeholder product-placeholder--detail"><span>{{ product.title.slice(0, 1) }}</span></div>
       <span class="image-caption">A closer look</span>
     </div>

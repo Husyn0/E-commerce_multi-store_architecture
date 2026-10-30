@@ -16,6 +16,8 @@ interface Category {
   id: string
   name: string
   slug: string
+  icon?: string | null
+  image_url?: string | null
 }
 
 const api = useStorefrontApi()
@@ -85,11 +87,12 @@ useSeoMeta({
           v-for="(category, index) in catalog.categories"
           :key="category.id"
           class="category-tile"
-          :class="`category-tile--${index % 4 + 1}`"
+          :class="[`category-tile--${index % 4 + 1}`, { 'category-tile--image': category.image_url }]"
           :to="`/categories/${category.slug}`"
+          :style="category.image_url ? { backgroundImage: `linear-gradient(0deg, rgba(25,22,18,.66), rgba(25,22,18,.05)), url(${category.image_url})` } : undefined"
         >
           <span class="category-tile__number">0{{ index + 1 }}</span>
-          <span>{{ category.name }}</span>
+          <span class="category-tile__label"><span v-if="category.icon && !category.image_url">{{ category.icon }} </span>{{ category.name }}</span>
           <span class="category-tile__arrow">↗</span>
         </NuxtLink>
       </div>

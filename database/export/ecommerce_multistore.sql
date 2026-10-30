@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Oct 30, 2026 at 12:04 PM
+-- Generation Time: Oct 30, 2026 at 06:12 PM
 -- Server version: 8.0.46-0ubuntu0.24.04.4
 -- PHP Version: 8.3.6
 
@@ -48,6 +48,13 @@ CREATE TABLE `addresses` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `addresses`
+--
+
+INSERT INTO `addresses` (`id`, `tenant_id`, `user_id`, `label`, `recipient_name`, `phone`, `line1`, `line2`, `city`, `state`, `postal_code`, `country_code`, `is_default_shipping`, `is_default_billing`, `created_at`, `updated_at`) VALUES
+('01a18d3f-a213-73d0-966f-75ab173a8aa2', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d28-023e-70b9-96b0-4ffd51bdcb5d', NULL, 'Hussein Azzam', '+96181121843', 'saddiqine main street', NULL, 'tyre', 'south', '00000', 'LB', 1, 1, '2026-10-30 12:38:40', '2026-10-30 12:38:40');
+
 -- --------------------------------------------------------
 
 --
@@ -84,7 +91,55 @@ INSERT INTO `audit_logs` (`id`, `tenant_id`, `actor_id`, `action`, `entity_type`
 ('01a18bfb-15d9-7367-909f-dd5ebaed6fe3', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'settings.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', '{\"fields\": [\"name\", \"default_locale\", \"require_email_verification\", \"require_phone_verification\"]}', '127.0.0.1', '2026-10-30 08:44:10'),
 ('01a18bfc-5fb8-7260-b08f-b45357637368', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'settings.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', '{\"fields\": [\"name\", \"default_locale\", \"require_email_verification\", \"require_phone_verification\"]}', '127.0.0.1', '2026-10-30 08:45:35'),
 ('01a18bfc-995b-7117-94df-bc445ed17a1f', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'settings.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', '{\"fields\": [\"name\", \"default_locale\", \"require_email_verification\", \"require_phone_verification\"]}', '127.0.0.1', '2026-10-30 08:45:49'),
-('01a18c37-f274-722d-9ae3-9378e34cdd86', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.created', 'product', '01a18c37-f258-7110-a592-aec93f3e2104', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 09:50:39');
+('01a18c37-f274-722d-9ae3-9378e34cdd86', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.created', 'product', '01a18c37-f258-7110-a592-aec93f3e2104', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 09:50:39'),
+('01a18cb7-c9b4-7299-a036-63fceba4306d', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'inventory.adjusted', 'product', '01a18c37-f258-7110-a592-aec93f3e2104', 'web', 'admin', '{\"stock\": 3, \"previous_stock\": 0}', '127.0.0.1', '2026-10-30 12:10:17'),
+('01a18cb7-e938-73bf-b968-e4d720a147fd', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'inventory.adjusted', 'product', '01a18bf4-71ed-738d-a6f9-05c2143f12d9', 'web', 'admin', '{\"stock\": 1, \"previous_stock\": 0}', '127.0.0.1', '2026-10-30 12:10:25'),
+('01a18cb8-0a07-7180-acd6-ea13976270c6', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'inventory.adjusted', 'product', '01a18c37-f258-7110-a592-aec93f3e2104', 'web', 'admin', '{\"stock\": 10, \"previous_stock\": 3}', '127.0.0.1', '2026-10-30 12:10:33'),
+('01a18cb8-341b-70d3-8061-794194c2a688', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'inventory.adjusted', 'product', '01a18bf4-71ed-738d-a6f9-05c2143f12d9', 'web', 'admin', '{\"stock\": 10, \"previous_stock\": 1}', '127.0.0.1', '2026-10-30 12:10:44'),
+('01a18cb8-c3d7-7068-a9fa-87151175d5e4', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.published', 'product', '01a18c37-f258-7110-a592-aec93f3e2104', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 12:11:21'),
+('01a18cdd-8663-71ef-8030-d04095f9b3f1', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 12:51:30'),
+('01a18cdf-0bf3-73df-9b15-6beeb209307b', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 12:53:10'),
+('01a18cf0-9f29-718e-bfc1-a426047d13d0', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 13:12:22'),
+('01a18cf0-bdf3-70f1-9bd1-7948a7dc94d9', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 13:12:29'),
+('01a18cf0-d137-7050-85b4-09e11e9a154c', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 13:12:34'),
+('01a18cf1-5175-713c-b9ce-8383fa33d5d3', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 13:13:07'),
+('01a18cf5-c2c0-70ae-ad1f-a70e4df57894', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 13:17:58'),
+('01a18d00-dffe-73b5-b0c3-d02c94fe1649', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 13:30:07'),
+('01a18d01-1a7d-7035-93fd-f3250a820c24', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 13:30:22'),
+('01a18d08-32a8-72d6-b87f-99849a98b760', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 13:38:07'),
+('01a18d1d-8b2b-702f-a448-86f13eb1511b', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.updated', 'product', '01a18bf4-71ed-738d-a6f9-05c2143f12d9', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 14:01:26'),
+('01a18d1e-16f7-71fc-a7af-c2d78608a61a', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.updated', 'product', '01a18c37-f258-7110-a592-aec93f3e2104', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 14:02:01'),
+('01a18d1e-9855-7053-a8ae-04060bec4dde', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.updated', 'product', '01a18c37-f258-7110-a592-aec93f3e2104', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 14:02:34'),
+('01a18d1f-5624-727b-a0f6-7ec7b6e46cf5', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.updated', 'product', '01a18c37-f258-7110-a592-aec93f3e2104', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 14:03:23'),
+('01a18d28-d4e2-70e9-8732-46736c5969b1', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'customer.suspended', 'user', '01a18d28-023e-70b9-96b0-4ffd51bdcb5d', 'web', 'admin', '{\"status\": \"suspended\"}', '127.0.0.1', '2026-10-30 14:13:45'),
+('01a18d28-ded6-7387-9aa5-eccfef240ac1', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'customer.updated', 'user', '01a18d28-023e-70b9-96b0-4ffd51bdcb5d', 'web', 'admin', '{\"status\": \"active\"}', '127.0.0.1', '2026-10-30 14:13:48'),
+('01a18d28-f29f-73f4-9541-076a399a7c03', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'customer.suspended', 'user', '01a18d28-023e-70b9-96b0-4ffd51bdcb5d', 'web', 'admin', '{\"status\": \"suspended\"}', '127.0.0.1', '2026-10-30 14:13:53'),
+('01a18d3b-67f6-73ae-9b62-1ad0004c6bfd', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'customer.updated', 'user', '01a18d28-023e-70b9-96b0-4ffd51bdcb5d', 'web', 'admin', '{\"status\": \"active\"}', '127.0.0.1', '2026-10-30 14:34:03'),
+('01a18d46-fb98-7179-9e5f-9f98611d2e30', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d28-023e-70b9-96b0-4ffd51bdcb5d', 'cart.merged', 'cart', '01a18be3-195c-727e-9121-b65092c31ea0', 'web', 'storefront', '{\"source\": \"guest\", \"merged_line_count\": 1}', '127.0.0.1', '2026-10-30 14:46:41'),
+('01a18d4b-6804-7157-9a2e-3d4c46c56e9c', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'category.created', 'category', '01a18d4b-6801-7397-bd27-a515170b5ab2', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 14:51:31'),
+('01a18d4b-db27-71fb-9f03-742854dff3fd', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'category.updated', 'category', '01a18be7-c794-71b5-818b-76c9ab8a4349', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 14:52:01'),
+('01a18d4c-007c-7092-ae43-c7abb211f8ce', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'category.updated', 'category', '01a18bf8-05bb-720d-b9d0-ea46134e1585', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 14:52:10'),
+('01a18d4c-b3f5-704b-bd41-f95ebf4cbe24', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'settings.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', '{\"fields\": [\"name\", \"default_locale\", \"require_email_verification\", \"require_phone_verification\"]}', '127.0.0.1', '2026-10-30 14:52:56'),
+('01a18d4d-66d1-738c-94f4-e120517048b9', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 14:53:42'),
+('01a18d4d-cd14-713f-8a1b-0f185bb1f133', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 14:54:08'),
+('01a18d54-3602-726b-a6cf-81f15f3f10bf', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.created', 'product', '01a18d54-3600-73d4-8b9a-3c2df6b8fdbc', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 15:01:08'),
+('01a18d54-8499-7021-a5ec-89aef91f73e5', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'inventory.adjusted', 'product', '01a18d54-3600-73d4-8b9a-3c2df6b8fdbc', 'web', 'admin', '{\"stock\": 6, \"previous_stock\": 0}', '127.0.0.1', '2026-10-30 15:01:28'),
+('01a18d56-04ba-7287-ae45-47a2abff7c39', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'category.created', 'category', '01a18d56-04b8-7100-8fe7-09fb3680dfe1', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 15:03:07'),
+('01a18d56-1bce-73c3-be78-11394049cbc6', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'category.updated', 'category', '01a18bf9-e431-738c-b5c5-5ae961ce7763', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 15:03:13'),
+('01a18d56-69a1-71de-b6eb-9180eaf01f6c', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'category.updated', 'category', '01a18bf9-e431-738c-b5c5-5ae961ce7763', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 15:03:33'),
+('01a18d57-19ab-7001-82ce-1d215ef15d7a', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'category.updated', 'category', '01a18d4b-6801-7397-bd27-a515170b5ab2', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 15:04:18'),
+('01a18d57-a649-73b4-94dd-960994becb5a', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'category.created', 'category', '01a18d57-a647-738d-8b63-49d8a41d9036', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 15:04:54'),
+('01a18d58-4616-72ac-8a22-98cd64108f4a', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'category.deleted', 'category', '01a18d57-a647-738d-8b63-49d8a41d9036', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 15:05:34'),
+('01a18dee-7b0a-7041-ba9d-5b2816377414', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.created', 'product', '01a18dee-7b08-7359-826a-d300bed0e9f7', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 17:49:38'),
+('01a18dee-9446-702e-8a68-0ca3c05af0d3', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'inventory.adjusted', 'product', '01a18dee-7b08-7359-826a-d300bed0e9f7', 'web', 'admin', '{\"stock\": 5, \"previous_stock\": 0}', '127.0.0.1', '2026-10-30 17:49:45'),
+('01a18df0-47e3-71b3-9e56-518834bedfaf', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.created', 'product', '01a18df0-47e1-72a6-a52b-c9c6b62301c6', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 17:51:36'),
+('01a18df0-8ad9-7147-9b9e-c2f8ab7349f2', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.published', 'product', '01a18df0-47e1-72a6-a52b-c9c6b62301c6', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 17:51:54'),
+('01a18df0-ac2e-7244-a537-281d4fe334e9', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'inventory.adjusted', 'product', '01a18df0-47e1-72a6-a52b-c9c6b62301c6', 'web', 'admin', '{\"stock\": 7, \"previous_stock\": 0}', '127.0.0.1', '2026-10-30 17:52:02'),
+('01a18df2-745a-71fa-aa15-5a46aea46ef7', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'product.created', 'product', '01a18df2-7459-73f3-ac4d-24dc3080cafd', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 17:53:59'),
+('01a18df2-8f9c-705f-aed5-c50784c6d7c5', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'inventory.adjusted', 'product', '01a18df2-7459-73f3-ac4d-24dc3080cafd', 'web', 'admin', '{\"stock\": 5, \"previous_stock\": 0}', '127.0.0.1', '2026-10-30 17:54:06'),
+('01a18df3-a85e-7150-850e-eea01d3719d0', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 17:55:18'),
+('01a18df4-62f7-710a-97f4-9d95f3a0f67c', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 17:56:06'),
+('01a18df4-f960-7259-8789-b2a6ed9d644e', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 17:56:44');
 
 -- --------------------------------------------------------
 
@@ -110,7 +165,8 @@ CREATE TABLE `carts` (
 INSERT INTO `carts` (`id`, `tenant_id`, `user_id`, `session_token_hash`, `currency`, `expires_at`, `created_at`, `updated_at`) VALUES
 ('01a1823b-06d5-7134-9ad0-58422c5d0dbf', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 0xbb9cd3b9c9e2420ffe6d3833cdb62407ab8865fd04e25420cfee07a72a3d375e, 'USD', '2026-11-27 09:17:48', '2026-10-28 09:17:48', '2026-10-28 09:17:48'),
 ('01a188a5-63df-73d6-9159-02d58db738b5', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 0x4b9a6fdb62db817e0ea244886df5f3e7f0a42fc1027a6d6f69253fed0d793884, 'USD', '2026-11-28 15:11:42', '2026-10-29 15:11:42', '2026-10-29 15:11:42'),
-('01a18be3-195c-727e-9121-b65092c31ea0', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 0xdc871e35f3c93f27866030a238c31ee9b9981e626bf22a403c490b8518b195cd, 'USD', '2026-11-29 06:17:58', '2026-10-30 06:17:58', '2026-10-30 06:17:58');
+('01a18be3-195c-727e-9121-b65092c31ea0', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d28-023e-70b9-96b0-4ffd51bdcb5d', NULL, 'USD', '2026-11-29 15:56:49', '2026-10-30 06:17:58', '2026-10-30 15:56:49'),
+('01a18cf4-60f9-7114-a1eb-721a39c2c9ea', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 0x1889a49427998e31c3ad8cfbb1da80eb9835d9244277a862be1a0d769ced1468, 'USD', '2026-11-29 11:16:28', '2026-10-30 11:16:28', '2026-10-30 11:16:28');
 
 -- --------------------------------------------------------
 
@@ -143,6 +199,8 @@ CREATE TABLE `categories` (
   `parent_id` char(36) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
   `name` varchar(160) COLLATE utf8mb4_unicode_ci NOT NULL,
   `slug` varchar(180) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `icon` varchar(32) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image_url` varchar(2048) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `position` int NOT NULL DEFAULT '0',
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -154,9 +212,11 @@ CREATE TABLE `categories` (
 --
 
 INSERT INTO `categories` (`id`, `tenant_id`, `parent_id`, `name`, `slug`, `position`, `is_active`, `created_at`, `updated_at`) VALUES
-('01a18be7-c794-71b5-818b-76c9ab8a4349', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 'computers', 'aa', 0, 1, '2026-10-30 06:23:05', '2026-10-30 06:23:05'),
-('01a18bf8-05bb-720d-b9d0-ea46134e1585', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18be7-c794-71b5-818b-76c9ab8a4349', 'accessories', 'bb', 0, 1, '2026-10-30 06:40:49', '2026-10-30 06:40:49'),
-('01a18bf9-e431-738c-b5c5-5ae961ce7763', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 'Electronics', 'ccccc', 0, 1, '2026-10-30 06:42:52', '2026-10-30 06:42:52');
+('01a18be7-c794-71b5-818b-76c9ab8a4349', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 'computers', 'aa', 2, 1, '2026-10-30 06:23:05', '2026-10-30 12:52:01'),
+('01a18bf8-05bb-720d-b9d0-ea46134e1585', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18be7-c794-71b5-818b-76c9ab8a4349', 'accessories', 'bb', 3, 1, '2026-10-30 06:40:49', '2026-10-30 12:52:10'),
+('01a18bf9-e431-738c-b5c5-5ae961ce7763', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 'Electronics', 'ccccc', 0, 1, '2026-10-30 06:42:52', '2026-10-30 13:03:33'),
+('01a18d4b-6801-7397-bd27-a515170b5ab2', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d56-04b8-7100-8fe7-09fb3680dfe1', 'cocktail', 'drtdrtd', 1, 1, '2026-10-30 12:51:31', '2026-10-30 13:04:18'),
+('01a18d56-04b8-7100-8fe7-09fb3680dfe1', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 'Food', 'cdacda', 0, 1, '2026-10-30 13:03:07', '2026-10-30 13:03:07');
 
 -- --------------------------------------------------------
 
@@ -200,7 +260,8 @@ CREATE TABLE `human_verifications` (
 --
 
 INSERT INTO `human_verifications` (`id`, `tenant_id`, `session_token_hash`, `provider`, `action`, `passed`, `ip_address`, `expires_at`, `created_at`) VALUES
-('01a188a5-b060-7096-8352-4361d8bfed04', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 0x4b9a6fdb62db817e0ea244886df5f3e7f0a42fc1027a6d6f69253fed0d793884, 'demo', 'register', 1, '127.0.0.1', '2026-10-29 15:17:02', '2026-10-29 17:12:02');
+('01a188a5-b060-7096-8352-4361d8bfed04', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 0x4b9a6fdb62db817e0ea244886df5f3e7f0a42fc1027a6d6f69253fed0d793884, 'demo', 'register', 1, '127.0.0.1', '2026-10-29 15:17:02', '2026-10-29 17:12:02'),
+('01a18d28-0157-70bb-9f2c-500671ebbf30', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 0xdc871e35f3c93f27866030a238c31ee9b9981e626bf22a403c490b8518b195cd, 'demo', 'register', 1, '127.0.0.1', '2026-10-30 12:17:51', '2026-10-30 14:12:51');
 
 -- --------------------------------------------------------
 
@@ -329,8 +390,12 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `tenant_id`, `category_id`, `title`, `slug`, `description`, `sku`, `price_cents`, `compare_at_price_cents`, `currency`, `stock`, `weight_grams`, `is_active`, `published_at`, `created_at`, `updated_at`) VALUES
-('01a18bf4-71ed-738d-a6f9-05c2143f12d9', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18be7-c794-71b5-818b-76c9ab8a4349', 'laptop', 'll', 'black laptop , 17 inch screen, core i7 13700H', '10', 1, 10, 'USD', 0, NULL, 1, '2026-10-30 06:35:00', '2026-10-30 06:36:55', '2026-10-30 06:39:42'),
-('01a18c37-f258-7110-a592-aec93f3e2104', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18bf9-e431-738c-b5c5-5ae961ce7763', 'arduino', 'njh', 'dev board', NULL, 0, NULL, 'USD', 0, NULL, 1, NULL, '2026-10-30 07:50:39', '2026-10-30 07:50:39');
+('01a18bf4-71ed-738d-a6f9-05c2143f12d9', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18be7-c794-71b5-818b-76c9ab8a4349', 'laptop', 'll', 'black laptop , 17 inch screen, core i7 13700H', '10', 9, 10, 'USD', 10, NULL, 1, '2026-10-30 06:35:00', '2026-10-30 06:36:55', '2026-10-30 12:01:26'),
+('01a18c37-f258-7110-a592-aec93f3e2104', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18bf9-e431-738c-b5c5-5ae961ce7763', 'arduino', 'njh', 'dev board', NULL, 100, 101, 'USD', 10, NULL, 1, '2026-10-30 10:11:00', '2026-10-30 07:50:39', '2026-10-30 12:03:23'),
+('01a18d54-3600-73d4-8b9a-3c2df6b8fdbc', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d4b-6801-7397-bd27-a515170b5ab2', 'Avocado', 'fcf', 'Avocado cocktail with milk', NULL, 500, NULL, 'USD', 6, NULL, 1, '2026-10-30 13:00:00', '2026-10-30 13:01:08', '2026-10-30 13:01:28'),
+('01a18dee-7b08-7359-826a-d300bed0e9f7', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18bf8-05bb-720d-b9d0-ea46134e1585', 'keyboard', 'hdrt', 'wireless keyboard', NULL, 1, NULL, 'USD', 5, NULL, 1, '2026-10-30 15:48:00', '2026-10-30 15:49:38', '2026-10-30 15:49:45'),
+('01a18df0-47e1-72a6-a52b-c9c6b62301c6', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d56-04b8-7100-8fe7-09fb3680dfe1', 'potato', 'frw', 'fried potato with katchab', 'hyjgppppppppppppppppppppppp', 5165516, NULL, 'USD', 7, NULL, 1, '2026-10-30 15:51:00', '2026-10-30 15:51:36', '2026-10-30 15:52:02'),
+('01a18df2-7459-73f3-ac4d-24dc3080cafd', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d4b-6801-7397-bd27-a515170b5ab2', 'Strawberry Cocktail', 'fr', 'strawberry with banana and milk cocktail', 'yguu', 5000, NULL, 'USD', 5, NULL, 1, '2026-10-30 15:53:00', '2026-10-30 15:53:59', '2026-10-30 15:54:06');
 
 -- --------------------------------------------------------
 
@@ -344,6 +409,7 @@ CREATE TABLE `product_images` (
   `product_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
   `url` varchar(2048) COLLATE utf8mb4_unicode_ci NOT NULL,
   `alt_text` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `media_type` enum('image','video') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'image',
   `position` int NOT NULL DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -407,7 +473,7 @@ CREATE TABLE `tenants` (
 --
 
 INSERT INTO `tenants` (`id`, `name`, `subdomain`, `custom_domain`, `status`, `default_currency`, `default_locale`, `created_at`, `updated_at`) VALUES
-('6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'Shop', 'shop', NULL, 'active', 'USD', 'en', '2026-10-28 08:34:48', '2026-10-30 06:45:49');
+('6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'Asil Shop', 'shop', NULL, 'active', 'USD', 'en', '2026-10-28 08:34:48', '2026-10-30 12:52:56');
 
 -- --------------------------------------------------------
 
@@ -435,7 +501,7 @@ CREATE TABLE `tenant_settings` (
 --
 
 INSERT INTO `tenant_settings` (`id`, `tenant_id`, `theme_config`, `payment_driver`, `verification_driver`, `human_check_driver`, `email_provider`, `sms_provider`, `stripe_account_id`, `require_email_verification`, `require_phone_verification`, `updated_at`) VALUES
-('01a18213-a8a2-710b-8805-48af78d69710', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '[]', 'demo', 'demo', 'demo', 'log', 'log', NULL, 1, 0, '2026-10-28 10:34:48');
+('01a18213-a8a2-710b-8805-48af78d69710', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '{\"fonts\": {\"body\": \"Arial\", \"heading\": \"Times New Roman\"}, \"colors\": {\"text\": \"#242323\", \"accent\": \"#aa7d52\", \"primary\": \"#6b5b4b\", \"secondary\": \"#f0ece7\", \"background\": \"#ffffff\"}, \"logo_url\": null, \"layout_variant\": \"editorial\"}', 'demo', 'demo', 'demo', 'smtp', 'log', NULL, 1, 0, '2026-10-30 17:56:44');
 
 -- --------------------------------------------------------
 
@@ -465,7 +531,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `tenant_id`, `email`, `email_verified_at`, `phone`, `phone_verified_at`, `password_hash`, `first_name`, `last_name`, `role`, `status`, `last_login_at`, `created_at`, `updated_at`) VALUES
-('e94ac131-ed1a-4f68-9d2a-806384f4c38d', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'admin@example.test', NULL, NULL, NULL, '$2y$12$1U6VQenOA.6.9.cYJC5FY.NzTPi41EU4odXp/DElocZsp7Hd67WDi', NULL, NULL, 'admin', 'active', '2026-10-30 06:20:40', '2026-10-28 08:34:49', '2026-10-30 06:20:40');
+('01a18d28-023e-70b9-96b0-4ffd51bdcb5d', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'mr.hussein.ceng@gmail.com', '2026-10-30 12:12:51', '+96181121843', NULL, '$2y$12$WJlatnXjiBuS1QXXVPJ.7uqSoj5Zqt/OwY0Rk0uQqhzTnCV.gId7C', 'Husyn', 'Azzam', 'customer', 'active', '2026-10-30 12:34:27', '2026-10-30 12:12:51', '2026-10-30 16:05:34'),
+('e94ac131-ed1a-4f68-9d2a-806384f4c38d', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'admin@example.test', NULL, NULL, NULL, '$2y$12$1U6VQenOA.6.9.cYJC5FY.NzTPi41EU4odXp/DElocZsp7Hd67WDi', NULL, NULL, 'admin', 'active', '2026-10-30 16:07:51', '2026-10-28 08:34:49', '2026-10-30 16:07:51');
 
 -- --------------------------------------------------------
 
@@ -519,7 +586,32 @@ INSERT INTO `user_sessions` (`id`, `tenant_id`, `user_id`, `session_type`, `toke
 ('01a18bfc-5f54-7214-a800-01588093bf8d', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x998564d5b60aca89eeebab7de67bf66ae04c9798dffb9c365c14fbfc05ed6c65, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 06:45:34', '2026-10-30 06:45:34', '2026-10-30 07:17:36', '2026-10-30 08:45:34'),
 ('01a18c19-b052-7391-ad3f-dcc78237bec9', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xc4ea26270ce1076b772582fa6241c096e620520b5f7cdeb6d0bf54f8218b8afd, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 07:17:36', '2026-10-30 07:17:36', '2026-10-30 07:50:38', '2026-10-30 09:17:36'),
 ('01a18c37-f193-72dd-a866-e45a469ebc82', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x93f986af43569e34c2574c2479c8741cc1d1cf636c9f65e601f6a41b83174822, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 07:50:38', '2026-10-30 07:50:38', '2026-10-30 09:51:29', '2026-10-30 09:50:39'),
-('01a18ca6-95db-7130-adbf-553f78bcfe72', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x3f8258eb46d129c49fafd9bbcfea8e6d3f58e8b2de3115560f7d566f02a88dfa, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 09:51:29', '2026-10-30 09:51:29', NULL, '2026-10-30 11:51:30');
+('01a18ca6-95db-7130-adbf-553f78bcfe72', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x3f8258eb46d129c49fafd9bbcfea8e6d3f58e8b2de3115560f7d566f02a88dfa, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 09:51:29', '2026-10-30 09:51:29', NULL, '2026-10-30 11:51:30'),
+('01a18cb7-613c-731a-a421-ba1576bc62ff', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x9362f288e6b07a7559fa7a9ce6038fb47549fee0a2bfbd18115dd77aa302b171, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 10:09:50', '2026-10-30 10:09:50', '2026-10-30 10:23:13', '2026-10-30 12:09:50'),
+('01a18cc3-a1a7-70e2-ab84-de5593eb169c', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x2ee211899f448a16db2887b55b9d988bc92b2861e56387f28728088815cff319, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 10:23:13', '2026-10-30 10:23:13', '2026-10-30 10:40:33', '2026-10-30 12:23:13'),
+('01a18cd3-80f4-70a0-bea5-60423ddb9114', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xef842fdb42fbd9981d0b2e5cd785291b498e70329b8d338fefd6b9d59bd2dc41, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 10:40:33', '2026-10-30 10:40:33', '2026-10-30 10:50:34', '2026-10-30 12:40:33'),
+('01a18cdc-ab2e-731c-8822-e8830ec454f4', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xf4c3d5d63d854da56d15715abc8c7a92fbd01170a9fa6c2692faa5390dc4ab71, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 10:50:34', '2026-10-30 10:50:34', '2026-10-30 11:03:15', '2026-10-30 12:50:34'),
+('01a18ce8-496c-71e7-96f1-f79f9349a2cd', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xcbe9c9cd588d22377c24ca414d90dfb659759dad6b520e0cf269e9c8e4df1f73, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 11:03:15', '2026-10-30 11:03:15', '2026-10-30 11:04:21', '2026-10-30 13:03:15'),
+('01a18ce9-48a6-72ec-815f-98c6ba226e40', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x676da59c9eb0a2ad79f6f6521fa20e31f074d1518356737ac249b2f30c5aa505, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 11:04:21', '2026-10-30 11:04:21', NULL, '2026-10-30 13:04:21'),
+('01a18ce9-f150-73b5-a696-a210f31e6501', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xa1f2bf406d0d9799c3e707ec7f24f4318261ee738e90493a4ead40ed83d1f9dd, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 11:05:04', '2026-10-30 11:05:04', '2026-10-30 11:17:52', '2026-10-30 13:05:04'),
+('01a18cf5-a922-72cc-9abf-e39055361d40', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x44c6352d4baabe65e795af7609a23fc8f88ab1efcfec578d685400dd6cac7617, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 11:17:52', '2026-10-30 11:17:52', '2026-10-30 11:19:01', '2026-10-30 13:17:52'),
+('01a18cf6-b78f-7149-9913-aa4deb96c74e', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xc506937102dc94599c71f303c93ac974d057ffbf7d59b94692dcbe6f7ccd66a9, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 11:19:01', '2026-10-30 11:19:01', '2026-10-30 11:24:33', '2026-10-30 13:19:01'),
+('01a18cfb-ca18-73df-b6fa-0e1ca8893aa7', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xa2225f6c6cc9b2dfd0b422d25fd48780a31b13aa8132beadc47b7955f8b64cd1, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 11:24:33', '2026-10-30 11:24:33', NULL, '2026-10-30 13:24:33'),
+('01a18cfd-5b72-716d-8a87-f0309f7be2d5', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xf7a77979b76518f7c570baf4ea8793fb5a011eb7bf6251a0815144bd67fd0468, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 11:26:16', '2026-10-30 11:26:16', '2026-10-30 11:36:49', '2026-10-30 13:26:16'),
+('01a18d07-028f-723a-989d-4fb46723e2e8', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xeed20d3dd127d5c621997f12f7f45c743ea0f1fed31700b911d8088439582ce4, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 11:36:49', '2026-10-30 11:36:49', NULL, '2026-10-30 13:36:49'),
+('01a18d07-495f-73dd-9eb0-f3a24df124be', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x29b8633cd9a321f93f053d8ae0363af1bef18637aa2522723ed60b435402ab6c, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 11:37:07', '2026-10-30 11:37:07', '2026-10-30 11:49:31', '2026-10-30 13:37:07'),
+('01a18d12-a5d2-7026-9c5b-8f43c715ff28', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x49a6696dd4ebfc7bf9cac0a4d2c4df1e0f75fad21f34f7f03b72a7a27eb7047f, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 11:49:31', '2026-10-30 11:49:31', NULL, '2026-10-30 13:49:31'),
+('01a18d13-19bf-7097-8a78-b031aa2a9b7c', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xc3f8aa48b0bf7cd54f3791b3a329a8300b6b52e426efd5cbf46c2fd480ead5c2, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 11:50:01', '2026-10-30 11:50:01', '2026-10-30 12:39:07', '2026-10-30 13:50:01'),
+('01a18d28-0241-7244-90f7-f9db99117426', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d28-023e-70b9-96b0-4ffd51bdcb5d', 'storefront', 0x9fae64cf2daa93fd9d2d52bb59674ae10ba50acf0b43bc334f1976d66fb39982, 'node', '127.0.0.1', '2026-11-29 12:12:51', '2026-10-30 12:13:35', '2026-10-30 12:13:45', '2026-10-30 14:12:51'),
+('01a18d3b-c73f-71d2-97ad-91ba48c15827', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d28-023e-70b9-96b0-4ffd51bdcb5d', 'storefront', 0xe27e135c7be07a2e697462b790dc2e07ede984949dafe0b6213787d4c64c850f, 'node', '127.0.0.1', '2026-11-29 12:34:27', '2026-10-30 16:05:41', NULL, '2026-10-30 14:34:27'),
+('01a18d40-0e71-733e-82ac-360b7cddac69', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x0e75254306ee6cedeaa942dc45029ee787ac9b2f2f1793e68cf1b3213273efb5, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 12:39:07', '2026-10-30 12:39:07', NULL, '2026-10-30 14:39:07'),
+('01a18d40-816f-71ff-b9e3-a6b30f03f991', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x12984afcafef553929dc02878f54e5f8df804550190e897f2dacf453917fdda4, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 12:39:37', '2026-10-30 12:39:37', '2026-10-30 12:45:40', '2026-10-30 14:39:37'),
+('01a18d49-b56d-7091-b65d-7b86b54592e4', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xf124a15a4fb158cb12e26b486527216d0090711873c5e09f7719340d5b57dcc6, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 12:49:40', '2026-10-30 12:49:40', '2026-10-30 13:06:51', '2026-10-30 14:49:40'),
+('01a18d59-7203-733b-b244-877db247ca5c', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xaca41d02120e6ab4b6559a0b1363bc38833dffeab2ec47a6a3b1085fe0c78699, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 13:06:51', '2026-10-30 13:06:51', '2026-10-30 15:37:41', '2026-10-30 15:06:51'),
+('01a18de3-8716-701d-afcb-fe8739d47e08', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x2f4080e6cc6ed50182dcbfda16e89ab2e95d159d4537887b0c84bd23cf7b17e8, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 15:37:41', '2026-10-30 15:37:41', NULL, '2026-10-30 17:37:41'),
+('01a18dec-1d3a-7096-95a6-78fd3d3df098', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xccd6f540216380f443f03d804834a06a29b8e66752df9e52f1513f0ff5a7262f, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 15:47:03', '2026-10-30 15:47:03', '2026-10-30 16:03:42', '2026-10-30 17:47:03'),
+('01a18dfb-5b19-7366-99a7-6846f254dc67', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xb0d99c182d9673bd5410fe790dd47d9ce2f8db64204c487f9c1454fa02654fbe, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 16:03:42', '2026-10-30 16:03:42', NULL, '2026-10-30 18:03:42'),
+('01a18dff-25d8-7214-9edf-2255c2fd702d', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x863b19b81bc2b992f24fe56597212d08a9ea0d519b479ea28476fbde598f547c, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 16:07:51', '2026-10-30 16:07:51', NULL, '2026-10-30 18:07:51');
 
 -- --------------------------------------------------------
 
@@ -547,7 +639,8 @@ CREATE TABLE `verification_codes` (
 --
 
 INSERT INTO `verification_codes` (`id`, `tenant_id`, `user_id`, `identifier`, `channel`, `purpose`, `code_hash`, `expires_at`, `attempts`, `max_attempts`, `used_at`, `created_at`) VALUES
-('01a18217-e50a-717d-bc97-b048eaa14a76', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin@example.test', 'email', 'password_reset', 0x6648473eed826ebc7e9dcb2e01861151748532032142b22d083c00618ee480b6, '2026-10-28 08:49:26', 0, 5, '2026-10-28 08:42:46', '2026-10-28 10:39:26');
+('01a18217-e50a-717d-bc97-b048eaa14a76', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin@example.test', 'email', 'password_reset', 0x6648473eed826ebc7e9dcb2e01861151748532032142b22d083c00618ee480b6, '2026-10-28 08:49:26', 0, 5, '2026-10-28 08:42:46', '2026-10-28 10:39:26'),
+('01a18d27-071c-70d3-9a54-d86583f31ea1', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 'mr.hussein.ceng@gmail.com', 'email', 'verify_email', 0x94bf6186174f00e98b92e6897eb294732108339ed9a9884db8154ac510796b66, '2026-10-30 12:21:47', 0, 5, '2026-10-30 12:12:51', '2026-10-30 14:11:47');
 
 --
 -- Indexes for dumped tables

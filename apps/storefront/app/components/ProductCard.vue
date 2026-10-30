@@ -2,6 +2,7 @@
 interface ProductImage {
   url?: string
   alt_text?: string | null
+  media_type?: 'image' | 'video'
 }
 
 interface Product {
@@ -45,7 +46,8 @@ async function addToBag() {
 <template>
   <article class="product-card">
     <NuxtLink class="product-card__media" :to="`/products/${product.slug}`">
-      <img v-if="product.images?.[0]?.url" :src="product.images[0].url" :alt="product.images[0].alt_text || product.title" loading="lazy">
+      <video v-if="product.images?.[0]?.media_type === 'video' && product.images[0]?.url" :src="product.images[0].url" muted playsinline preload="metadata" />
+      <img v-else-if="product.images?.[0]?.url" :src="product.images[0].url" :alt="product.images[0].alt_text || product.title" loading="lazy">
       <div v-else class="product-placeholder" aria-hidden="true"><span>{{ product.title.slice(0, 1) }}</span></div>
       <span v-if="!available" class="product-badge">Sold out</span>
     </NuxtLink>

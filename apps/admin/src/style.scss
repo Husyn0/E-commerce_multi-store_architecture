@@ -113,6 +113,11 @@ a { color: inherit; }
 .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
 .field { display: grid; gap: 6px; min-width: 0; }
 .field--wide { grid-column: 1 / -1; }
+.admin-media-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+.admin-media-item { display: grid; justify-items: start; gap: 6px; }
+.admin-media-preview { display: block; width: 110px; max-height: 90px; object-fit: cover; border: 1px solid #deddd7; border-radius: 6px; }
+.category-admin-thumb { width: 30px; height: 30px; margin-right: 8px; object-fit: cover; vertical-align: middle; border-radius: 5px; }
+.media-file-list { color: #6e6a62; font-size: 11px; }
 .field label { color: #5e5c57; font-size: 11px; font-weight: 650; }
 .field input, .field select, .field textarea, .search-input { width: 100%; min-height: 39px; padding: 9px 11px; border: 1px solid #deddd7; border-radius: 8px; outline: none; color: var(--ink); background: white; font-size: 12px; }
 .field textarea { min-height: 100px; resize: vertical; }
