@@ -29,6 +29,7 @@ export default defineComponent({
     <div class="card-head"><span class="card-title">Customer accounts</span><div class="filter-row">
       <input v-model="filters.q" class="search-input" placeholder="Search name, email or phone" @keyup.enter="searchCustomers" />
       <select v-model="filters.status" class="search-input status-filter" @change="searchCustomers"><option value="">All statuses</option><option value="active">Active</option><option value="suspended">Suspended</option><option value="deleted">Deleted</option></select>
+      <label class="page-size-control">Rows<select class="search-input" :value="pageSizes.customers" @change="changePageSize('customers', $event.target.value)"><option :value="10">10</option><option :value="25">25</option><option :value="50">50</option><option :value="100">100</option></select></label>
       <button class="button button--secondary" @click="searchCustomers">Search</button>
     </div></div>
     <div v-if="loading" class="loading">Loading customers…</div>

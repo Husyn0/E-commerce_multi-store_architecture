@@ -30,9 +30,9 @@ export default defineComponent({
       </form>
     </section>
     <section class="card">
-      <div class="card-head"><span class="card-title">Product catalog</span><button class="text-button" type="button" @click="loadSection(page)">Refresh</button></div>
+      <div class="card-head"><span class="card-title">Product catalog</span><div class="filter-row"><input v-model.trim="filters.product_q" class="search-input table-search-input" placeholder="Search title, slug or SKU" @keyup.enter="searchTable" /><button class="button button--secondary button--small" type="button" @click="searchTable">Search</button><label class="page-size-control">Rows<select class="search-input" :value="pageSizes.products" @change="changePageSize('products', $event.target.value)"><option :value="10">10</option><option :value="20">20</option><option :value="50">50</option><option :value="100">100</option></select></label><button class="text-button" type="button" @click="loadSection(page)">Refresh</button></div></div>
       <div v-if="loading" class="loading">Loading products…</div>
-      <div v-else-if="rows.length === 0" class="empty-state">No products in this tenant yet.</div>
+      <div v-else-if="rows.length === 0" class="empty-state">{{ filters.product_q ? 'No products match your search.' : 'No products in this tenant yet.' }}</div>
       <div v-else class="table-scroll"><table class="data-table">
         <thead><tr><th>Product</th><th>SKU</th><th>Price</th><th>Stock</th><th>Status</th><th></th></tr></thead>
         <tbody><tr v-for="product in rows" :key="product.id">

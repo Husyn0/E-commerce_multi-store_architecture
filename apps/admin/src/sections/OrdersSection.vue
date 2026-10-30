@@ -12,9 +12,14 @@ export default defineComponent({
 
 
   <div class="order-filters">
+    <label class="filter-label">Search orders
+      <input v-model.trim="filters.order_q" class="search-input table-search-input" placeholder="Order number or customer email" @keyup.enter="searchTable" />
+    </label>
     <label class="filter-label">Fulfillment
       <select v-model="filters.status" class="search-input"><option value="">All statuses</option><option v-for="status in ['pending','processing','shipped','delivered','cancelled']" :key="status" :value="status">{{ status }}</option></select>
     </label>
+    <label class="page-size-control">Rows<select class="search-input" :value="pageSizes.orders" @change="changePageSize('orders', $event.target.value)"><option :value="10">10</option><option :value="25">25</option><option :value="50">50</option><option :value="100">100</option></select></label>
+    <button class="button button--secondary" type="button" @click="searchTable">Search</button>
     <label class="filter-label">Payment
       <select v-model="filters.payment_status" class="search-input"><option value="">All payments</option><option v-for="status in ['requires_payment','processing','succeeded','failed','refunded']" :key="status" :value="status">{{ status.replaceAll('_', ' ') }}</option></select>
     </label>

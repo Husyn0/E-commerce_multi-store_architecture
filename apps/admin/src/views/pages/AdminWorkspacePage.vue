@@ -52,6 +52,9 @@ const selectedOrder = ref(null)
 const selectedCustomer = ref(null)
 const filters = reactive({
   q: '',
+  product_q: '',
+  category_q: '',
+  order_q: '',
   status: '',
   source: '',
   action: '',
@@ -61,6 +64,7 @@ const filters = reactive({
   from: '',
   to: '',
 })
+const pageSizes = reactive({ products: 20, categories: 20, orders: 25, customers: 25 })
 const productForm = reactive({
   id: '',
   title: '',
@@ -104,7 +108,7 @@ async function loadSection(nextPage = 1, preserveFeedback = false) {
       dashboard.value = await api.get('/admin/dashboard')
     } else if (section.value === 'products') {
       const [response, categoryResponse] = await Promise.all([
-        api.get('/admin/products', { query: { per_page: 20, page: nextPage } }),
+        api.get('/admin/products', { query: { per_page: pageSizes.products, page: nextPage, q: filters.product_q } }),
         api.get('/admin/categories', { query: { per_page: 100 } }),
       ])
       rows.value = response.data || []
@@ -118,15 +122,20 @@ async function loadSection(nextPage = 1, preserveFeedback = false) {
       page.value = response.meta?.current_page || nextPage
       lastPage.value = response.meta?.last_page || 1
     } else if (section.value === 'categories') {
-      const response = await api.get('/admin/categories', { query: { page: nextPage } })
+      const [response, categoryResponse] = await Promise.all([
+        api.get('/admin/categories', { query: { page: nextPage, per_page: pageSizes.categories, q: filters.category_q } }),
+        api.get('/admin/categories', { query: { per_page: 100 } }),
+      ])
       rows.value = response.data || []
+      categories.value = categoryResponse.data || []
       page.value = response.meta?.current_page || nextPage
       lastPage.value = response.meta?.last_page || 1
     } else if (section.value === 'orders') {
       const response = await api.get('/admin/orders', {
         query: {
-          per_page: 25,
+          per_page: pageSizes.orders,
           page: nextPage,
+          q: filters.order_q,
           status: filters.status,
           payment_status: filters.payment_status,
         },
@@ -136,7 +145,7 @@ async function loadSection(nextPage = 1, preserveFeedback = false) {
       lastPage.value = response.meta?.last_page || 1
     } else if (section.value === 'customers') {
       const response = await api.get('/admin/customers', {
-        query: { q: filters.q, status: filters.status, per_page: 25, page: nextPage },
+        query: { q: filters.q, status: filters.status, per_page: pageSizes.customers, page: nextPage },
       })
       rows.value = response.data || []
       page.value = response.meta?.current_page || nextPage
@@ -532,6 +541,15 @@ function searchCustomers() {
   loadSection(1)
 }
 
+function searchTable() {
+  loadSection(1)
+}
+
+function changePageSize(name, value) {
+  pageSizes[name] = Number(value)
+  loadSection(1)
+}
+
 function filterAudit() {
   auditCursor.value = null
   loadSection(1)
@@ -606,9 +624,9 @@ provide('adminWorkspace', {
   route, router, section, busy, loading, error, notice, rows, page, lastPage, settings,
   themeForm, showProductForm, showCategoryForm, refundingOrder, refundAmount,
   refundReason, refundAttempt, categories, stockDrafts, dashboard, selectedOrder,
-  selectedCustomer, filters, productForm, categoryForm, settingsForm, title,
+  selectedCustomer, filters, pageSizes, productForm, categoryForm, settingsForm, title,
   description, previewColors, auditCursor, nextAuditCursor, resetFeedback,
-  loadSection, removeProduct, removeProductImage, openOrder, openCustomer, editProduct, newProduct,
+  loadSection, searchTable, changePageSize, removeProduct, removeProductImage, openOrder, openCustomer, editProduct, newProduct,
   newCategory, editCategory, saveProduct, saveCategory, removeCategory,
   saveSettings, saveTheme, formatLocalDateTime, updateOrderStatus, startRefund,
   submitRefund, updateInventory, toggleCustomer, searchCustomers, filterAudit,

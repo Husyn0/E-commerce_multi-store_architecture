@@ -14,14 +14,26 @@ use Illuminate\Validation\Rule;
 
 class CategoryController extends TenantApiController
 {
-    public function index()
+    public function index(Request $request)
     {
+        $filters = $request->validate([
+            'q' => ['sometimes', 'string', 'max:120'],
+            'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
+        ]);
+
         return CategoryResource::collection(
             Category::query()
                 ->forTenant($this->tenantId())
+                ->when(isset($filters['q']), function ($query) use ($filters): void {
+                    $term = '%'.addcslashes($filters['q'], '\\%_').'%';
+                    $query->where(function ($searchQuery) use ($term): void {
+                        $searchQuery->where('name', 'like', $term)
+                            ->orWhere('slug', 'like', $term);
+                    });
+                })
                 ->orderBy('position')
                 ->orderBy('name')
-                ->paginate(100),
+                ->paginate($filters['per_page'] ?? 100),
         );
     }
 

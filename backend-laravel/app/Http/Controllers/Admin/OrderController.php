@@ -21,6 +21,7 @@ class OrderController extends TenantApiController
     public function index(Request $request)
     {
         $filters = $request->validate([
+            'q' => ['sometimes', 'string', 'max:120'],
             'status' => ['sometimes', 'in:pending,processing,shipped,delivered,cancelled'],
             'payment_status' => ['sometimes', 'in:requires_payment,processing,succeeded,failed,refunded'],
             'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
@@ -29,6 +30,13 @@ class OrderController extends TenantApiController
         $orders = Order::query()
             ->forTenant($this->tenantId())
             ->withSum(['refunds as refunded_total_cents' => fn ($query) => $query->where('status', 'succeeded')], 'amount_cents')
+            ->when(isset($filters['q']), function ($query) use ($filters): void {
+                $term = '%'.addcslashes($filters['q'], '\\%_').'%';
+                $query->where(function ($searchQuery) use ($term): void {
+                    $searchQuery->where('order_number', 'like', $term)
+                        ->orWhere('customer_email', 'like', $term);
+                });
+            })
             ->when(isset($filters['status']), fn ($query) => $query->where('status', $filters['status']))
             ->when(isset($filters['payment_status']), fn ($query) => $query->where('payment_status', $filters['payment_status']))
             ->orderByDesc('created_at')

@@ -184,6 +184,8 @@ a { color: inherit; }
 .appearance-group { min-width: 0; margin: 0; padding: 0; border: 0; }
 .appearance-group legend { margin-bottom: 9px; color: var(--ink); font-size: 12px; font-weight: 680; }
 .palette-select { position: relative; display: grid; gap: 6px; max-width: 420px; color: var(--ink); font-size: 11px; }
+.palette-source-note { margin: -2px 0 9px; color: var(--muted); font-size: 10px; line-height: 1.5; }
+.palette-source-note a { color: var(--accent); text-underline-offset: 2px; }
 .palette-select-trigger { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px; color: var(--ink); background: #fff; text-align: left; font: inherit; }
 .palette-select-trigger > span:first-child { flex: 1; }
 .palette-chevron { color: var(--muted); font-size: 16px; }

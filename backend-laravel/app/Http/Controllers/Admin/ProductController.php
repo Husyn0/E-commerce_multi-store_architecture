@@ -18,12 +18,24 @@ class ProductController extends TenantApiController
 {
     public function index(Request $request)
     {
+        $filters = $request->validate([
+            'q' => ['sometimes', 'string', 'max:120'],
+            'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
+        ]);
         $products = Product::query()
             ->forTenant($this->tenantId())
             ->with(['images', 'variants'])
+            ->when(isset($filters['q']), function ($query) use ($filters): void {
+                $term = '%'.addcslashes($filters['q'], '\\%_').'%';
+                $query->where(function ($searchQuery) use ($term): void {
+                    $searchQuery->where('title', 'like', $term)
+                        ->orWhere('slug', 'like', $term)
+                        ->orWhere('sku', 'like', $term);
+                });
+            })
             ->orderByDesc('created_at')
             ->orderByDesc('id')
-            ->paginate(min(max($request->integer('per_page', 20), 1), 100));
+            ->paginate($filters['per_page'] ?? 20);
 
         return ProductResource::collection($products);
     }
