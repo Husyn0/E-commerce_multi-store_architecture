@@ -336,7 +336,7 @@ CREATE TABLE `orders` (
   `user_id` char(36) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
   `status` enum('pending','processing','shipped','delivered','cancelled') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
   `payment_status` enum('requires_payment','processing','succeeded','failed','refunded') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'requires_payment',
-  `payment_provider` enum('demo','stripe') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payment_provider` enum('demo','stripe','cash_on_delivery') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `payment_intent_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `checkout_idempotency_key` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `checkout_request_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,

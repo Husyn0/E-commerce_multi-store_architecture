@@ -4,6 +4,7 @@ interface Order {
   order_number: string
   status: string
   payment_status: string
+  payment_provider: string
   total_cents: number
   currency: string
   created_at: string
@@ -24,6 +25,12 @@ function dateLabel(value: string) {
   return new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(new Date(value))
 }
 
+function paymentLabel(order: Order) {
+  return order.payment_provider === 'cash_on_delivery'
+    ? 'Due on delivery'
+    : order.payment_status.replaceAll('_', ' ')
+}
+
 useSeoMeta({ title: 'Order history', description: 'Review your orders from this store.' })
 </script>
 
@@ -42,7 +49,7 @@ useSeoMeta({ title: 'Order history', description: 'Review your orders from this 
           <strong>{{ dateLabel(order.created_at) }}</strong>
         </div>
         <span class="order-status">{{ order.status.replaceAll('_', ' ') }}</span>
-        <span class="order-payment">{{ order.payment_status.replaceAll('_', ' ') }}</span>
+        <span class="order-payment">{{ paymentLabel(order) }}</span>
         <strong class="order-total">{{ formatMoney(order.total_cents, order.currency) }}</strong>
         <span class="order-arrow">↗</span>
       </NuxtLink>

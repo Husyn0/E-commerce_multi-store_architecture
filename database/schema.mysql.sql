@@ -352,7 +352,7 @@ CREATE TABLE IF NOT EXISTS orders (
   user_id CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NULL,
   status ENUM('pending', 'processing', 'shipped', 'delivered', 'cancelled') NOT NULL DEFAULT 'pending',
   payment_status ENUM('requires_payment', 'processing', 'succeeded', 'failed', 'refunded') NOT NULL DEFAULT 'requires_payment',
-  payment_provider ENUM('demo', 'stripe') NOT NULL,
+  payment_provider ENUM('demo', 'stripe', 'cash_on_delivery') NOT NULL,
   payment_intent_id VARCHAR(255) NULL,
   checkout_idempotency_key VARCHAR(255) NOT NULL,
   checkout_request_hash CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,

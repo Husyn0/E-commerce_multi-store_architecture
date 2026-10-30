@@ -62,18 +62,25 @@ class CheckoutController extends TenantApiController
             'currency' => ['required', 'string', 'size:3'],
             'customer_email' => ['required', 'email', 'max:254'],
             'customer_phone' => ['nullable', 'string', 'max:32'],
+            'payment_method' => ['required', 'in:cash_on_delivery,online'],
             'notes' => ['nullable', 'string', 'max:5000'],
             'payment_method_id' => ['sometimes', 'prohibited'],
         ]);
 
         $context = $this->tenantContext();
         $tenantId = $context->tenant->id;
+        $paymentMethod = $input['payment_method'];
         $settings = TenantSettings::query()->forTenant($tenantId)->first();
-        if ($settings === null) {
+        if ($paymentMethod === 'online' && $settings === null) {
             return response()->json(['message' => 'Payment processing is not configured for this store.'], 503);
         }
+        if ($paymentMethod === 'online' && $settings?->payment_driver !== 'stripe') {
+            return response()->json(['message' => 'Online card payments are not available for this store yet.'], 503);
+        }
         try {
-            $gateway = $gateways->forTenant($settings);
+            $gateway = $paymentMethod === 'online'
+                ? $gateways->forTenant($settings ?? throw new RuntimeException('Payment settings are missing.'))
+                : null;
             $session = $sessions->resolve($request, $context);
             $principalType = $session->user === null ? 'guest' : 'user';
             $principalId = $session->user?->id;
@@ -103,6 +110,7 @@ class CheckoutController extends TenantApiController
             'shipping_address' => $shipping,
             'billing_address' => $input['billing_address'] ?? 'same as shipping',
             'payment_method_id' => null,
+            'payment_method' => $paymentMethod,
             'currency' => $currency,
             'customer_email' => mb_strtolower(trim($input['customer_email'])),
             'customer_phone' => $input['customer_phone'] ?? null,
@@ -112,7 +120,9 @@ class CheckoutController extends TenantApiController
             $semanticRequest['billing_address'] = $billing;
         }
         $requestHash = $requestHasher->hash($semanticRequest);
-        $paymentDriver = (string) $settings->payment_driver;
+        $paymentDriver = $paymentMethod === 'cash_on_delivery'
+            ? 'cash_on_delivery'
+            : (string) ($settings?->payment_driver ?? '');
 
         try {
             $checkout = DB::transaction(function () use (
@@ -331,15 +341,28 @@ class CheckoutController extends TenantApiController
         if (isset($checkout['in_progress'])) {
             return response()->json(['message' => 'Checkout is being processed; retry with the same key.'], 409);
         }
-        if ($checkout['order']->payment_provider !== $settings->payment_driver) {
+        if ($checkout['order']->payment_provider === 'cash_on_delivery') {
+            return response()->json([
+                'order' => [
+                    'id' => $checkout['order']->id,
+                    'order_number' => $checkout['order']->order_number,
+                    'status' => $checkout['order']->status,
+                    'payment_status' => $checkout['order']->payment_status,
+                    'total_cents' => (int) $checkout['order']->total_cents,
+                    'currency' => $checkout['order']->currency,
+                ],
+                'payment' => ['provider' => 'cash_on_delivery', 'status' => 'due_on_delivery'],
+            ])->header('Cache-Control', 'no-store');
+        }
+        if ($settings === null || $checkout['order']->payment_provider !== $settings->payment_driver) {
             return response()->json([
                 'message' => 'The payment configuration changed; restore the order provider before retrying.',
             ], 503);
         }
 
         try {
-            $intent = $gateway->createIntent(
-                $settings,
+            $intent = ($gateway ?? throw new RuntimeException('The online payment gateway is missing.'))->createIntent(
+                $settings ?? throw new RuntimeException('Payment settings are missing.'),
                 $checkout['order'],
                 'checkout_'.$checkout['record']->id,
             );
@@ -370,7 +393,7 @@ class CheckoutController extends TenantApiController
             $cancelOrder = $paymentState['order'];
             $cancelOrder->payment_intent_id = $intent->id;
             try {
-                $gateway->cancelIntent($settings, $cancelOrder, 'checkout_cancel_'.$checkout['record']->id);
+                $gateway->cancelIntent($settings ?? throw new RuntimeException('Payment settings are missing.'), $cancelOrder, 'checkout_cancel_'.$checkout['record']->id);
             } catch (PaymentProviderException $exception) {
                 report($exception);
 

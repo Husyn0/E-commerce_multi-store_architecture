@@ -31,8 +31,8 @@ export default defineComponent({
     <div class="card-body">
       <div class="detail-list">
         <div class="detail-item"><div class="detail-label">Customer</div><div class="detail-value">{{ selectedOrder.customer_email }}</div></div>
-        <div class="detail-item"><div class="detail-label">Payment status</div><div class="detail-value">{{ selectedOrder.payment_status }}</div></div>
-        <div class="detail-item"><div class="detail-label">Payment provider</div><div class="detail-value">{{ selectedOrder.payment_provider }}</div></div>
+        <div class="detail-item"><div class="detail-label">Payment status</div><div class="detail-value">{{ selectedOrder.payment_provider === 'cash_on_delivery' ? 'Due on delivery' : selectedOrder.payment_status.replaceAll('_', ' ') }}</div></div>
+        <div class="detail-item"><div class="detail-label">Payment method</div><div class="detail-value">{{ selectedOrder.payment_provider === 'cash_on_delivery' ? 'Cash on delivery' : selectedOrder.payment_provider }}</div></div>
         <div class="detail-item"><div class="detail-label">Total / refunded</div><div class="detail-value">{{ money(selectedOrder.total_cents, selectedOrder.currency) }} / {{ money(selectedOrder.refunded_total_cents, selectedOrder.currency) }}</div></div>
         <div class="detail-item"><div class="detail-label">Shipping address snapshot</div><div class="detail-value">{{ formatAddress(selectedOrder.shipping_address) }}</div></div>
         <div class="detail-item"><div class="detail-label">Billing address snapshot</div><div class="detail-value">{{ formatAddress(selectedOrder.billing_address) }}</div></div>
@@ -70,7 +70,7 @@ export default defineComponent({
         <td><button class="text-button primary-cell" type="button" @click="openOrder(order)">{{ order.order_number }}</button><div class="secondary-cell">{{ new Date(order.created_at).toLocaleString() }}</div></td>
         <td>{{ order.customer_email || 'Guest' }}</td>
         <td><div class="primary-cell">{{ money(order.total_cents, order.currency) }}</div><div class="secondary-cell">Refunded {{ money(order.refunded_total_cents, order.currency) }}</div></td>
-        <td><span class="status-pill" :class="`status-pill--${order.payment_status}`">{{ order.payment_status.replaceAll('_', ' ') }}</span></td>
+        <td><span class="status-pill" :class="`status-pill--${order.payment_status}`">{{ order.payment_provider === 'cash_on_delivery' ? 'Due on delivery' : order.payment_status.replaceAll('_', ' ') }}</span></td>
         <td><span class="status-pill">{{ order.status }}</span></td>
         <td><select class="search-input order-status-select" :value="order.status" :disabled="busy || orderStatusOptions(order).length === 1" aria-label="Update order status" @change="updateOrderStatus(order, $event.target.value)"><option v-for="status in orderStatusOptions(order)" :key="status" :value="status">{{ status }}</option></select></td>
         <td><button v-if="order.payment_status === 'succeeded' && order.total_cents > order.refunded_total_cents" class="text-button" type="button" :disabled="busy || (refundAttempt && refundAttempt.orderId !== order.id)" @click="startRefund(order)">Refund</button></td>

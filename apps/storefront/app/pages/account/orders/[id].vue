@@ -13,6 +13,7 @@ interface Order {
   order_number: string
   status: string
   payment_status: string
+  payment_provider: string
   total_cents: number
   refunded_total_cents: number
   currency: string
@@ -34,6 +35,9 @@ if (error.value) {
   else throw createError({ statusCode: status === 404 ? 404 : 503, statusMessage: status === 404 ? 'Order not found.' : 'Order details are unavailable.' })
 }
 const order = computed(() => response.value ? unwrapResource(response.value) : null)
+const paymentLabel = computed(() => order.value?.payment_provider === 'cash_on_delivery'
+  ? 'Due on delivery'
+  : order.value?.payment_status.replaceAll('_', ' '))
 useSeoMeta({ title: () => order.value ? `Order ${order.value.order_number}` : 'Order details' })
 </script>
 
@@ -59,7 +63,7 @@ useSeoMeta({ title: () => order.value ? `Order ${order.value.order_number}` : 'O
       </div>
       <aside class="order-summary">
         <span class="eyebrow">Order summary</span>
-        <div class="summary-row"><span>Payment</span><strong>{{ order.payment_status.replaceAll('_', ' ') }}</strong></div>
+        <div class="summary-row"><span>Payment</span><strong>{{ paymentLabel }}</strong></div>
         <div class="summary-row"><span>Total</span><strong>{{ formatMoney(order.total_cents, order.currency) }}</strong></div>
         <div v-if="order.refunded_total_cents > 0" class="summary-row"><span>Refunded</span><strong>{{ formatMoney(order.refunded_total_cents, order.currency) }}</strong></div>
         <div class="address-block">
