@@ -9,9 +9,11 @@ sent by this guide.
 1. Start the Laravel API and use the exact domain settings in `backend-laravel/.env`.
    With the sample domains in `INITIALIZATION.md`, a tenant named `shop` uses:
    - Admin: `http://shop.admin.localhost:8000`
-   - Storefront: `http://shop.store.localhost:8000`
+   - Storefront: `http://shop.storefront.localhost:8000` (matches the exported `.env` value `STOREFRONT_BASE_DOMAIN=storefront.localhost`)
 2. Confirm the tenant exists and is active. Set the test tenant's `subdomain` to
-   the host prefix used below.
+   the host prefix used below. If the database was initialized from the schema
+   only, provision a tenant using the protected CLI flow in `INITIALIZATION.md`;
+   the schema does not create one automatically.
 3. Keep secrets in `.env`; do not paste secret values into reports, screenshots,
    or shared terminals.
 4. Configure independent `SESSION_TOKEN_PEPPER` and
@@ -20,9 +22,11 @@ sent by this guide.
    use `APP_ENV=local`, `payment_driver=demo`, and a `DEMO_WEBHOOK_SECRET` of at
    least 32 characters. For human-check demo, the response token is `demo-pass`
    and the app must be in `local` or `testing`.
-5. Registration requires an email OTP when `require_email_verification=true`.
-   Configure a real email delivery transport, or use an existing test customer.
-   The `log` mailer is deliberately not a valid OTP delivery transport.
+5. New customer registration is documented step-by-step in `auth-test.md`.
+   It requires a Storefront cart cookie, CSRF header, human-verification proof,
+   and an email OTP when `require_email_verification=true`. The `log` mailer is
+   not a working OTP delivery transport; configure a test inbox or disable email
+   verification only for an isolated local test.
 6. Admin login requires an existing active tenant Admin. For initial
    provisioning, use the protected CLI flow documented in `INITIALIZATION.md`.
 7. Most commands require `jq` only for convenient JSON value extraction. If
@@ -33,7 +37,7 @@ Start a shell and set the test values (replace example values as needed):
 
 ```sh
 export ADMIN_BASE='http://shop.admin.localhost:8000'
-export STORE_BASE='http://shop.store.localhost:8000'
+export STORE_BASE='http://shop.storefront.localhost:8000'
 export ADMIN_EMAIL='admin@example.test'
 export ADMIN_PASSWORD='@password123'
 export CUSTOMER_EMAIL='customer@example.test'

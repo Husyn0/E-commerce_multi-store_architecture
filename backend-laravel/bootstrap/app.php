@@ -4,6 +4,7 @@ use App\Http\Middleware\RequireActiveTenant;
 use App\Http\Middleware\RequireTenantAdmin;
 use App\Http\Middleware\RequireTenantHostType;
 use App\Http\Middleware\ResolveTenantFromHost;
+use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -23,6 +24,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'tenant.active' => RequireActiveTenant::class,
             'tenant.admin' => RequireTenantAdmin::class,
         ]);
+
+        $middleware->prependToPriorityList(AuthenticatesRequests::class, ResolveTenantFromHost::class);
+        $middleware->prependToPriorityList(AuthenticatesRequests::class, RequireTenantHostType::class);
+        $middleware->prependToPriorityList(AuthenticatesRequests::class, RequireActiveTenant::class);
 
         $middleware->redirectGuestsTo(
             fn (Request $request) => $request->is('api/*') ? null : route('login'),

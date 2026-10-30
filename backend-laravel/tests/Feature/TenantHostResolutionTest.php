@@ -2,8 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\RequireActiveTenant;
+use App\Http\Middleware\RequireTenantHostType;
+use App\Http\Middleware\ResolveTenantFromHost;
 use App\Models\Tenant;
 use App\Tenancy\TenantHostLocator;
+use Illuminate\Auth\Middleware\Authenticate;
+use Illuminate\Foundation\Http\Kernel;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use PDOException;
@@ -73,6 +79,29 @@ class TenantHostResolutionTest extends TestCase
 
         $this->getJson('https://violet.admin.example.test/api/storefront/tenant')
             ->assertNotFound();
+    }
+
+    public function test_tenant_resolution_and_gates_precede_jwt_authentication(): void
+    {
+        $this->app->make(Kernel::class);
+        $router = $this->app->make(Router::class);
+        $route = $router->getRoutes()->getByName('products.index');
+
+        $this->assertNotNull($route);
+
+        $middleware = $router->gatherRouteMiddleware($route);
+        $tenantResolution = array_search(ResolveTenantFromHost::class, $middleware, true);
+        $adminHost = array_search(RequireTenantHostType::class.':admin', $middleware, true);
+        $activeTenant = array_search(RequireActiveTenant::class, $middleware, true);
+        $authentication = array_search(Authenticate::class.':tenant-jwt', $middleware, true);
+
+        $this->assertIsInt($tenantResolution);
+        $this->assertIsInt($adminHost);
+        $this->assertIsInt($activeTenant);
+        $this->assertIsInt($authentication);
+        $this->assertLessThan($authentication, $tenantResolution);
+        $this->assertLessThan($authentication, $adminHost);
+        $this->assertLessThan($authentication, $activeTenant);
     }
 
     public function test_unauthenticated_admin_api_request_without_accept_header_returns_json_401(): void
