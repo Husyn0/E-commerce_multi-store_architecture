@@ -52,7 +52,7 @@ class AuthController extends TenantApiController
         return response()->json([
             'access_token' => $accessTokens->issue($user, $this->tenantContext()),
             'token_type' => 'Bearer',
-            'expires_in' => (int) config('auth.access_token_ttl', 600),
+            'expires_in' => (int) config('auth.access_token_ttl', 5400),
             'user' => [
                 'id' => $user->id,
                 'email' => $user->email,
@@ -129,7 +129,7 @@ class AuthController extends TenantApiController
         return response()->json([
             'access_token' => $accessTokens->issue($user, $this->tenantContext()),
             'token_type' => 'Bearer',
-            'expires_in' => (int) config('auth.access_token_ttl', 600),
+            'expires_in' => (int) config('auth.access_token_ttl', 5400),
         ])
             ->header('Cache-Control', 'no-store')
             ->withCookie(cookie('admin_refresh', $newRefreshToken, 60 * 24 * 30, '/', null, app()->isProduction(), true, false, 'lax'))

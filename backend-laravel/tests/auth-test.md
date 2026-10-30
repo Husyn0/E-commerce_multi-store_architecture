@@ -27,7 +27,7 @@ directly from the response without printing the token.
 export ADMIN_CSRF="$(awk '$6 == "admin_csrf" {print $7}' "$ADMIN_JAR")"
 ```
 
-Access tokens expire after the configured TTL (600 seconds by default), so log
+Access tokens expire after the configured TTL (5400 seconds / 90 minutes by default), so log
 in again or refresh before continuing if needed.
 
 ### A2. Reject invalid credentials

@@ -20,7 +20,7 @@ return [
         'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
     ],
 
-    'access_token_ttl' => (int) env('ADMIN_ACCESS_TOKEN_TTL', 600),
+    'access_token_ttl' => (int) env('ADMIN_ACCESS_TOKEN_TTL', 5400),
 
     /*
     |--------------------------------------------------------------------------
