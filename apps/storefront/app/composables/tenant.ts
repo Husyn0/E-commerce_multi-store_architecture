@@ -5,6 +5,12 @@ export interface StoreTenant {
   default_locale: string
   default_currency: string
   host_type: 'storefront'
+  theme_config?: {
+    colors?: Record<string, string>
+    fonts?: { heading?: string; body?: string }
+    logo_url?: string | null
+    layout_variant?: string
+  }
 }
 
 export function useTenant() {

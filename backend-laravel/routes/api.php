@@ -25,6 +25,7 @@ use App\Http\Controllers\Storefront\PaymentMethodController;
 use App\Http\Controllers\Storefront\VerificationController;
 use App\Http\Controllers\Webhooks\PaymentWebhookController;
 use App\Http\Middleware\AuthenticateStorefrontSession;
+use App\Models\TenantSettings;
 use App\Http\Middleware\EnforceConfiguredVerification;
 use App\Http\Middleware\VerifyStorefrontCsrf;
 use App\Tenancy\TenantManager;
@@ -134,6 +135,7 @@ Route::middleware([
         'status' => $tenant->status,
         'default_locale' => $tenant->default_locale,
         'default_currency' => $tenant->default_currency,
+        'theme_config' => TenantSettings::query()->forTenant($tenant->id)->value('theme_config') ?? [],
         'host_type' => $context->hostType,
     ]);
 });

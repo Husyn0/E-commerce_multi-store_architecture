@@ -11,6 +11,20 @@ if (error.value) {
 const route = useRoute()
 const { count, refresh } = useCart()
 const menuOpen = ref(false)
+const themeStyle = computed(() => {
+  const theme = tenant.value?.theme_config || {}
+  const colors = theme.colors || {}
+  return {
+    '--store-primary': colors.primary || '#543c30',
+    '--store-secondary': colors.secondary || '#efe5dc',
+    '--store-accent': colors.accent || '#855b45',
+    '--store-background': colors.background || '#fbfaf7',
+    '--store-text': colors.text || '#24231f',
+    '--store-heading-font': theme.fonts?.heading || 'Playfair Display, Georgia, serif',
+    '--store-body-font': theme.fonts?.body || 'DM Sans, sans-serif',
+  }
+})
+const layoutClass = computed(() => `store-shell--${tenant.value?.theme_config?.layout_variant || 'classic'}`)
 
 onMounted(() => {
   refresh().catch(() => undefined)
@@ -22,10 +36,13 @@ watch(() => route.fullPath, () => {
 </script>
 
 <template>
-  <div class="store-shell">
+  <div class="store-shell" :class="layoutClass" :style="themeStyle">
     <div class="announcement">Thoughtfully chosen goods, made for everyday living.</div>
     <header class="store-header">
-      <NuxtLink class="wordmark" to="/">{{ tenant?.name || 'The Store' }}</NuxtLink>
+      <NuxtLink class="wordmark" to="/">
+        <img v-if="tenant?.theme_config?.logo_url" class="store-logo" :src="tenant.theme_config.logo_url" :alt="tenant?.name || 'Store logo'" />
+        <span v-else>{{ tenant?.name || 'The Store' }}</span>
+      </NuxtLink>
       <button class="menu-toggle" type="button" aria-label="Toggle navigation" @click="menuOpen = !menuOpen">
         {{ menuOpen ? 'Close' : 'Menu' }}
       </button>
