@@ -63,7 +63,7 @@ export default defineEventHandler(async (event) => {
     const cookies = response.headers.getSetCookie?.()
     if (cookies?.length) setResponseHeader(event, 'set-cookie', cookies)
 
-    return response._data
+    return rewriteMediaUrls(response._data)
   } catch (error) {
     console.error('Storefront API proxy request failed.', error)
     throw createError({
@@ -72,3 +72,28 @@ export default defineEventHandler(async (event) => {
     })
   }
 })
+
+function rewriteMediaUrls(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(rewriteMediaUrls)
+  }
+
+  if (!value || typeof value !== 'object') {
+    return value
+  }
+
+  return Object.fromEntries(Object.entries(value).map(([key, entry]) => {
+    if ((key === 'url' || key === 'image_url') && typeof entry === 'string') {
+      try {
+        const url = new URL(entry, 'http://storefront.local')
+        if (url.pathname.startsWith('/storage/tenants/')) {
+          return [key, `/media/${url.pathname.slice('/storage/'.length)}${url.search}${url.hash}`]
+        }
+      } catch {
+        return [key, entry]
+      }
+    }
+
+    return [key, rewriteMediaUrls(entry)]
+  }))
+}
