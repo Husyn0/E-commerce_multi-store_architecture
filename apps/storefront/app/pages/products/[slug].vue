@@ -33,6 +33,8 @@ if (error.value) {
 }
 const product = computed(() => response.value ? unwrapResource(response.value) : null)
 const selectedVariant = ref('')
+const activeMediaIndex = ref(0)
+const mediaTrack = ref<HTMLElement | null>(null)
 const quantity = ref(1)
 const pending = ref(false)
 const message = ref('')
@@ -50,6 +52,18 @@ watch(product, (item) => {
   const firstVariant = item?.variants[0]
   if (firstVariant) selectedVariant.value = firstVariant.id
 }, { immediate: true })
+
+function selectMedia(index: number) {
+  const media = product.value?.images[index]
+  if (!media) return
+  activeMediaIndex.value = index
+  mediaTrack.value?.children[index]?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' })
+}
+
+function updateActiveMedia(event: Event) {
+  const track = event.currentTarget as HTMLElement
+  activeMediaIndex.value = Math.round(track.scrollLeft / track.clientWidth)
+}
 
 async function addToBag() {
   if (!product.value || available.value < 1 || (product.value.variants.length && !selectedVariant.value)) return
@@ -75,10 +89,24 @@ useSeoMeta({
   <section v-if="product" class="product-detail">
     <div class="product-detail__visual">
       <div v-if="product.images.length" class="product-detail__gallery">
-        <template v-for="media in product.images" :key="media.id">
-          <video v-if="media.media_type === 'video'" :src="media.url" controls playsinline preload="metadata" />
-          <img v-else :src="media.url" :alt="media.alt_text || product.title">
-        </template>
+        <div ref="mediaTrack" class="product-detail__gallery-track" @scroll.passive="updateActiveMedia">
+          <div v-for="media in product.images" :key="media.id" class="product-detail__gallery-slide">
+            <video v-if="media.media_type === 'video'" :src="media.url" controls playsinline preload="metadata" />
+            <img v-else :src="media.url" :alt="media.alt_text || product.title">
+          </div>
+        </div>
+        <div v-if="product.images.length > 1" class="product-detail__gallery-controls">
+          <button type="button" aria-label="Previous product image" :disabled="activeMediaIndex === 0" @click="selectMedia(activeMediaIndex - 1)">←</button>
+          <span>{{ activeMediaIndex + 1 }} / {{ product.images.length }}</span>
+          <button type="button" aria-label="Next product image" :disabled="activeMediaIndex >= product.images.length - 1" @click="selectMedia(activeMediaIndex + 1)">→</button>
+        </div>
+        <div v-if="product.images.length > 1" class="product-detail__thumbnails" aria-label="Choose product image">
+          <button v-for="(media, index) in product.images" :key="`thumb-${media.id}`" type="button" :aria-label="`Show product media ${index + 1}`" :aria-current="activeMediaIndex === index ? 'true' : undefined" @click="selectMedia(index)">
+            <video v-if="media.media_type === 'video'" :src="media.url" muted preload="metadata" />
+            <img v-else :src="media.url" :alt="media.alt_text || `${product.title} ${index + 1}`">
+            <span v-if="media.media_type === 'video'" aria-hidden="true">▶</span>
+          </button>
+        </div>
       </div>
       <div v-else class="product-placeholder product-placeholder--detail"><span>{{ product.title.slice(0, 1) }}</span></div>
       <span class="image-caption">A closer look</span>

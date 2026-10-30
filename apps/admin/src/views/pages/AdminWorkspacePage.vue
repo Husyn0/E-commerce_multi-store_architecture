@@ -75,7 +75,7 @@ const productForm = reactive({
   media_files: [],
   images: [],
 })
-const categoryForm = reactive({ id: '', parent_id: '', name: '', slug: '', position: 0, is_active: true, icon: '', image_url: '', image_file: null })
+const categoryForm = reactive({ id: '', parent_id: '', name: '', slug: '', position: 0, is_active: true, icon: '', image_url: '', image_file: null, remove_image: false })
 const settingsForm = reactive({
   name: '',
   default_locale: '',
@@ -254,7 +254,7 @@ function newProduct() {
 }
 
 function newCategory() {
-  Object.assign(categoryForm, { id: '', parent_id: '', name: '', slug: '', position: 0, is_active: true, icon: '', image_url: '', image_file: null })
+  Object.assign(categoryForm, { id: '', parent_id: '', name: '', slug: '', position: 0, is_active: true, icon: '', image_url: '', image_file: null, remove_image: false })
   showCategoryForm.value = true
 }
 
@@ -269,6 +269,7 @@ function editCategory(category) {
     icon: category.icon || '',
     image_url: category.image_url || '',
     image_file: null,
+    remove_image: false,
   })
   showCategoryForm.value = true
 }
@@ -339,6 +340,7 @@ async function saveCategory() {
       is_active: categoryForm.is_active,
       icon: categoryForm.icon || null,
     }
+    if (categoryForm.remove_image) body.image_url = null
     if (categoryForm.id) {
       await api.patch(`/admin/categories/${categoryForm.id}`, body)
     } else {
@@ -350,7 +352,7 @@ async function saveCategory() {
       form.append('image', categoryForm.image_file)
       await api.upload(`/admin/categories/${categoryForm.id}/image`, form)
     }
-    Object.assign(categoryForm, { id: '', parent_id: '', name: '', slug: '', position: 0, is_active: true, icon: '', image_url: '', image_file: null })
+    Object.assign(categoryForm, { id: '', parent_id: '', name: '', slug: '', position: 0, is_active: true, icon: '', image_url: '', image_file: null, remove_image: false })
     showCategoryForm.value = false
     notice.value = updating ? 'Category updated.' : 'Category created.'
     await loadSection(1, true)
