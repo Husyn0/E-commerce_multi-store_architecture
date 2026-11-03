@@ -33,6 +33,9 @@
   .store-nav a { padding: 12px 3px; border-bottom: 1px solid #eeece6; }
   .store-nav a:last-child { border-bottom: 0; }
   .store-nav .appearance-toggle { align-self: flex-start; margin-top: 10px; }
+  .discover-filters { align-items: stretch; flex-direction: column; gap: 11px; }
+  .category-filter { flex-basis: auto; }
+  .category-filter__trigger { min-height: 46px; }
   .cart-link span { margin-left: auto; }
   .hero { display: flex; flex-direction: column; gap: 27px; padding: 46px 20px 23px; }
   .hero__copy { padding: 0; }
