@@ -20,6 +20,11 @@ interface Product {
   images: { id: string; url: string; alt_text: string | null; media_type?: 'image' | 'video' }[]
   variants: Variant[]
 }
+interface Category {
+  id: string
+  name: string
+  slug: string
+}
 
 const route = useRoute()
 const api = useStorefrontApi()
@@ -32,6 +37,28 @@ if (error.value) {
   throw createError({ statusCode: status === 404 ? 404 : 503, statusMessage: status === 404 ? 'Product not found.' : 'Product unavailable.' })
 }
 const product = computed(() => response.value ? unwrapResource(response.value) : null)
+const { data: relatedCatalog } = await useAsyncData(`storefront-related-products-${slug}`, async () => {
+  const currentProduct = product.value
+  if (!currentProduct?.category_id) return { category: null as Category | null, products: [] as Product[] }
+
+  try {
+    const categoriesResponse = await api.get<{ data: Category[] }>('catalog/categories')
+    const category = unwrapResource(categoriesResponse).find((item) => item.id === currentProduct.category_id) || null
+    if (!category) return { category: null, products: [] as Product[] }
+
+    const productsResponse = await api.get<{ data: Product[] }>('catalog/products', {
+      category: category.slug,
+      per_page: 8,
+    })
+    const products = unwrapResource(productsResponse)
+      .filter((item) => item.id !== currentProduct.id)
+      .slice(0, 4)
+
+    return { category, products }
+  } catch {
+    return { category: null, products: [] as Product[] }
+  }
+})
 const selectedVariant = ref('')
 const activeMediaIndex = ref(0)
 const mediaTrack = ref<HTMLElement | null>(null)
@@ -144,6 +171,23 @@ useSeoMeta({
       </button>
       <p v-if="message" class="inline-message" role="status">{{ message }}</p>
       <div class="product-promise"><span>◇</span><p>Good design, made to be part of your everyday.</p></div>
+    </div>
+  </section>
+
+  <section v-if="relatedCatalog?.products.length" class="section related-products">
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">{{ relatedCatalog.category?.name || 'From this collection' }}</span>
+        <h2>You may also like</h2>
+      </div>
+      <NuxtLink
+        v-if="relatedCatalog.category"
+        class="underlined-link"
+        :to="`/categories/${relatedCatalog.category.slug}`"
+      >View collection <span>↗</span></NuxtLink>
+    </div>
+    <div class="product-grid">
+      <ProductCard v-for="relatedProduct in relatedCatalog.products" :key="relatedProduct.id" :product="relatedProduct" />
     </div>
   </section>
 </template>
