@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Oct 30, 2026 at 07:55 PM
+-- Generation Time: Nov 03, 2026 at 07:30 AM
 -- Server version: 8.0.46-0ubuntu0.24.04.4
 -- PHP Version: 8.3.6
 
@@ -191,7 +191,12 @@ INSERT INTO `audit_logs` (`id`, `tenant_id`, `actor_id`, `action`, `entity_type`
 ('01a18e4c-459b-7176-afe6-3f66b63ffb70', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'category.image.updated', 'category', '01a18bf9-e431-738c-b5c5-5ae961ce7763', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:32:05'),
 ('01a18e52-11a4-7025-bf3f-b15fe5c2f54b', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:38:25'),
 ('01a18e54-a890-7100-b6f0-381c4c8eb8bf', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'settings.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', '{\"fields\": [\"name\", \"default_locale\", \"require_email_verification\", \"require_phone_verification\"]}', '127.0.0.1', '2026-10-30 19:41:15'),
-('01a18e56-aacd-7164-b46d-5cdb395e57c5', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:43:26');
+('01a18e56-aacd-7164-b46d-5cdb395e57c5', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-10-30 19:43:26'),
+('01a19b92-b794-7343-8566-d34e182a5e3e', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'settings.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', '{\"fields\": [\"name\", \"default_locale\", \"require_email_verification\", \"require_phone_verification\"]}', '127.0.0.1', '2026-11-02 09:24:06'),
+('01a19b96-e1bd-7386-843c-2e67a6453582', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-11-02 09:28:39'),
+('01a19b97-3452-727b-b404-8eef0604c122', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'theme.updated', 'tenant_settings', '01a18213-a8a2-710b-8805-48af78d69710', 'web', 'admin', NULL, '127.0.0.1', '2026-11-02 09:29:00'),
+('01a19b9a-efcb-70a2-90bb-e95956f8963d', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'customer.suspended', 'user', '01a18d28-023e-70b9-96b0-4ffd51bdcb5d', 'web', 'admin', '{\"status\": \"suspended\"}', '127.0.0.1', '2026-11-02 09:33:04'),
+('01a19b9b-db55-716d-922c-0efdbe8878ae', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'customer.updated', 'user', '01a18d28-023e-70b9-96b0-4ffd51bdcb5d', 'web', 'admin', '{\"status\": \"active\"}', '127.0.0.1', '2026-11-02 09:34:05');
 
 -- --------------------------------------------------------
 
@@ -217,8 +222,9 @@ CREATE TABLE `carts` (
 INSERT INTO `carts` (`id`, `tenant_id`, `user_id`, `session_token_hash`, `currency`, `expires_at`, `created_at`, `updated_at`) VALUES
 ('01a1823b-06d5-7134-9ad0-58422c5d0dbf', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 0xbb9cd3b9c9e2420ffe6d3833cdb62407ab8865fd04e25420cfee07a72a3d375e, 'USD', '2026-11-27 09:17:48', '2026-10-28 09:17:48', '2026-10-28 09:17:48'),
 ('01a188a5-63df-73d6-9159-02d58db738b5', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 0x4b9a6fdb62db817e0ea244886df5f3e7f0a42fc1027a6d6f69253fed0d793884, 'USD', '2026-11-28 15:11:42', '2026-10-29 15:11:42', '2026-10-29 15:11:42'),
-('01a18be3-195c-727e-9121-b65092c31ea0', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d28-023e-70b9-96b0-4ffd51bdcb5d', NULL, 'USD', '2026-11-29 17:38:29', '2026-10-30 06:17:58', '2026-10-30 17:38:29'),
-('01a18cf4-60f9-7114-a1eb-721a39c2c9ea', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 0x1889a49427998e31c3ad8cfbb1da80eb9835d9244277a862be1a0d769ced1468, 'USD', '2026-11-29 11:16:28', '2026-10-30 11:16:28', '2026-10-30 11:16:28');
+('01a18be3-195c-727e-9121-b65092c31ea0', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d28-023e-70b9-96b0-4ffd51bdcb5d', NULL, 'USD', '2026-12-02 07:31:07', '2026-10-30 06:17:58', '2026-11-02 07:31:07'),
+('01a18cf4-60f9-7114-a1eb-721a39c2c9ea', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 0x1889a49427998e31c3ad8cfbb1da80eb9835d9244277a862be1a0d769ced1468, 'USD', '2026-11-29 11:16:28', '2026-10-30 11:16:28', '2026-10-30 11:16:28'),
+('01a19b9c-1c87-7153-8dc4-09f0da3e64c5', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', NULL, 0xbb99d7ebcc49b0d5592de2496be0f31a2abfb855d5da06b0c81f7704f847672b, 'USD', '2026-12-02 07:34:21', '2026-11-02 07:34:21', '2026-11-02 07:34:21');
 
 -- --------------------------------------------------------
 
@@ -336,7 +342,7 @@ CREATE TABLE `orders` (
   `user_id` char(36) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL,
   `status` enum('pending','processing','shipped','delivered','cancelled') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
   `payment_status` enum('requires_payment','processing','succeeded','failed','refunded') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'requires_payment',
-  `payment_provider` enum('demo','stripe','cash_on_delivery') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `payment_provider` enum('demo','stripe') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `payment_intent_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `checkout_idempotency_key` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `checkout_request_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
@@ -551,7 +557,7 @@ CREATE TABLE `tenants` (
 --
 
 INSERT INTO `tenants` (`id`, `name`, `subdomain`, `custom_domain`, `status`, `default_currency`, `default_locale`, `created_at`, `updated_at`) VALUES
-('6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'Shop', 'shop', NULL, 'active', 'USD', 'en', '2026-10-28 08:34:48', '2026-10-30 17:41:15');
+('6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'VIOLET', 'shop', NULL, 'active', 'USD', 'en', '2026-10-28 08:34:48', '2026-11-02 07:24:06');
 
 -- --------------------------------------------------------
 
@@ -579,7 +585,7 @@ CREATE TABLE `tenant_settings` (
 --
 
 INSERT INTO `tenant_settings` (`id`, `tenant_id`, `theme_config`, `payment_driver`, `verification_driver`, `human_check_driver`, `email_provider`, `sms_provider`, `stripe_account_id`, `require_email_verification`, `require_phone_verification`, `updated_at`) VALUES
-('01a18213-a8a2-710b-8805-48af78d69710', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '{\"fonts\": {\"body\": \"Arial\", \"heading\": \"Times New Roman\"}, \"colors\": {\"text\": \"#202a27\", \"accent\": \"#b77a52\", \"primary\": \"#315c55\", \"secondary\": \"#e7f0ec\", \"background\": \"#ffffff\"}, \"logo_url\": null, \"layout_variant\": \"editorial\"}', 'demo', 'demo', 'demo', 'smtp', 'log', NULL, 1, 0, '2026-10-30 19:43:26');
+('01a18213-a8a2-710b-8805-48af78d69710', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '{\"fonts\": {\"body\": \"Arial\", \"heading\": \"Times New Roman\"}, \"colors\": {\"text\": \"#202431\", \"accent\": \"#cf5b46\", \"primary\": \"#293b68\", \"secondary\": \"#edf0f8\", \"background\": \"#ffffff\"}, \"logo_url\": null, \"layout_variant\": \"editorial\"}', 'demo', 'demo', 'demo', 'smtp', 'log', NULL, 1, 0, '2026-11-02 09:29:00');
 
 -- --------------------------------------------------------
 
@@ -609,8 +615,8 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `tenant_id`, `email`, `email_verified_at`, `phone`, `phone_verified_at`, `password_hash`, `first_name`, `last_name`, `role`, `status`, `last_login_at`, `created_at`, `updated_at`) VALUES
-('01a18d28-023e-70b9-96b0-4ffd51bdcb5d', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'mr.hussein.ceng@gmail.com', '2026-10-30 12:12:51', '+96181121843', NULL, '$2y$12$WJlatnXjiBuS1QXXVPJ.7uqSoj5Zqt/OwY0Rk0uQqhzTnCV.gId7C', 'Husyn', 'Azzam', 'customer', 'active', '2026-10-30 12:34:27', '2026-10-30 12:12:51', '2026-10-30 16:05:34'),
-('e94ac131-ed1a-4f68-9d2a-806384f4c38d', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'admin@example.test', NULL, NULL, NULL, '$2y$12$1U6VQenOA.6.9.cYJC5FY.NzTPi41EU4odXp/DElocZsp7Hd67WDi', NULL, NULL, 'admin', 'active', '2026-10-30 17:46:57', '2026-10-28 08:34:49', '2026-10-30 17:46:57');
+('01a18d28-023e-70b9-96b0-4ffd51bdcb5d', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'mr.hussein.ceng@gmail.com', '2026-10-30 12:12:51', '+96181121843', NULL, '$2y$12$WJlatnXjiBuS1QXXVPJ.7uqSoj5Zqt/OwY0Rk0uQqhzTnCV.gId7C', 'Husyn', 'Azzam', 'customer', 'active', '2026-10-30 12:34:27', '2026-10-30 12:12:51', '2026-11-02 07:34:05'),
+('e94ac131-ed1a-4f68-9d2a-806384f4c38d', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'admin@example.test', NULL, NULL, NULL, '$2y$12$1U6VQenOA.6.9.cYJC5FY.NzTPi41EU4odXp/DElocZsp7Hd67WDi', NULL, NULL, 'admin', 'active', '2026-11-02 07:15:41', '2026-10-28 08:34:49', '2026-11-02 07:15:41');
 
 -- --------------------------------------------------------
 
@@ -681,7 +687,7 @@ INSERT INTO `user_sessions` (`id`, `tenant_id`, `user_id`, `session_type`, `toke
 ('01a18d12-a5d2-7026-9c5b-8f43c715ff28', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x49a6696dd4ebfc7bf9cac0a4d2c4df1e0f75fad21f34f7f03b72a7a27eb7047f, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 11:49:31', '2026-10-30 11:49:31', NULL, '2026-10-30 13:49:31'),
 ('01a18d13-19bf-7097-8a78-b031aa2a9b7c', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xc3f8aa48b0bf7cd54f3791b3a329a8300b6b52e426efd5cbf46c2fd480ead5c2, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 11:50:01', '2026-10-30 11:50:01', '2026-10-30 12:39:07', '2026-10-30 13:50:01'),
 ('01a18d28-0241-7244-90f7-f9db99117426', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d28-023e-70b9-96b0-4ffd51bdcb5d', 'storefront', 0x9fae64cf2daa93fd9d2d52bb59674ae10ba50acf0b43bc334f1976d66fb39982, 'node', '127.0.0.1', '2026-11-29 12:12:51', '2026-10-30 12:13:35', '2026-10-30 12:13:45', '2026-10-30 14:12:51'),
-('01a18d3b-c73f-71d2-97ad-91ba48c15827', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d28-023e-70b9-96b0-4ffd51bdcb5d', 'storefront', 0xe27e135c7be07a2e697462b790dc2e07ede984949dafe0b6213787d4c64c850f, 'node', '127.0.0.1', '2026-11-29 12:34:27', '2026-10-30 17:38:29', NULL, '2026-10-30 14:34:27'),
+('01a18d3b-c73f-71d2-97ad-91ba48c15827', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', '01a18d28-023e-70b9-96b0-4ffd51bdcb5d', 'storefront', 0xe27e135c7be07a2e697462b790dc2e07ede984949dafe0b6213787d4c64c850f, 'node', '127.0.0.1', '2026-11-29 12:34:27', '2026-11-02 07:32:27', '2026-11-02 07:33:04', '2026-10-30 14:34:27'),
 ('01a18d40-0e71-733e-82ac-360b7cddac69', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x0e75254306ee6cedeaa942dc45029ee787ac9b2f2f1793e68cf1b3213273efb5, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 12:39:07', '2026-10-30 12:39:07', NULL, '2026-10-30 14:39:07'),
 ('01a18d40-816f-71ff-b9e3-a6b30f03f991', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x12984afcafef553929dc02878f54e5f8df804550190e897f2dacf453917fdda4, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 12:39:37', '2026-10-30 12:39:37', '2026-10-30 12:45:40', '2026-10-30 14:39:37'),
 ('01a18d49-b56d-7091-b65d-7b86b54592e4', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xf124a15a4fb158cb12e26b486527216d0090711873c5e09f7719340d5b57dcc6, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 12:49:40', '2026-10-30 12:49:40', '2026-10-30 13:06:51', '2026-10-30 14:49:40'),
@@ -695,7 +701,13 @@ INSERT INTO `user_sessions` (`id`, `tenant_id`, `user_id`, `session_type`, `toke
 ('01a18e51-e29e-716e-ad2c-6fc4316594c3', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xfd7f8773e2c8c6ba3d96fe8e5d7f7cfe91b587297e7ea9f01987412da867985c, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 17:38:13', '2026-10-30 17:38:13', '2026-10-30 17:39:43', '2026-10-30 19:38:13'),
 ('01a18e54-7cfd-734c-8326-a50be6a9ef13', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x307bfe9f66a8445a72703d061764b41d4f7c96f9168af65f3032d9782424e934, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 17:41:04', '2026-10-30 17:41:04', '2026-10-30 17:46:43', '2026-10-30 19:41:04'),
 ('01a18e59-ab97-70bc-b0a8-bdfdb3daf554', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x07eb47a19ec9bcebd1d4e30277121098adbaedde343b4a5b96079b15840bcddb, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 17:46:43', '2026-10-30 17:46:43', NULL, '2026-10-30 19:46:43'),
-('01a18e59-e2ae-726c-9911-cc203a81e722', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xd96d07d5eed9c0d49137b250334124b0ec19a7da6a01324dd2c708755fc910ce, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 17:46:57', '2026-10-30 17:46:57', NULL, '2026-10-30 19:46:57');
+('01a18e59-e2ae-726c-9911-cc203a81e722', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xd96d07d5eed9c0d49137b250334124b0ec19a7da6a01324dd2c708755fc910ce, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 17:46:57', '2026-10-30 17:46:57', '2026-10-30 18:01:04', '2026-10-30 19:46:57'),
+('01a18e66-ce1a-727c-a71c-a9b3180fa82e', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x452b8f4e39ecf17efe5d61c10f122eb780f8094c4a576177e0f7d98370e814ad, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 18:01:04', '2026-10-30 18:01:04', NULL, '2026-10-30 20:01:04'),
+('01a18e67-1001-73f1-8556-91cbc20bb7c2', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x7a2145859c8e90807ab79622e8f3fddc1b9da0f1e17ffc6e2b3c2e68ebec5843, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 18:01:21', '2026-10-30 18:01:21', '2026-10-30 18:01:26', '2026-10-30 20:01:21'),
+('01a18e67-24d9-718d-bbf7-524063ba9a45', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x34b27babc363939077b86044423fd04ca205af32164749355735434c17a87f7f, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 18:01:26', '2026-10-30 18:01:26', NULL, '2026-10-30 20:01:26'),
+('01a18e8f-13da-737f-9f97-f2b073207c53', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0x82ee1706f759c4a21a693993a1b19b439b950af80152180b456265a01322263a, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-11-29 18:45:03', '2026-10-30 18:45:03', '2026-11-02 07:14:28', '2026-10-30 20:45:03'),
+('01a19b89-e5e9-738b-9954-cbca4c87cef8', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xd845d0c43377c112be8cc2277f2a7e57b7521dea6f6c72d26178e4d2ec03c71e, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-12-02 07:14:28', '2026-11-02 07:14:28', NULL, '2026-11-02 09:14:28'),
+('01a19b8b-02d7-7217-9076-95631aa506a5', '6b6641e4-180a-42dc-9ec8-488d802f7bf2', 'e94ac131-ed1a-4f68-9d2a-806384f4c38d', 'admin_refresh', 0xe73d222500b4f8e99602c762427e64df553533b491dda2294f7fc2d3739b1a45, 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:158.0) Gecko/20100101 Firefox/158.0', '127.0.0.1', '2026-12-02 07:15:41', '2026-11-02 07:15:41', NULL, '2026-11-02 09:15:41');
 
 -- --------------------------------------------------------
 

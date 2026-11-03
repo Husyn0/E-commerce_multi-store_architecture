@@ -64,7 +64,7 @@ a { color: inherit; }
 }
 
 .admin-shell { min-height: 100vh; display: grid; grid-template-columns: 248px minmax(0, 1fr); }
-.sidebar { display: flex; flex-direction: column; min-height: 100vh; padding: 24px 16px; background: #fff; border-right: 1px solid var(--line); }
+.sidebar { position: fixed; inset: 0 auto 0 0; z-index: 20; display: flex; flex-direction: column; width: 248px; height: 100vh; overflow-y: auto; padding: 24px 16px; background: #fff; border-right: 1px solid var(--line); }
 .brand { display: flex; align-items: center; gap: 11px; padding: 2px 9px 26px; font-size: 17px; font-weight: 750; letter-spacing: -.03em; }
 .brand-mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 10px; color: white; background: var(--accent); font-size: 15px; }
 .tenant-chip { display: flex; align-items: center; gap: 10px; padding: 12px; margin-bottom: 24px; border: 1px solid var(--line); border-radius: 10px; }
@@ -81,7 +81,7 @@ a { color: inherit; }
 .sidebar-bottom { margin-top: auto; padding: 16px 8px 0; border-top: 1px solid var(--line); }
 .admin-email { overflow: hidden; color: var(--muted); font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 
-.main-area { min-width: 0; }
+.main-area { grid-column: 2; min-width: 0; }
 .topbar { display: flex; justify-content: flex-end; align-items: center; min-height: 68px; padding: 0 36px; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.72); }
 .topbar-meta { color: var(--muted); font-size: 12px; }
 .page-wrap { width: min(1200px, 100%); margin: 0 auto; padding: 34px 38px 56px; }
@@ -305,7 +305,8 @@ a { color: inherit; }
 
 @media (max-width: 850px) {
   .admin-shell { grid-template-columns: 1fr; }
-  .sidebar { min-height: auto; padding: 13px 14px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .sidebar { position: static; grid-column: 1; width: auto; height: auto; min-height: auto; overflow: visible; padding: 13px 14px; border-right: 0; border-bottom: 1px solid var(--line); }
+  .main-area { grid-column: 1; }
   .brand { padding: 2px 5px 12px; }
   .tenant-chip, .nav-caption, .sidebar-bottom { display: none; }
   .nav-list { display: flex; overflow-x: auto; padding-bottom: 3px; }
