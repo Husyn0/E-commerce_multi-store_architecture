@@ -1,0 +1,40 @@
+:root {
+  font-family: 'DM Sans', sans-serif;
+  color: #24231f;
+  background: #fbfaf7;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --ink: #24231f;
+  --muted: #818078;
+  --line: #e9e6de;
+  --paper: #fbfaf7;
+  --white: #fff;
+  --accent: #855b45;
+  --accent-dark: #543c30;
+  --accent-soft: #efe5dc;
+  --danger: #a84538;
+  --success: #356a4a;
+  --serif: 'Playfair Display', Georgia, serif;
+  --page: 1320px;
+}
+
+* { box-sizing: border-box; }
+
+.store-shell {
+  min-height: 100vh;
+  color: var(--store-text, var(--ink));
+  background: var(--store-background, var(--paper));
+  font-family: var(--store-body-font, 'DM Sans', sans-serif);
+}
+.store-shell { --ink: var(--store-text, #24231f); --paper: var(--store-background, #fbfaf7); --accent: var(--store-accent, #855b45); --accent-dark: var(--store-primary, #543c30); --accent-soft: var(--store-secondary, #efe5dc); --serif: var(--store-heading-font, 'Playfair Display', Georgia, serif); }
+.store-logo { max-width: 180px; max-height: 44px; object-fit: contain; }
+
+html { scroll-behavior: smooth; }
+body { margin: 0; min-width: 320px; min-height: 100vh; }
+button, input, select { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+button { cursor: pointer; }
+button:disabled { opacity: .58; cursor: not-allowed; }
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }

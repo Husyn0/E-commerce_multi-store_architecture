@@ -1,0 +1,15 @@
+.account-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 15px; }
+.account-card { display: flex; flex-direction: column; align-items: flex-start; min-height: 225px; padding: 23px; border: 1px solid var(--line); background: #fff; }
+.account-card--orders { color: white; background: #534339; }
+.account-card--orders .eyebrow, .account-card--orders p { color: #d6c9bc; }
+.account-card--orders .account-card__link { color: #fff; }
+.account-card__icon { margin-bottom: 25px; font-size: 16px; }
+.account-card h2 { margin: 8px 0 6px; font-family: var(--serif); font-size: 22px; font-weight: 500; }
+.account-card p { margin: 0 0 6px; color: #77746e; font-size: 10px; line-height: 1.7; }
+.account-card__link { margin-top: auto; padding-top: 19px; color: var(--accent); font-size: 10px; font-weight: 600; }
+.account-actions { display: flex; gap: 25px; margin-top: 25px; }
+.account-actions .text-action { color: #8b8075; }
+.profile-form { max-width: 600px; padding: 26px; border: 1px solid var(--line); background: #fff; }
+.profile-form__row { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+.form-footer { display: flex; justify-content: flex-end; align-items: center; gap: 20px; padding-top: 7px; }
+.form-footer .button { min-height: 42px; }
