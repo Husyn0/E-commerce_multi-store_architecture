@@ -84,8 +84,10 @@ const productForm = reactive({
   slug: '',
   description: '',
   sku: '',
-  price_cents: 0,
-  compare_at_price_cents: '',
+  price: 0,
+  compare_at_price: '',
+  variants: [],
+  removed_variant_ids: [],
   category_id: '',
   is_active: true,
   published_at: '',
@@ -271,8 +273,23 @@ function editProduct(product) {
     slug: product.slug,
     description: product.description,
     sku: product.sku || '',
-    price_cents: product.price_cents,
-    compare_at_price_cents: product.compare_at_price_cents ?? '',
+    price: priceFromMinorUnits(product.price_cents),
+    compare_at_price: product.compare_at_price_cents === null ? '' : priceFromMinorUnits(product.compare_at_price_cents),
+    variants: (product.variants || []).map((variant) => {
+      const attributes = variant.attributes || {}
+      const colorKey = Object.keys(attributes).find((key) => key.toLowerCase() === 'color')
+      const sizeKey = Object.keys(attributes).find((key) => key.toLowerCase() === 'size')
+      return {
+        id: variant.id,
+        sku: variant.sku || '',
+        color: colorKey ? attributes[colorKey] : '',
+        size: sizeKey ? attributes[sizeKey] : '',
+        attributes: { ...attributes },
+        price: priceFromMinorUnits(variant.price_cents),
+        stock: variant.stock,
+      }
+    }),
+    removed_variant_ids: [],
     category_id: product.category_id || '',
     is_active: product.is_active,
     published_at: product.published_at || '',
@@ -284,10 +301,22 @@ function editProduct(product) {
 
 function newProduct() {
   Object.assign(productForm, {
-    id: '', title: '', slug: '', description: '', sku: '', price_cents: 0,
-    compare_at_price_cents: '', category_id: '', is_active: true, published_at: '', media_files: [], images: [],
+    id: '', title: '', slug: '', description: '', sku: '', price: 0,
+    compare_at_price: '', variants: [], removed_variant_ids: [], category_id: '', is_active: true, published_at: '', media_files: [], images: [],
   })
   showProductForm.value = true
+}
+
+function addProductVariant() {
+  productForm.variants.push({
+    id: '', sku: '', color: '', size: '', attributes: {},
+    price: Number(productForm.price) || 0, stock: 0,
+  })
+}
+
+function removeProductVariant(index) {
+  const [variant] = productForm.variants.splice(index, 1)
+  if (variant?.id) productForm.removed_variant_ids.push(variant.id)
 }
 
 function newCategory() {
@@ -312,6 +341,15 @@ function editCategory(category) {
 }
 
 async function saveProduct() {
+  const invalidVariant = productForm.variants.find((variant) =>
+    !variant.sku.trim() ||
+    (!variant.color.trim() && !variant.size.trim() && !Object.keys(variant.attributes || {}).length)
+  )
+  if (invalidVariant) {
+    error.value = 'Each variant needs a SKU and at least one option, such as a color or size.'
+    return
+  }
+
   busy.value = true
   resetFeedback()
   try {
@@ -320,8 +358,8 @@ async function saveProduct() {
       slug: productForm.slug,
       description: productForm.description,
       sku: productForm.sku || null,
-      price_cents: Number(productForm.price_cents),
-      compare_at_price_cents: productForm.compare_at_price_cents === '' ? null : Number(productForm.compare_at_price_cents),
+      price_cents: priceToMinorUnits(productForm.price),
+      compare_at_price_cents: productForm.compare_at_price === '' ? null : priceToMinorUnits(productForm.compare_at_price),
       category_id: productForm.category_id || null,
       is_active: productForm.is_active,
       published_at: productForm.published_at
@@ -338,6 +376,39 @@ async function saveProduct() {
       const form = new FormData()
       form.append('file', file)
       await api.upload(`/admin/products/${productForm.id}/images`, form)
+    }
+    for (const variant of productForm.variants) {
+      const attributes = { ...(variant.attributes || {}) }
+      for (const key of Object.keys(attributes)) {
+        if (key.toLowerCase() === 'color' || key.toLowerCase() === 'size') delete attributes[key]
+      }
+      if (variant.color.trim()) attributes.Color = variant.color.trim()
+      if (variant.size.trim()) attributes.Size = variant.size.trim()
+      const otherAttributes = Object.entries(attributes)
+        .filter(([key]) => key.toLowerCase() !== 'color' && key.toLowerCase() !== 'size')
+        .map(([, value]) => value)
+      const name = [variant.color.trim(), variant.size.trim(), ...otherAttributes]
+        .filter(Boolean)
+        .join(' / ')
+      const variantBody = {
+        sku: variant.sku.trim(),
+        name,
+        attributes,
+        price_cents: priceToMinorUnits(variant.price),
+        stock: Number(variant.stock),
+      }
+      if (variant.id) {
+        await api.patch(`/admin/products/${productForm.id}/variants/${variant.id}`, variantBody)
+      } else {
+        const created = await api.post(`/admin/products/${productForm.id}/variants`, variantBody)
+        const savedVariant = (created.data?.variants || created.variants || []).find((item) => item.sku === variantBody.sku)
+        if (savedVariant) variant.id = savedVariant.id
+      }
+    }
+    while (productForm.removed_variant_ids.length) {
+      const variantId = productForm.removed_variant_ids[0]
+      await api.delete(`/admin/products/${productForm.id}/variants/${variantId}`)
+      productForm.removed_variant_ids.shift()
     }
     showProductForm.value = false
     notice.value = 'Product saved.'
@@ -700,6 +771,7 @@ provide('adminWorkspace', {
   description, previewColors, auditCursor, nextAuditCursor, auditPage, auditLimit, resetFeedback,
   loadSection, searchTable, changePageSize, removeProduct, removeProductImage, openOrder, openCustomer, editProduct, newProduct,
   newCategory, editCategory, saveProduct, saveCategory, removeCategory,
+  addProductVariant, removeProductVariant,
   saveSettings, saveTheme, uploadHeroImage, formatLocalDateTime, updateOrderStatus, startRefund,
   submitRefund, updateInventory, toggleCustomer, searchCustomers, filterAudit, previousAuditPage, changeAuditLimit,
   nextAuditPage, resetAuditFilters, money, formatAddress, productVisibility,

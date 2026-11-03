@@ -1,0 +1,20 @@
+.variant-editor { gap: 12px; }
+.variant-editor__heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.variant-editor__heading > div { display: grid; gap: 4px; }
+.variant-editor__heading strong { color: var(--ink); font-size: 12px; }
+.variant-editor__heading small, .variant-empty { color: var(--muted); font-size: 11px; line-height: 1.5; }
+.variant-empty { margin: 0; }
+.variant-row { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)) auto; align-items: end; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: #fcfcfa; }
+.variant-row .field { gap: 5px; }
+.variant-row .field > span { color: #5e5c57; font-size: 10px; font-weight: 650; }
+.variant-row__remove { min-height: 38px; white-space: nowrap; }
+
+@container (max-width: 760px) {
+  .variant-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .variant-row__remove { justify-self: start; }
+}
+
+@container (max-width: 440px) {
+  .variant-editor__heading { align-items: flex-start; flex-direction: column; }
+  .variant-row { grid-template-columns: minmax(0, 1fr); }
+}

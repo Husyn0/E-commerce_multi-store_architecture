@@ -17,12 +17,27 @@ export default defineComponent({
         <div class="form-grid">
           <div class="field"><label for="product-title">Title</label><input id="product-title" v-model.trim="productForm.title" maxlength="240" required /></div>
           <div class="field"><label for="product-slug">Slug</label><input id="product-slug" v-model.trim="productForm.slug" maxlength="240" required /></div>
-          <div class="field"><label for="product-sku">SKU</label><input id="product-sku" v-model.trim="productForm.sku" maxlength="100" /></div>
-          <div class="field"><label for="product-price">Price (minor currency units)</label><input id="product-price" v-model.number="productForm.price_cents" type="number" min="0" step="1" required /></div>
-          <div class="field"><label for="product-compare">Compare-at price (minor units)</label><input id="product-compare" v-model="productForm.compare_at_price_cents" type="number" min="0" step="1" /></div>
+          <div class="field"><label for="product-sku">SKU</label><input id="product-sku" v-model.trim="productForm.sku" maxlength="100" /><small>Internal stock code used to identify this product. Shoppers won’t see it.</small></div>
+          <div class="field"><label for="product-price">Selling price (minor units)</label><input id="product-price" v-model.number="productForm.price_cents" type="number" min="0" step="1" required /><small>Enter the amount in the store currency’s smallest unit (for example, 1299 = $12.99).</small></div>
+          <div class="field"><label for="product-compare">Compare-at price (minor units)</label><input id="product-compare" v-model="productForm.compare_at_price_cents" type="number" min="0" step="1" /><small>Optional original price shown as crossed out. It must be higher than the selling price.</small></div>
           <div class="field"><label for="product-category">Category</label><select id="product-category" v-model="productForm.category_id"><option value="">Uncategorized</option><option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option></select></div>
           <div class="field"><label for="product-published-at">Publish date/time</label><input id="product-published-at" :value="formatLocalDateTime(productForm.published_at)" type="datetime-local" @input="productForm.published_at = $event.target.value ? new Date($event.target.value).toISOString() : ''" /><small>Leave blank to keep this product unpublished.</small></div>
           <div class="field field--wide"><label for="product-description">Description</label><textarea id="product-description" v-model="productForm.description" required /></div>
+          <div class="field field--wide variant-editor">
+            <div class="variant-editor__heading">
+              <div><strong>Options and variants</strong><small>Add combinations such as color and size. Each combination has its own SKU, price, and stock.</small></div>
+              <button class="button button--secondary button--small" type="button" @click="addProductVariant">Add variant</button>
+            </div>
+            <p v-if="!productForm.variants.length" class="variant-empty">No variants. Leave this empty for a product with one price and stock count.</p>
+            <div v-for="(variant, index) in productForm.variants" :key="variant.id || `new-${index}`" class="variant-row">
+              <label class="field"><span>Color</span><input v-model.trim="variant.color" maxlength="120" placeholder="e.g. Sage green" /></label>
+              <label class="field"><span>Size</span><input v-model.trim="variant.size" maxlength="120" placeholder="e.g. Medium" /></label>
+              <label class="field"><span>Variant SKU</span><input v-model.trim="variant.sku" maxlength="100" placeholder="Unique stock code" required /></label>
+              <label class="field"><span>Price (minor units)</span><input v-model.number="variant.price_cents" type="number" min="0" step="1" required /></label>
+              <label class="field"><span>Stock</span><input v-model.number="variant.stock" type="number" min="0" step="1" required /></label>
+              <button class="text-button text-button--danger variant-row__remove" type="button" @click="removeProductVariant(index)">Remove</button>
+            </div>
+          </div>
           <div class="field field--wide"><label for="product-media">Product photos and short videos</label><input id="product-media" type="file" accept="image/jpeg,image/png,image/webp,image/avif,video/mp4,video/webm,video/quicktime" multiple @change="productForm.media_files = Array.from($event.target.files || [])" /><small>Choose photos up to 10 MB each and videos up to 25 MB each. New media uploads when you save.</small><div v-if="productForm.media_files.length" class="media-file-list">Selected: {{ productForm.media_files.map((file) => file.name).join(', ') }}</div><div v-if="productForm.images.length" class="admin-media-list"><div v-for="image in productForm.images" :key="image.id" class="admin-media-item"><img v-if="image.media_type !== 'video'" :src="image.url" :alt="image.alt_text || ''" class="admin-media-preview" /><video v-else :src="image.url" class="admin-media-preview" muted controls /><button class="text-button text-button--danger" type="button" :disabled="busy" @click="removeProductImage(image)">Remove</button></div></div></div>
           <label class="checkbox-field"><input v-model="productForm.is_active" type="checkbox" /> Active in catalog</label>
         </div>
