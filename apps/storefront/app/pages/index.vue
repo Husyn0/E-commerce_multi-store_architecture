@@ -37,6 +37,17 @@ if (error.value) {
 }
 
 const { data: tenant } = useTenant()
+const homeContent = computed(() => ({
+  hero_eyebrow: 'Good things, thoughtfully made',
+  hero_title: 'Everyday objects.',
+  hero_emphasis: 'Extraordinary feel.',
+  hero_description: 'Find considered essentials that bring a little more intention to the everyday.',
+  hero_cta_label: 'Explore the collection',
+  story_title: 'Less, but better.',
+  story_emphasis: 'Always.',
+  story_caption: 'Thoughtful design, made to be lived with.',
+  ...tenant.value?.theme_config?.content,
+}))
 useSeoMeta({
   title: () => `${catalog.value?.categories[0]?.name || 'Objects for everyday'} — ${tenant.value?.name || 'Store'}`,
   description: 'Explore the latest collection from your neighborhood store.'
@@ -47,10 +58,10 @@ useSeoMeta({
   <div>
     <section class="hero">
       <div class="hero__copy">
-        <span class="eyebrow">Good things, thoughtfully made</span>
-        <h1>Everyday objects.<br><em>Extraordinary feel.</em></h1>
-        <p>Find considered essentials that bring a little more intention to the everyday.</p>
-        <NuxtLink class="button button--dark" to="/search">Explore the collection <span>↗</span></NuxtLink>
+        <span class="eyebrow">{{ homeContent.hero_eyebrow }}</span>
+        <h1>{{ homeContent.hero_title }}<br><em>{{ homeContent.hero_emphasis }}</em></h1>
+        <p>{{ homeContent.hero_description }}</p>
+        <NuxtLink class="button button--dark" to="/search">{{ homeContent.hero_cta_label }} <span>↗</span></NuxtLink>
       </div>
       <div class="hero__art" aria-hidden="true">
         <div class="hero-sun" />
@@ -100,8 +111,8 @@ useSeoMeta({
 
     <section class="story-band">
       <div class="story-band__mark">V.</div>
-      <p>Less, but better.<br><em>Always.</em></p>
-      <span>Thoughtful design, made to be lived with.</span>
+      <p>{{ homeContent.story_title }}<br><em>{{ homeContent.story_emphasis }}</em></p>
+      <span>{{ homeContent.story_caption }}</span>
     </section>
   </div>
 </template>

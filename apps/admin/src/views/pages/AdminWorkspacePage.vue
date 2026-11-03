@@ -38,6 +38,16 @@ const themeForm = reactive({
   fonts: { heading: 'Georgia', body: 'Arial' },
   logo_url: '',
   layout_variant: 'classic',
+  content: {
+    hero_eyebrow: 'Good things, thoughtfully made',
+    hero_title: 'Everyday objects.',
+    hero_emphasis: 'Extraordinary feel.',
+    hero_description: 'Find considered essentials that bring a little more intention to the everyday.',
+    hero_cta_label: 'Explore the collection',
+    story_title: 'Less, but better.',
+    story_emphasis: 'Always.',
+    story_caption: 'Thoughtful design, made to be lived with.',
+  },
 })
 const showProductForm = ref(false)
 const showCategoryForm = ref(false)
@@ -175,6 +185,7 @@ async function loadSection(nextPage = 1, preserveFeedback = false) {
       Object.assign(themeForm.fonts, config.fonts || {})
       themeForm.logo_url = config.logo_url || ''
       themeForm.layout_variant = config.layout_variant || 'classic'
+      Object.assign(themeForm.content, config.content || {})
     } else if (section.value === 'audit') {
       const response = await api.get('/admin/audit-logs', {
         query: {
@@ -419,6 +430,7 @@ async function saveTheme() {
         fonts: { ...themeForm.fonts },
         logo_url: themeForm.logo_url.trim() || null,
         layout_variant: themeForm.layout_variant,
+        content: { ...themeForm.content },
       },
     })
     notice.value = 'Theme saved.'

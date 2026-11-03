@@ -38,6 +38,10 @@
 .theme-preview-content > p:not(.preview-eyebrow) { margin: 0; color: var(--theme-text); opacity: .7; font-family: var(--theme-body-font), sans-serif; font-size: 9px; line-height: 1.6; }
 .theme-preview-image { max-width: 90px; max-height: 26px; object-fit: contain; }
 .preview-button { display: flex; justify-content: space-between; align-items: center; width: 100%; min-height: 34px; margin-top: 19px; padding: 0 11px; border: 0; border-radius: 6px; color: #fff; background: var(--theme-primary); font-size: 9px; }
+.theme-preview-story { padding: 18px 14px; color: #fff; background: var(--theme-primary); text-align: center; }
+.theme-preview-story p { margin: 0 0 6px; font-family: var(--theme-heading-font), Georgia, serif; font-size: 15px; line-height: 1.2; }
+.theme-preview-story em { color: var(--theme-secondary); font-style: italic; }
+.theme-preview-story span { color: rgba(255,255,255,.72); font-size: 8px; }
 .theme-preview-swatch-row { display: flex; gap: 8px; padding: 14px; }
 .theme-swatch { width: 20px; height: 20px; border: 1px solid rgba(0,0,0,.08); border-radius: 50%; }
 .store-shell--editorial .hero { grid-template-columns: minmax(0, 1.05fr) minmax(360px, .95fr); }

@@ -106,6 +106,22 @@ export default defineComponent({
             <label class="field"><span>Body font</span><select v-model="themeForm.fonts.body"><option>Arial</option><option>Georgia</option><option>Trebuchet MS</option><option>Verdana</option></select></label>
             <label class="field"><span>Logo image link <small>Optional</small></span><input v-model.trim="themeForm.logo_url" type="url" placeholder="https://…" /><small>Use a public link to your logo image.</small></label>
           </fieldset>
+
+          <fieldset class="appearance-group homepage-content-fields">
+            <legend>Homepage hero</legend>
+            <label class="field"><span>Eyebrow</span><input v-model.trim="themeForm.content.hero_eyebrow" maxlength="100" required /></label>
+            <label class="field"><span>Heading</span><input v-model.trim="themeForm.content.hero_title" maxlength="120" required /></label>
+            <label class="field"><span>Emphasized heading line</span><input v-model.trim="themeForm.content.hero_emphasis" maxlength="100" required /></label>
+            <label class="field"><span>Description</span><textarea v-model.trim="themeForm.content.hero_description" maxlength="320" rows="3" required /></label>
+            <label class="field"><span>Button label</span><input v-model.trim="themeForm.content.hero_cta_label" maxlength="60" required /></label>
+          </fieldset>
+
+          <fieldset class="appearance-group homepage-content-fields">
+            <legend>Homepage story band</legend>
+            <label class="field"><span>Heading</span><input v-model.trim="themeForm.content.story_title" maxlength="120" required /></label>
+            <label class="field"><span>Emphasized heading line</span><input v-model.trim="themeForm.content.story_emphasis" maxlength="100" required /></label>
+            <label class="field"><span>Caption</span><input v-model.trim="themeForm.content.story_caption" maxlength="240" required /></label>
+          </fieldset>
         </div>
         <div class="theme-preview" :class="`theme-preview--${themeForm.layout_variant}`" :style="{
           '--theme-primary': previewColors.primary,
@@ -118,10 +134,14 @@ export default defineComponent({
         }">
           <div class="theme-preview-head"><img v-if="themeForm.logo_url" class="theme-preview-image" :src="themeForm.logo_url" alt="Store logo preview" /><span v-else class="theme-preview-logo">V</span><span>Storefront preview</span><span class="preview-dot" /></div>
           <div class="theme-preview-content">
-            <p class="preview-eyebrow">A LITTLE SOMETHING SPECIAL</p>
-            <h2>Find your<br />everyday favorite.</h2>
-            <p>A considered collection, made for the way you live.</p>
-            <button type="button" class="preview-button">Explore the collection <span>→</span></button>
+            <p class="preview-eyebrow">{{ themeForm.content.hero_eyebrow }}</p>
+            <h2>{{ themeForm.content.hero_title }}<br />{{ themeForm.content.hero_emphasis }}</h2>
+            <p>{{ themeForm.content.hero_description }}</p>
+            <button type="button" class="preview-button">{{ themeForm.content.hero_cta_label }} <span>→</span></button>
+          </div>
+          <div class="theme-preview-story">
+            <p>{{ themeForm.content.story_title }}<br /><em>{{ themeForm.content.story_emphasis }}</em></p>
+            <span>{{ themeForm.content.story_caption }}</span>
           </div>
           <div class="theme-preview-swatch-row"><span v-for="(value, key) in previewColors" :key="key" class="theme-swatch" :title="`${key}: ${value}`" :style="{ backgroundColor: value }" /></div>
         </div>

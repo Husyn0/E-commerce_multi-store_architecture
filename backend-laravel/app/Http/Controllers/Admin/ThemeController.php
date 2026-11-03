@@ -27,7 +27,7 @@ class ThemeController extends TenantApiController
         }
 
         $data = $request->validate([
-            'theme_config' => ['required', 'array:colors,fonts,logo_url,layout_variant'],
+            'theme_config' => ['required', 'array:colors,fonts,logo_url,layout_variant,content'],
             'theme_config.colors' => ['sometimes', 'array:primary,secondary,accent,background,text'],
             'theme_config.colors.primary' => ['sometimes', 'string', 'max:40'],
             'theme_config.colors.secondary' => ['sometimes', 'string', 'max:40'],
@@ -39,6 +39,15 @@ class ThemeController extends TenantApiController
             'theme_config.fonts.body' => ['sometimes', 'string', 'max:80'],
             'theme_config.logo_url' => ['sometimes', 'nullable', 'url', 'max:2048'],
             'theme_config.layout_variant' => ['sometimes', 'string', 'max:40'],
+            'theme_config.content' => ['sometimes', 'array:hero_eyebrow,hero_title,hero_emphasis,hero_description,hero_cta_label,story_title,story_emphasis,story_caption'],
+            'theme_config.content.hero_eyebrow' => ['sometimes', 'string', 'min:1', 'max:100'],
+            'theme_config.content.hero_title' => ['sometimes', 'string', 'min:1', 'max:120'],
+            'theme_config.content.hero_emphasis' => ['sometimes', 'string', 'min:1', 'max:100'],
+            'theme_config.content.hero_description' => ['sometimes', 'string', 'min:1', 'max:320'],
+            'theme_config.content.hero_cta_label' => ['sometimes', 'string', 'min:1', 'max:60'],
+            'theme_config.content.story_title' => ['sometimes', 'string', 'min:1', 'max:120'],
+            'theme_config.content.story_emphasis' => ['sometimes', 'string', 'min:1', 'max:100'],
+            'theme_config.content.story_caption' => ['sometimes', 'string', 'min:1', 'max:240'],
         ]);
 
         $updated = DB::transaction(function () use ($auditLogger, $data, $request): bool {

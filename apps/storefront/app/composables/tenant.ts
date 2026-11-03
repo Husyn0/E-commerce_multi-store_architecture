@@ -10,6 +10,16 @@ export interface StoreTenant {
     fonts?: { heading?: string; body?: string }
     logo_url?: string | null
     layout_variant?: string
+    content?: {
+      hero_eyebrow?: string
+      hero_title?: string
+      hero_emphasis?: string
+      hero_description?: string
+      hero_cta_label?: string
+      story_title?: string
+      story_emphasis?: string
+      story_caption?: string
+    }
   }
   registration?: {
     require_email_verification: boolean
