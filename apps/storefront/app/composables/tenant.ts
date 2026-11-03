@@ -16,6 +16,8 @@ export interface StoreTenant {
       hero_emphasis?: string
       hero_description?: string
       hero_cta_label?: string
+      hero_image_url?: string | null
+      hero_product_id?: string | null
       story_title?: string
       story_emphasis?: string
       story_caption?: string

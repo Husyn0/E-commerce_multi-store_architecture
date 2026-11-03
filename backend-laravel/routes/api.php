@@ -102,6 +102,8 @@ Route::middleware([
     Route::get('/settings', [AdminSettingsController::class, 'show'])->name('admin.settings.show');
     Route::patch('/settings', [AdminSettingsController::class, 'update'])->name('admin.settings.update');
     Route::get('/theme', [AdminThemeController::class, 'show'])->name('admin.theme.show');
+    Route::post('/theme/hero-image', [AdminThemeController::class, 'uploadHeroImage'])
+        ->name('admin.theme.hero-image.store');
     Route::patch('/theme', [AdminThemeController::class, 'update'])->name('admin.theme.update');
     Route::get('/audit-logs', [AdminAuditController::class, 'index'])->name('admin.audit-logs.index');
     Route::patch('/products/{productId}/inventory', [AdminInventoryController::class, 'updateProduct'])
@@ -119,6 +121,8 @@ Route::middleware([
         ->name('storefront.catalog.categories');
     Route::get('/products', [CatalogController::class, 'index'])
         ->name('storefront.catalog.index');
+    Route::get('/products/id/{productId}', [CatalogController::class, 'showById'])
+        ->name('storefront.catalog.featured-product');
     Route::get('/products/{slug}', [CatalogController::class, 'show'])
         ->name('storefront.catalog.show');
 });

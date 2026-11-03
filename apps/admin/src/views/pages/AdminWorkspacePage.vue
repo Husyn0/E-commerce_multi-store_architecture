@@ -27,6 +27,7 @@ const rows = ref([])
 const page = ref(1)
 const lastPage = ref(1)
 const settings = ref(null)
+const themeProducts = ref([])
 const themeForm = reactive({
   colors: {
     primary: '#6b5b4b',
@@ -44,6 +45,8 @@ const themeForm = reactive({
     hero_emphasis: 'Extraordinary feel.',
     hero_description: 'Find considered essentials that bring a little more intention to the everyday.',
     hero_cta_label: 'Explore the collection',
+    hero_image_url: '',
+    hero_product_id: '',
     story_title: 'Less, but better.',
     story_emphasis: 'Always.',
     story_caption: 'Thoughtful design, made to be lived with.',
@@ -179,13 +182,24 @@ async function loadSection(nextPage = 1, preserveFeedback = false) {
         })
       }
     } else if (section.value === 'appearance') {
-      const response = await api.get('/admin/theme')
+      const [response, productsResponse] = await Promise.all([
+        api.get('/admin/theme'),
+        api.get('/admin/products', { query: { per_page: 100 } }),
+      ])
       const config = response.theme_config || {}
+      themeProducts.value = (productsResponse.data || []).filter((product) =>
+        product.is_active
+        && product.published_at
+        && new Date(product.published_at).getTime() <= Date.now()
+        && (product.images || []).some((image) => image.media_type !== 'video' && image.url),
+      )
       Object.assign(themeForm.colors, config.colors || {})
       Object.assign(themeForm.fonts, config.fonts || {})
       themeForm.logo_url = config.logo_url || ''
       themeForm.layout_variant = config.layout_variant || 'classic'
       Object.assign(themeForm.content, config.content || {})
+      themeForm.content.hero_image_url = config.content?.hero_image_url || ''
+      themeForm.content.hero_product_id = config.content?.hero_product_id || ''
     } else if (section.value === 'audit') {
       const response = await api.get('/admin/audit-logs', {
         query: {
@@ -430,7 +444,11 @@ async function saveTheme() {
         fonts: { ...themeForm.fonts },
         logo_url: themeForm.logo_url.trim() || null,
         layout_variant: themeForm.layout_variant,
-        content: { ...themeForm.content },
+        content: {
+          ...themeForm.content,
+          hero_image_url: themeForm.content.hero_image_url.trim() || null,
+          hero_product_id: themeForm.content.hero_product_id || null,
+        },
       },
     })
     notice.value = 'Theme saved.'
@@ -438,6 +456,27 @@ async function saveTheme() {
   } catch (requestError) {
     error.value = requestError.message
   } finally {
+    busy.value = false
+  }
+}
+
+async function uploadHeroImage(event) {
+  const input = event.target
+  const file = input.files?.[0]
+  if (!file) return
+
+  busy.value = true
+  resetFeedback()
+  try {
+    const form = new FormData()
+    form.append('image', file)
+    const response = await api.upload('/admin/theme/hero-image', form)
+    themeForm.content.hero_image_url = response.hero_image_url
+    notice.value = 'Hero image uploaded.'
+  } catch (requestError) {
+    error.value = requestError.message
+  } finally {
+    input.value = ''
     busy.value = false
   }
 }
@@ -655,13 +694,13 @@ watch(section, () => {
 
 provide('adminWorkspace', {
   route, router, section, busy, loading, error, notice, rows, page, lastPage, settings,
-  themeForm, showProductForm, showCategoryForm, refundingOrder, refundAmount,
+  themeForm, themeProducts, showProductForm, showCategoryForm, refundingOrder, refundAmount,
   refundReason, refundAttempt, categories, stockDrafts, dashboard, selectedOrder,
   selectedCustomer, filters, pageSizes, productForm, categoryForm, settingsForm, title,
   description, previewColors, auditCursor, nextAuditCursor, auditPage, auditLimit, resetFeedback,
   loadSection, searchTable, changePageSize, removeProduct, removeProductImage, openOrder, openCustomer, editProduct, newProduct,
   newCategory, editCategory, saveProduct, saveCategory, removeCategory,
-  saveSettings, saveTheme, formatLocalDateTime, updateOrderStatus, startRefund,
+  saveSettings, saveTheme, uploadHeroImage, formatLocalDateTime, updateOrderStatus, startRefund,
   submitRefund, updateInventory, toggleCustomer, searchCustomers, filterAudit, previousAuditPage, changeAuditLimit,
   nextAuditPage, resetAuditFilters, money, formatAddress, productVisibility,
   orderStatusOptions,

@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
   if (
     !path
     || path.includes('..')
-    || !/^tenants\/[0-9a-f-]{36}\/(products|categories)\/[A-Za-z0-9._/-]+$/i.test(path)
+    || !/^tenants\/[0-9a-f-]{36}\/(products|categories|homepage)\/[A-Za-z0-9._/-]+$/i.test(path)
   ) {
     throw createError({ statusCode: 404, statusMessage: 'Media not found.' })
   }

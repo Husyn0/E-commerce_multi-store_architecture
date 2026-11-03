@@ -1,5 +1,5 @@
 <script>
-import { defineComponent, inject, ref } from 'vue'
+import { computed, defineComponent, inject, ref } from 'vue'
 
 const palettes = [
   { name: 'Warm & natural', colors: { primary: '#6b5b4b', secondary: '#f0ece7', accent: '#aa7d52', background: '#ffffff', text: '#242323' } },
@@ -41,11 +41,33 @@ export default defineComponent({
     const workspace = inject('adminWorkspace')
     const selectedPalette = ref('')
     const paletteMenuOpen = ref(false)
+    const featuredProductMenuOpen = ref(false)
+    const featuredProductSearch = ref('')
+    const selectedFeaturedProduct = computed(() =>
+      workspace.themeProducts.value.find((product) => product.id === workspace.themeForm.content.hero_product_id),
+    )
+    const filteredFeaturedProducts = computed(() => {
+      const query = featuredProductSearch.value.trim().toLocaleLowerCase()
+      if (!query) return workspace.themeProducts.value
+
+      return workspace.themeProducts.value.filter((product) =>
+        [product.title, product.slug, product.sku]
+          .some((value) => String(value || '').toLocaleLowerCase().includes(query)),
+      )
+    })
+    const selectedFeaturedProductImage = computed(() =>
+      selectedFeaturedProduct.value?.images?.find((image) => image.media_type !== 'video' && image.url)?.url || '',
+    )
     return {
       ...workspace,
       palettes,
       selectedPalette,
       paletteMenuOpen,
+      featuredProductMenuOpen,
+      featuredProductSearch,
+      selectedFeaturedProduct,
+      filteredFeaturedProducts,
+      selectedFeaturedProductImage,
       applyPalette(palette) {
         Object.assign(workspace.themeForm.colors, palette.colors)
       },
@@ -55,6 +77,19 @@ export default defineComponent({
         Object.assign(workspace.themeForm.colors, palette.colors)
         selectedPalette.value = String(index)
         paletteMenuOpen.value = false
+      },
+      openFeaturedProductMenu() {
+        featuredProductSearch.value = ''
+        featuredProductMenuOpen.value = true
+      },
+      closeFeaturedProductMenu() {
+        featuredProductMenuOpen.value = false
+        featuredProductSearch.value = ''
+      },
+      chooseFeaturedProduct(productId) {
+        workspace.themeForm.content.hero_product_id = productId
+        featuredProductMenuOpen.value = false
+        featuredProductSearch.value = ''
       },
     }
   },
@@ -109,6 +144,75 @@ export default defineComponent({
 
           <fieldset class="appearance-group homepage-content-fields">
             <legend>Homepage hero</legend>
+            <div class="field featured-product-field">
+              <span>Featured product <small>Optional</small></span>
+              <button
+                v-if="!featuredProductMenuOpen"
+                class="featured-product-trigger"
+                type="button"
+                :disabled="busy"
+                aria-haspopup="listbox"
+                :aria-expanded="featuredProductMenuOpen"
+                @click="openFeaturedProductMenu"
+              >
+                <span>{{ selectedFeaturedProduct?.title || (themeForm.content.hero_product_id ? 'Unavailable product — clear selection' : 'No featured product') }}</span>
+                <span aria-hidden="true">⌄</span>
+              </button>
+              <div v-else class="featured-product-picker">
+                <div class="featured-product-search-row">
+                  <input
+                    v-model="featuredProductSearch"
+                    class="featured-product-search"
+                    type="search"
+                    role="combobox"
+                    aria-label="Search featured products"
+                    aria-autocomplete="list"
+                    aria-controls="featured-product-options"
+                    :aria-expanded="featuredProductMenuOpen"
+                    placeholder="Search by product name, SKU, or slug"
+                    @keydown.esc="closeFeaturedProductMenu"
+                  />
+                  <button class="featured-product-close" type="button" aria-label="Close product list" @click="closeFeaturedProductMenu">×</button>
+                </div>
+                <div id="featured-product-options" class="featured-product-options" role="listbox" aria-label="Published products with images">
+                  <button
+                    class="featured-product-option"
+                    type="button"
+                    role="option"
+                    :aria-selected="!themeForm.content.hero_product_id"
+                    @click="chooseFeaturedProduct('')"
+                  >No featured product</button>
+                  <button
+                    v-if="themeForm.content.hero_product_id && !selectedFeaturedProduct"
+                    class="featured-product-option"
+                    type="button"
+                    role="option"
+                    aria-selected="true"
+                    @click="chooseFeaturedProduct('')"
+                  >Unavailable product — clear selection</button>
+                  <button
+                    v-for="product in filteredFeaturedProducts"
+                    :key="product.id"
+                    class="featured-product-option"
+                    :class="{ 'featured-product-option--selected': product.id === themeForm.content.hero_product_id }"
+                    type="button"
+                    role="option"
+                    :aria-selected="product.id === themeForm.content.hero_product_id"
+                    @click="chooseFeaturedProduct(product.id)"
+                  >
+                    <span>{{ product.title }}</span>
+                    <small v-if="product.sku">{{ product.sku }}</small>
+                  </button>
+                  <p v-if="!filteredFeaturedProducts.length && !(themeForm.content.hero_product_id && !selectedFeaturedProduct)" class="featured-product-empty">No matching products.</p>
+                </div>
+              </div>
+              <small>Choose a published product with a photo to show it in the hero. Its image links to the product page.</small>
+            </div>
+            <label class="field"><span>Default hero image <small>Optional</small></span><input type="file" accept="image/jpeg,image/png,image/webp,image/avif" :disabled="busy" @change="uploadHeroImage" /><small>Choose a JPG, PNG, WebP, or AVIF image up to 10 MB. It appears when no featured product is selected.</small></label>
+            <div v-if="themeForm.content.hero_image_url" class="hero-image-preview-wrap">
+              <img class="hero-image-preview" :src="themeForm.content.hero_image_url" alt="Hero image preview" />
+              <button class="text-button text-button--danger" type="button" :disabled="busy" @click="themeForm.content.hero_image_url = ''">Remove hero image</button>
+            </div>
             <label class="field"><span>Eyebrow</span><input v-model.trim="themeForm.content.hero_eyebrow" maxlength="100" required /></label>
             <label class="field"><span>Heading</span><input v-model.trim="themeForm.content.hero_title" maxlength="120" required /></label>
             <label class="field"><span>Emphasized heading line</span><input v-model.trim="themeForm.content.hero_emphasis" maxlength="100" required /></label>
@@ -138,6 +242,10 @@ export default defineComponent({
             <h2>{{ themeForm.content.hero_title }}<br />{{ themeForm.content.hero_emphasis }}</h2>
             <p>{{ themeForm.content.hero_description }}</p>
             <button type="button" class="preview-button">{{ themeForm.content.hero_cta_label }} <span>→</span></button>
+          </div>
+          <div v-if="selectedFeaturedProductImage || themeForm.content.hero_image_url" class="theme-preview-hero-image">
+            <img :src="selectedFeaturedProductImage || themeForm.content.hero_image_url" :alt="selectedFeaturedProduct?.title || 'Default hero image preview'" />
+            <span v-if="selectedFeaturedProduct">Featured: {{ selectedFeaturedProduct.title }}</span>
           </div>
           <div class="theme-preview-story">
             <p>{{ themeForm.content.story_title }}<br /><em>{{ themeForm.content.story_emphasis }}</em></p>

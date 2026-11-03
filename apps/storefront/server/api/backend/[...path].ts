@@ -83,7 +83,7 @@ function rewriteMediaUrls(value: unknown): unknown {
   }
 
   return Object.fromEntries(Object.entries(value).map(([key, entry]) => {
-    if ((key === 'url' || key === 'image_url') && typeof entry === 'string') {
+    if ((key === 'url' || key === 'image_url' || key === 'hero_image_url') && typeof entry === 'string') {
       try {
         const url = new URL(entry, 'http://storefront.local')
         if (url.pathname.startsWith('/storage/tenants/')) {

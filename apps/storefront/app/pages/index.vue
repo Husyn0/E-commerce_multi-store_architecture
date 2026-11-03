@@ -8,7 +8,7 @@ interface Product {
   compare_at_price_cents: number | null
   currency: string
   stock: number
-  images: { url?: string; alt_text?: string | null }[]
+  images: { url?: string; alt_text?: string | null; media_type?: 'image' | 'video' }[]
   variants: { id: string; price_cents: number; stock: number }[]
 }
 
@@ -43,11 +43,30 @@ const homeContent = computed(() => ({
   hero_emphasis: 'Extraordinary feel.',
   hero_description: 'Find considered essentials that bring a little more intention to the everyday.',
   hero_cta_label: 'Explore the collection',
+  hero_image_url: null,
+  hero_product_id: null,
   story_title: 'Less, but better.',
   story_emphasis: 'Always.',
   story_caption: 'Thoughtful design, made to be lived with.',
   ...tenant.value?.theme_config?.content,
 }))
+const heroProductId = homeContent.value.hero_product_id
+const { data: featuredProduct } = await useAsyncData(
+  `storefront-home-featured-${heroProductId || 'none'}`,
+  async () => {
+    if (!heroProductId) return null
+    try {
+      const response = await api.get<{ data: Product }>(`catalog/products/id/${encodeURIComponent(heroProductId)}`)
+      return unwrapResource(response)
+    } catch {
+      return null
+    }
+  }
+)
+const featuredProductImage = computed(() =>
+  featuredProduct.value?.images.find((image) => image.media_type !== 'video' && image.url)?.url || null
+)
+const heroImageUrl = computed(() => featuredProductImage.value || homeContent.value.hero_image_url)
 useSeoMeta({
   title: () => `${catalog.value?.categories[0]?.name || 'Objects for everyday'} — ${tenant.value?.name || 'Store'}`,
   description: 'Explore the latest collection from your neighborhood store.'
@@ -63,7 +82,19 @@ useSeoMeta({
         <p>{{ homeContent.hero_description }}</p>
         <NuxtLink class="button button--dark" to="/search">{{ homeContent.hero_cta_label }} <span>↗</span></NuxtLink>
       </div>
-      <div class="hero__art" aria-hidden="true">
+      <NuxtLink
+        v-if="featuredProduct && featuredProductImage"
+        class="hero__art hero__art--image hero__art--featured"
+        :to="`/products/${featuredProduct.slug}`"
+        :aria-label="`View featured product: ${featuredProduct.title}`"
+      >
+        <img :src="heroImageUrl || ''" :alt="featuredProduct.title" />
+        <span class="hero-featured-label">Featured product · {{ featuredProduct.title }}</span>
+      </NuxtLink>
+      <div v-else-if="heroImageUrl" class="hero__art hero__art--image" aria-hidden="true">
+        <img :src="heroImageUrl" alt="" />
+      </div>
+      <div v-else class="hero__art" aria-hidden="true">
         <div class="hero-sun" />
         <div class="hero-vase hero-vase--large" />
         <div class="hero-vase hero-vase--small" />

@@ -72,4 +72,18 @@ class CatalogController extends TenantApiController
 
         return new ProductResource($product);
     }
+
+    public function showById(string $productId): ProductResource
+    {
+        $product = Product::query()
+            ->forTenant($this->tenantId())
+            ->with(['images', 'variants'])
+            ->whereKey($productId)
+            ->where('is_active', true)
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now())
+            ->firstOrFail();
+
+        return new ProductResource($product);
+    }
 }
