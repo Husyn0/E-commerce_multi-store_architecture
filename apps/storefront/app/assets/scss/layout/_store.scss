@@ -30,3 +30,5 @@
 .cart-link { display: inline-flex; align-items: center; gap: 8px; }
 .cart-link span { display: grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 50%; color: white; background: var(--accent-dark); font-size: 10px; }
 .menu-toggle { display: none; border: 0; color: var(--ink); background: transparent; font-size: 12px; }
+.appearance-toggle { display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px; border: 1px solid var(--line); color: var(--ink); background: transparent; font-size: 10px; }
+.appearance-toggle:hover { border-color: var(--accent); color: var(--accent); }

@@ -11,6 +11,13 @@ if (error.value) {
 const route = useRoute()
 const { count, refresh } = useCart()
 const menuOpen = ref(false)
+const appearanceMode = useCookie<'shop' | 'dark'>('storefront_appearance', {
+  default: () => 'shop',
+  maxAge: 60 * 60 * 24 * 365,
+  path: '/',
+  sameSite: 'lax',
+})
+const isDarkMode = computed(() => appearanceMode.value === 'dark')
 const themeStyle = computed(() => {
   const theme = tenant.value?.theme_config || {}
   const colors = theme.colors || {}
@@ -26,6 +33,10 @@ const themeStyle = computed(() => {
 })
 const layoutClass = computed(() => `store-shell--${tenant.value?.theme_config?.layout_variant || 'classic'}`)
 
+function toggleAppearance() {
+  appearanceMode.value = isDarkMode.value ? 'shop' : 'dark'
+}
+
 onMounted(() => {
   refresh().catch(() => undefined)
 })
@@ -36,7 +47,7 @@ watch(() => route.fullPath, () => {
 </script>
 
 <template>
-  <div class="store-shell" :class="layoutClass" :style="themeStyle">
+  <div class="store-shell" :class="[layoutClass, { 'store-shell--dark': isDarkMode }]" :style="themeStyle">
     <div class="announcement">Thoughtfully chosen goods, made for everyday living.</div>
     <header class="store-header">
       <NuxtLink class="wordmark" to="/">
@@ -51,6 +62,16 @@ watch(() => route.fullPath, () => {
         <NuxtLink to="/search">Discover</NuxtLink>
         <NuxtLink to="/account">My account</NuxtLink>
         <NuxtLink class="cart-link" to="/cart">Bag <span>{{ count }}</span></NuxtLink>
+        <button
+          class="appearance-toggle"
+          type="button"
+          :aria-label="isDarkMode ? 'Switch to shop theme' : 'Switch to dark theme'"
+          :aria-pressed="isDarkMode"
+          @click="toggleAppearance"
+        >
+          <span aria-hidden="true">{{ isDarkMode ? '☼' : '☾' }}</span>
+          {{ isDarkMode ? 'Shop theme' : 'Dark mode' }}
+        </button>
       </nav>
     </header>
     <main>

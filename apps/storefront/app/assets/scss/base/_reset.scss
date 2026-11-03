@@ -30,6 +30,189 @@
 .store-shell { --ink: var(--store-text, #24231f); --paper: var(--store-background, #fbfaf7); --accent: var(--store-accent, #855b45); --accent-dark: var(--store-primary, #543c30); --accent-soft: var(--store-secondary, #efe5dc); --serif: var(--store-heading-font, 'Playfair Display', Georgia, serif); }
 .store-logo { max-width: 180px; max-height: 44px; object-fit: contain; }
 
+.store-shell.store-shell--dark {
+  --ink: #f2eee8;
+  --paper: #171615;
+  --white: #242220;
+  --muted: #aaa49a;
+  --line: #3b3833;
+  --accent-soft: #3b3029;
+  --accent-dark: #725b49;
+  color: var(--ink);
+  color-scheme: dark;
+  background: var(--paper);
+}
+
+.store-shell--dark .store-header {
+  border-color: var(--line);
+  background: rgba(23, 22, 21, .95);
+}
+
+.store-shell--dark .hero {
+  background: #252320;
+}
+
+.store-shell--dark .account-card:not(.account-card--orders),
+.store-shell--dark .profile-form,
+.store-shell--dark .cart-summary,
+.store-shell--dark .order-summary,
+.store-shell--dark .saved-address,
+.store-shell--dark .address-form,
+.store-shell--dark .checkout-notice__card,
+.store-shell--dark .checkout-panel,
+.store-shell--dark .checkout-complete,
+.store-shell--dark .verification-panel {
+  border-color: var(--line);
+  color: var(--ink);
+  background: #242220;
+}
+
+.store-shell--dark .account-card--orders {
+  color: var(--ink);
+  background: #302923;
+}
+
+.store-shell--dark .account-card--orders .eyebrow,
+.store-shell--dark .account-card--orders p {
+  color: #d3c7b9;
+}
+
+.store-shell--dark .hero__copy > p,
+.store-shell--dark .product-card__price,
+.store-shell--dark .page-intro p,
+.store-shell--dark .product-description,
+.store-shell--dark .detail-price,
+.store-shell--dark .product-promise,
+.store-shell--dark .account-card p,
+.store-shell--dark .order-status,
+.store-shell--dark .order-payment,
+.store-shell--dark .address-block p,
+.store-shell--dark .saved-address p,
+.store-shell--dark .checkout-notice__card p,
+.store-shell--dark .checkout-verification-note p,
+.store-shell--dark .summary-note,
+.store-shell--dark .summary-row--muted,
+.store-shell--dark .underlined-link,
+.store-shell--dark .continue-link,
+.store-shell--dark .back-link,
+.store-shell--dark .auth-copy,
+.store-shell--dark .auth-footnote,
+.store-shell--dark .form-field small,
+.store-shell--dark .store-footer,
+.store-shell--dark .store-footer small {
+  color: #b5aea4;
+}
+
+.store-shell--dark .form-field > span,
+.store-shell--dark .detail-field label,
+.store-shell--dark .register-human-demo,
+.store-shell--dark .recovery-channel,
+.store-shell--dark .recovery-channel legend,
+.store-shell--dark .check-field {
+  color: #d0c9bf;
+}
+
+.store-shell--dark .form-field input,
+.store-shell--dark .form-field select,
+.store-shell--dark .detail-field select,
+.store-shell--dark .quantity-control,
+.store-shell--dark .quantity-control button,
+.store-shell--dark .quantity-control input,
+.store-shell--dark .quantity-control output,
+.store-shell--dark .product-detail__gallery-controls {
+  border-color: #504b44;
+  color: var(--ink);
+  background: #242220;
+}
+
+.store-shell--dark .form-field input:disabled {
+  color: #aaa49a;
+  background: #302e2a;
+}
+
+.store-shell--dark .search-bar,
+.store-shell--dark .order-list,
+.store-shell--dark .order-row,
+.store-shell--dark .order-detail-items,
+.store-shell--dark .order-item,
+.store-shell--dark .summary-row {
+  border-color: var(--line);
+}
+
+.store-shell--dark .search-bar,
+.store-shell--dark .category-tile__number {
+  color: #b5aea4;
+}
+
+.store-shell--dark .product-detail__visual,
+.store-shell--dark .product-detail__gallery-slide img,
+.store-shell--dark .product-detail__gallery-slide video,
+.store-shell--dark .product-card__media,
+.store-shell--dark .product-detail__thumbnails button,
+.store-shell--dark .cart-line__image,
+.store-shell--dark .order-item__mark,
+.store-shell--dark .product-placeholder,
+.store-shell--dark .category-tile:not(.category-tile--image) {
+  background-color: #302e2a;
+}
+
+.store-shell--dark .product-placeholder {
+  background-image: linear-gradient(145deg, #38352f, #242321);
+}
+
+.store-shell--dark .category-tile:not(.category-tile--image),
+.store-shell--dark .product-placeholder,
+.store-shell--dark .cart-line__image,
+.store-shell--dark .order-item__mark {
+  color: #d5cec4;
+}
+
+.store-shell--dark .product-badge {
+  color: var(--ink);
+  background: #242220;
+}
+
+.store-shell--dark .payment-choice:has(input:checked) {
+  background: #302b23;
+}
+
+.store-shell--dark .address-tags span {
+  color: #c2d2b8;
+  background: #2b3428;
+}
+
+.store-shell--dark .register-notice,
+.store-shell--dark .checkout-verification-note {
+  border-color: #514638;
+  color: #e3d2b8;
+  background: #302b23;
+}
+
+.store-shell--dark .verification-state {
+  color: #e3d2b8;
+  background: #44392b;
+}
+
+.store-shell--dark .verification-state--verified {
+  color: #a9d5b3;
+  background: #26372b;
+}
+
+.store-shell--dark .error-box {
+  border-color: #673a35;
+  background: #321f1d;
+}
+
+.store-shell--dark .success-box {
+  border-color: #355a40;
+  background: #1f2d23;
+}
+
+.store-shell--dark .order-row:hover,
+.store-shell--dark .button--outline:hover:not(:disabled) {
+  background: #302e2a;
+}
+
 html { scroll-behavior: smooth; }
 body { margin: 0; min-width: 320px; min-height: 100vh; }
 button, input, select { font: inherit; }
