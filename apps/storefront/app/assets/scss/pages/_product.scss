@@ -21,7 +21,7 @@
 .product-description { max-width: 430px; margin: 24px 0 30px; color: #77746c; font-size: 12px; line-height: 1.9; white-space: pre-line; }
 .detail-field { display: grid; gap: 8px; width: 100%; margin-bottom: 20px; }
 .detail-field label { color: #55524c; font-size: 10px; font-weight: 600; }
-.detail-field select { width: 100%; min-height: 44px; padding: 0 11px; border: 1px solid #dcd7cd; border-radius: 0; color: var(--ink); background: #fff; font-size: 11px; }
+.detail-field select { width: 100%; min-height: 46px; padding: 0 12px; border: 1px solid #dcd7cd; border-radius: 9px; color: var(--ink); background: #fff; font-size: 11px; }
 .quantity-control { display: inline-flex; align-items: center; border: 1px solid #ddd8ce; }
 .quantity-control button { width: 37px; height: 38px; border: 0; color: var(--ink); background: #fff; font-size: 15px; }
 .quantity-control input, .quantity-control output { width: 40px; border: 0; outline: 0; color: var(--ink); background: #fff; font-size: 11px; text-align: center; }

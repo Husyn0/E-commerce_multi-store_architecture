@@ -18,7 +18,7 @@
 }
 .hero h1 em, .story-band p em { color: var(--accent); font-weight: 500; }
 .hero__copy > p { max-width: 360px; margin: 10px 0 28px; color: #77756e; font-size: 13px; line-height: 1.8; }
-.button { display: inline-flex; align-items: center; justify-content: center; gap: 28px; min-height: 48px; padding: 0 21px; border: 1px solid transparent; border-radius: 2px; color: var(--ink); background: transparent; font-size: 11px; font-weight: 600; transition: background .2s, color .2s, transform .2s; }
+.button { display: inline-flex; align-items: center; justify-content: center; gap: 28px; min-height: 48px; padding: 0 21px; border: 1px solid transparent; border-radius: 9px; color: var(--ink); background: transparent; font-size: 11px; font-weight: 600; transition: background .2s, color .2s, transform .2s, box-shadow .2s; }
 .button:hover:not(:disabled) { transform: translateY(-1px); }
 .button--dark { color: #fff; background: var(--accent-dark); }
 .button--dark:hover:not(:disabled) { background: #76533f; }

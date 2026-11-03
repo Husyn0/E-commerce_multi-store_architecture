@@ -1,6 +1,6 @@
 @use 'sass:color';
 
-.button { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 0 14px; border: 1px solid transparent; border-radius: 8px; color: white; background: var(--accent); font-size: 12px; font-weight: 650; transition: background .15s, transform .15s; }
+.button { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 15px; border: 1px solid transparent; border-radius: 10px; color: white; background: var(--accent); font-size: 12px; font-weight: 650; transition: background .15s, transform .15s, box-shadow .15s; }
 .button:hover:not(:disabled) { background: color.adjust(#6b5b4b, $lightness: -7%); }
 .button:active:not(:disabled) { transform: translateY(1px); }
 .button--secondary { color: #484640; border-color: var(--line); background: #fff; }
