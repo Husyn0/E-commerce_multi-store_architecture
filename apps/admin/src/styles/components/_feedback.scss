@@ -1,0 +1,10 @@
+.driver-banner { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; margin-bottom: 23px; border: 1px solid #e8d6a5; border-radius: 10px; color: #6b5420; background: #fff8e6; font-size: 12px; line-height: 1.55; }
+.driver-banner strong { display: block; margin-bottom: 2px; }
+.card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.card-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 17px 19px; border-bottom: 1px solid var(--line); }
+.card-title { font-size: 14px; font-weight: 700; }
+.card-body { padding: 19px; }
+.empty-state { padding: 45px 20px; color: var(--muted); text-align: center; font-size: 13px; }
+.error-box { padding: 12px 14px; border: 1px solid #f1d0cc; border-radius: 9px; color: var(--danger); background: #fff7f6; font-size: 13px; }
+.success-box { padding: 12px 14px; border: 1px solid #cfe7d9; border-radius: 9px; color: #276b49; background: #f4fbf7; font-size: 13px; }
+.loading { padding: 34px 18px; color: var(--muted); text-align: center; font-size: 13px; }

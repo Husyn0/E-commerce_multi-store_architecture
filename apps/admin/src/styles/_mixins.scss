@@ -1,0 +1,7 @@
+@mixin below($width) {
+  @media (max-width: $width) { @content; }
+}
+
+@mixin auth-compact-height($min-width: 561px) {
+  @media (max-height: 760px) and (min-width: $min-width) { @content; }
+}
