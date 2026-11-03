@@ -1,5 +1,5 @@
 .product-detail { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(330px, .75fr); gap: clamp(40px, 8vw, 110px); width: min(var(--page), 100%); margin: 0 auto; padding: 60px 6.5vw 100px; }
-.product-detail__visual { position: relative; min-height: 520px; max-height: 720px; overflow: hidden; background: #eeeae2; }
+.product-detail__visual { position: relative; min-height: 520px; max-height: 720px; overflow: hidden; border-radius: 18px; background: #eeeae2; }
 .product-detail__gallery { position: relative; width: 100%; }
 .product-detail__gallery-track { display: flex; width: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-inline: contain; }
 .product-detail__gallery-track::-webkit-scrollbar { display: none; }
@@ -9,7 +9,7 @@
 .product-detail__gallery-controls button { width: 29px; height: 29px; border: 0; color: inherit; background: transparent; cursor: pointer; }
 .product-detail__gallery-controls button:disabled { opacity: .35; cursor: default; }
 .product-detail__thumbnails { display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; }
-.product-detail__thumbnails button { position: relative; flex: 0 0 62px; width: 62px; height: 62px; padding: 0; overflow: hidden; border: 1px solid transparent; background: #eeeae2; cursor: pointer; }
+.product-detail__thumbnails button { position: relative; flex: 0 0 62px; width: 62px; height: 62px; padding: 0; overflow: hidden; border: 1px solid transparent; border-radius: 8px; background: #eeeae2; cursor: pointer; }
 .product-detail__thumbnails button[aria-current="true"] { border-color: var(--store-primary, #4b3b32); }
 .product-detail__thumbnails img, .product-detail__thumbnails video { width: 100%; height: 100%; object-fit: cover; }
 .product-detail__thumbnails button span { position: absolute; inset: 0; display: grid; place-items: center; color: white; background: rgba(0,0,0,.22); font-size: 14px; }
