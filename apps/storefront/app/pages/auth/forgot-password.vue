@@ -71,10 +71,18 @@ useSeoMeta({ title: 'Reset your password', description: 'Recover access to your 
 
 <template>
   <section class="auth-page">
-    <div class="auth-art">
-      <div class="auth-art__shape auth-art__shape--one" />
-      <div class="auth-art__shape auth-art__shape--two" />
-      <span class="auth-art__caption">A place for your favorites.</span>
+    <div class="auth-visual">
+      <div class="auth-visual__top"><span class="auth-visual__mark">✳</span><span>MEMBER STUDIO <b>01</b></span></div>
+      <div class="auth-visual__message">
+        <span class="auth-visual__eyebrow">A little more personal</span>
+        <h2>Good things,<br>kept close.</h2>
+        <p>Your orders, addresses, and favorite finds in one thoughtful place.</p>
+      </div>
+      <div class="auth-visual__benefits" aria-label="Account benefits">
+        <div><span>01</span><p><b>Order history</b><small>Every parcel, easy to find</small></p><span aria-hidden="true">↗</span></div>
+        <div><span>02</span><p><b>Quicker checkout</b><small>Your details ready when you are</small></p><span aria-hidden="true">↗</span></div>
+      </div>
+      <span class="auth-visual__foot">Thoughtfully chosen goods · Made for everyday living</span>
     </div>
     <div class="auth-panel auth-panel--register">
       <NuxtLink class="back-link" to="/auth/login">← Back to sign in</NuxtLink>
