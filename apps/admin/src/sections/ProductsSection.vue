@@ -18,8 +18,8 @@ export default defineComponent({
           <div class="field"><label for="product-title">Title</label><input id="product-title" v-model.trim="productForm.title" maxlength="240" required /></div>
           <div class="field"><label for="product-slug">Slug</label><input id="product-slug" v-model.trim="productForm.slug" maxlength="240" required /></div>
           <div class="field"><label for="product-sku">SKU</label><input id="product-sku" v-model.trim="productForm.sku" maxlength="100" /><small>Internal stock code used to identify this product. Shoppers won’t see it.</small></div>
-          <div class="field"><label for="product-price">Selling price (minor units)</label><input id="product-price" v-model.number="productForm.price_cents" type="number" min="0" step="1" required /><small>Enter the amount in the store currency’s smallest unit (for example, 1299 = $12.99).</small></div>
-          <div class="field"><label for="product-compare">Compare-at price (minor units)</label><input id="product-compare" v-model="productForm.compare_at_price_cents" type="number" min="0" step="1" /><small>Optional original price shown as crossed out. It must be higher than the selling price.</small></div>
+          <div class="field"><label for="product-price">Selling price</label><input id="product-price" v-model.number="productForm.price" type="number" min="0" step="0.01" required /><small>Enter a normal price with up to two decimal places, for example 12.99.</small></div>
+          <div class="field"><label for="product-compare">Compare-at price</label><input id="product-compare" v-model.number="productForm.compare_at_price" type="number" min="0" step="0.01" /><small>Optional original price shown crossed out. It must be higher than the selling price.</small></div>
           <div class="field"><label for="product-category">Category</label><select id="product-category" v-model="productForm.category_id"><option value="">Uncategorized</option><option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option></select></div>
           <div class="field"><label for="product-published-at">Publish date/time</label><input id="product-published-at" :value="formatLocalDateTime(productForm.published_at)" type="datetime-local" @input="productForm.published_at = $event.target.value ? new Date($event.target.value).toISOString() : ''" /><small>Leave blank to keep this product unpublished.</small></div>
           <div class="field field--wide"><label for="product-description">Description</label><textarea id="product-description" v-model="productForm.description" required /></div>
@@ -33,7 +33,7 @@ export default defineComponent({
               <label class="field"><span>Color</span><input v-model.trim="variant.color" maxlength="120" placeholder="e.g. Sage green" /></label>
               <label class="field"><span>Size</span><input v-model.trim="variant.size" maxlength="120" placeholder="e.g. Medium" /></label>
               <label class="field"><span>Variant SKU</span><input v-model.trim="variant.sku" maxlength="100" placeholder="Unique stock code" required /></label>
-              <label class="field"><span>Price (minor units)</span><input v-model.number="variant.price_cents" type="number" min="0" step="1" required /></label>
+              <label class="field"><span>Price</span><input v-model.number="variant.price" type="number" min="0" step="0.01" required /></label>
               <label class="field"><span>Stock</span><input v-model.number="variant.stock" type="number" min="0" step="1" required /></label>
               <button class="text-button text-button--danger variant-row__remove" type="button" @click="removeProductVariant(index)">Remove</button>
             </div>

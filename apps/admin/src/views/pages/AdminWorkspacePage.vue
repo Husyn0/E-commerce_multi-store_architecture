@@ -713,6 +713,14 @@ function resetAuditFilters() {
   filterAudit()
 }
 
+function priceFromMinorUnits(value) {
+  return (Number(value || 0) / 100).toFixed(2)
+}
+
+function priceToMinorUnits(value) {
+  return Math.round((Number(value) + Number.EPSILON) * 100)
+}
+
 function money(cents, currency) {
   return new Intl.NumberFormat(undefined, { style: 'currency', currency: currency || 'USD' }).format((cents || 0) / 100)
 }
