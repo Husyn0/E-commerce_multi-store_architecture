@@ -15,6 +15,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { api } from '../../api'
 import AdminPageHeading from '../../components/admin/AdminPageHeading.vue'
 import AdminFeedback from '../../components/admin/AdminFeedback.vue'
+import AdminDialog from '../../components/admin/AdminDialog.vue'
 import { adminSections } from '../../sections/adminSections'
 
 const route = useRoute()
@@ -24,6 +25,8 @@ const busy = ref(false)
 const loading = ref(false)
 const error = ref('')
 const notice = ref('')
+const dialog = ref(null)
+let dialogResolver = null
 const rows = ref([])
 const variantRows = ref([])
 const variantProducts = ref([])
@@ -125,6 +128,30 @@ function resetFeedback() {
   error.value = ''
   notice.value = ''
 }
+
+function showWarning(message, title = 'Action unavailable') {
+  dialog.value = { title, message, confirmLabel: 'Got it', cancelLabel: '', danger: false }
+}
+
+function askToConfirm(message, title = 'Please confirm', confirmLabel = 'Continue', danger = false) {
+  return new Promise((resolve) => {
+    dialogResolver = resolve
+    dialog.value = { title, message, confirmLabel, cancelLabel: 'Cancel', danger }
+  })
+}
+
+function resolveDialog(confirmed) {
+  dialog.value = null
+  if (dialogResolver) {
+    dialogResolver(confirmed)
+    dialogResolver = null
+  }
+  error.value = ''
+}
+
+watch(error, (message) => {
+  if (message) showWarning(message, 'Unable to complete action')
+})
 
 function productFeatureVisibility(product) {
   if (!product.is_featured) return 'not featured'
@@ -323,7 +350,7 @@ async function saveVariant(variant = null) {
 }
 
 async function deleteVariant(variant) {
-  if (!window.confirm(`Delete variant ${variant.sku}?`)) return
+  if (!await askToConfirm(`Delete variant ${variant.sku}? This cannot be undone.`, 'Delete variant', 'Delete variant', true)) return
   busy.value = true
   resetFeedback()
   try {
@@ -354,7 +381,7 @@ async function saveVariantInventory(variant) {
 }
 
 async function removeProduct(product) {
-  if (!window.confirm(`Delete "${product.title}"? Products with cart or order history must be deactivated instead.`)) return
+  if (!await askToConfirm(`Delete “${product.title}”? Products with cart or order history cannot be deleted. Deactivate the product instead if it has sales or cart history.`, 'Delete product', 'Delete product', true)) return
   busy.value = true
   resetFeedback()
   try {
@@ -594,7 +621,11 @@ async function saveProduct() {
 }
 
 async function removeProductImage(image) {
-  if (!productForm.id || !window.confirm('Remove this product media?')) return
+  if (!productForm.id) {
+    showWarning('Save the product before removing its media.')
+    return
+  }
+  if (!await askToConfirm('Remove this product media?', 'Remove media', 'Remove media', true)) return
   busy.value = true
   resetFeedback()
   try {
@@ -645,7 +676,7 @@ async function saveCategory() {
 }
 
 async function removeCategory(category) {
-  if (!window.confirm(`Delete category "${category.name}"?`)) return
+  if (!await askToConfirm(`Delete category “${category.name}”?`, 'Delete category', 'Delete category', true)) return
   busy.value = true
   resetFeedback()
   try {
@@ -748,7 +779,10 @@ async function updateOrderStatus(order, status) {
 }
 
 function startRefund(order) {
-  if (refundAttempt.value && refundAttempt.value.orderId !== order.id) return
+  if (refundAttempt.value && refundAttempt.value.orderId !== order.id) {
+    showWarning(`A refund request for order ${refundAttempt.value.orderNumber} is still awaiting a response. Retry or resolve that same request before starting a refund for another order.`, 'Refund already in progress')
+    return
+  }
   if (refundAttempt.value?.orderId === order.id) {
     refundingOrder.value = order
     return
@@ -772,6 +806,7 @@ async function submitRefund() {
   if (!refundAttempt.value) {
     refundAttempt.value = {
       orderId: order.id,
+      orderNumber: order.order_number,
       amount,
       reason,
       key: crypto.randomUUID(),
@@ -947,6 +982,7 @@ watch(section, () => {
 provide('adminWorkspace', {
   route, router, section, busy, loading, error, notice, rows, page, lastPage, settings,
   variantRows, variantProducts, variantSearch, newVariant, editingVariantId, variantDraft,
+  showWarning,
   themeForm, themeProducts, showProductForm, showCategoryForm, refundingOrder, refundAmount,
   refundReason, refundAttempt, categories, stockDrafts, dashboard, selectedOrder,
   selectedCustomer, filters, pageSizes, productForm, categoryForm, settingsForm, title,
@@ -965,6 +1001,7 @@ provide('adminWorkspace', {
 
 
 <template>
+  <AdminDialog v-if="dialog" v-bind="dialog" @confirm="resolveDialog(true)" @cancel="resolveDialog(false)" />
   <AdminPageHeading :title="title" :description="description" :section="section" @add-product="newProduct" @add-category="newCategory" />
   <AdminFeedback :error="error" :notice="notice" />
 

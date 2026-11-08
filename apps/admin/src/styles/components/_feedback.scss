@@ -8,3 +8,12 @@
 .error-box { padding: 12px 14px; border: 1px solid #f1d0cc; border-radius: 9px; color: var(--danger); background: #fff7f6; font-size: 13px; }
 .success-box { padding: 12px 14px; border: 1px solid #cfe7d9; border-radius: 9px; color: #276b49; background: #f4fbf7; font-size: 13px; }
 .loading { padding: 34px 18px; color: var(--muted); text-align: center; font-size: 13px; }
+.admin-dialog-backdrop { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: center; padding: 20px; background: rgb(23 22 20 / 46%); }
+.admin-dialog { width: min(100%, 430px); padding: 24px; border: 1px solid var(--line); border-radius: 16px; background: #fff; box-shadow: 0 24px 70px rgb(0 0 0 / 22%); }
+.admin-dialog__mark { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 50%; color: #66563f; background: #f3eee6; font-size: 17px; font-weight: 750; }
+.admin-dialog__mark--danger { color: #963c34; background: #faeae8; }
+.admin-dialog h2 { margin: 14px 0 7px; color: var(--ink); font-size: 18px; }
+.admin-dialog p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+.admin-dialog__actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 22px; }
+.button--danger { color: #fff; background: #963c34; }
+.button--danger:hover { background: #7e302a; }
