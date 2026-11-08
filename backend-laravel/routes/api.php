@@ -119,6 +119,8 @@ Route::middleware([
 ])->prefix('storefront/catalog')->group(function (): void {
     Route::get('/categories', [CatalogController::class, 'categories'])
         ->name('storefront.catalog.categories');
+    Route::get('/featured-products', [CatalogController::class, 'featured'])
+        ->name('storefront.catalog.featured-products');
     Route::get('/products', [CatalogController::class, 'index'])
         ->name('storefront.catalog.index');
     Route::get('/products/id/{productId}', [CatalogController::class, 'showById'])

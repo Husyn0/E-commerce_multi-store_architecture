@@ -93,6 +93,30 @@ curl -i -X DELETE -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN" \
 **Expect:** `204` when no dependent rows; otherwise `409` and deactivate
 instead.
 
+### P7. Feature products for the storefront
+
+Feature a product with an optional start and end time:
+
+```sh
+curl -i -X PATCH -H "Authorization: ******" \
+  -H 'Content-Type: application/json' \
+  -d '{"is_featured":true,"featured_from":"2026-11-08T00:00:00Z","featured_until":"2026-11-15T00:00:00Z"}' \
+  "$ADMIN_BASE/api/admin/products/$PRODUCT_ID"
+```
+
+**Expect:** `200`; products with an end time before their start time should
+return `422`. Either time may be `null` for an open-ended feature period.
+Featured products appear on the storefront only while active, published, and
+inside their feature period. Remove a product from the section by setting
+`is_featured` to `false`.
+
+```sh
+curl -i "$STORE_BASE/api/storefront/catalog/featured-products?per_page=100&page=1"
+```
+
+**Expect:** `200` with pagination metadata and all currently featured products
+across pages.
+
 ## Storefront catalog
 
 ```sh

@@ -10,13 +10,33 @@
 .variant-row .field { gap: 5px; }
 .variant-row .field > span { color: #5e5c57; font-size: 10px; font-weight: 650; }
 .variant-row__remove { min-height: 38px; white-space: nowrap; }
+.variant-create-form { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.variant-create-form .field--wide { grid-column: 1 / -1; }
+.variant-create-form textarea { min-height: 74px; }
+.variant-create-form .form-actions { grid-column: 1 / -1; }
+.variants-table .search-input { min-width: 90px; width: 100%; }
+.variant-option-list { display: grid; gap: 3px; color: var(--muted); font-size: 10px; }
+.variant-count { display: inline-flex; margin-left: 6px; padding: 3px 7px; border-radius: 12px; color: #5e5c57; background: #f0efeb; font-size: 10px; vertical-align: middle; }
+.product-picker { position: relative; }
+.product-picker__list { position: absolute; z-index: 5; top: calc(100% - 4px); right: 0; left: 0; max-height: 220px; overflow-y: auto; padding: 5px; border: 1px solid var(--line); border-radius: 9px; background: #fff; box-shadow: 0 8px 24px rgb(35 32 28 / 12%); }
+.product-picker__option { display: block; width: 100%; padding: 8px 9px; border: 0; border-radius: 6px; color: var(--ink); background: #fff; text-align: left; font: inherit; cursor: pointer; }
+.product-picker__option:hover, .product-picker__option:focus-visible { background: #f4f2ee; }
+.product-picker__empty { display: block; padding: 9px; color: var(--muted); font-size: 11px; }
+.variant-extra-options { display: grid; gap: 9px; }
+.variant-extra-options__heading { display: flex; align-items: center; justify-content: space-between; }
+.variant-extra-option { display: grid; grid-template-columns: 1fr 1fr auto; gap: 9px; align-items: end; }
+.variant-edit-options { display: grid; min-width: 180px; gap: 6px; }
+.variant-edit-options > label, .variant-extra-option > label { display: grid; gap: 3px; color: var(--muted); font-size: 10px; }
+.variant-edit-options > .variant-extra-option { grid-template-columns: 1fr 1fr auto; }
 
 @container (max-width: 760px) {
   .variant-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .variant-row__remove { justify-self: start; }
+  .variant-create-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @container (max-width: 440px) {
   .variant-editor__heading { align-items: flex-start; flex-direction: column; }
   .variant-row { grid-template-columns: minmax(0, 1fr); }
+  .variant-create-form { grid-template-columns: minmax(0, 1fr); }
 }

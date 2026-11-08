@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -83,7 +84,7 @@ class ProductController extends TenantApiController
     public function update(Request $request, string $productId, AuditLogger $auditLogger): ProductResource
     {
         $product = Product::query()->forTenant($this->tenantId())->findOrFail($productId);
-        $data = $this->validatedProduct($request, $product->id);
+        $data = $this->validatedProduct($request, $product->id, $product);
         $this->assertCategoryBelongsToTenant($data['category_id'] ?? null);
         $this->assertComparePrice($data, $product);
 
@@ -154,7 +155,7 @@ class ProductController extends TenantApiController
     /**
      * @return array<string, mixed>
      */
-    private function validatedProduct(Request $request, ?string $ignoreId = null): array
+    private function validatedProduct(Request $request, ?string $ignoreId = null, ?Product $product = null): array
     {
         $tenantId = $this->tenantId();
         $allowed = [
@@ -168,6 +169,9 @@ class ProductController extends TenantApiController
             'weight_grams',
             'is_active',
             'published_at',
+            'is_featured',
+            'featured_from',
+            'featured_until',
         ];
         if (array_diff(array_keys($request->all()), $allowed) !== []) {
             abort(422, 'The request contains fields that cannot be edited.');
@@ -181,7 +185,7 @@ class ProductController extends TenantApiController
         }
         $required = $ignoreId === null ? 'required' : 'sometimes';
 
-        return $request->validate([
+        $data = $request->validate([
             'category_id' => [
                 'sometimes',
                 'nullable',
@@ -208,7 +212,26 @@ class ProductController extends TenantApiController
             'weight_grams' => ['sometimes', 'nullable', 'integer', 'min:0'],
             'is_active' => ['sometimes', 'boolean'],
             'published_at' => ['sometimes', 'nullable', 'date'],
+            'is_featured' => ['sometimes', 'boolean'],
+            'featured_from' => ['sometimes', 'nullable', 'date'],
+            'featured_until' => ['sometimes', 'nullable', 'date'],
         ]);
+
+        $featuredFrom = array_key_exists('featured_from', $data)
+            ? $data['featured_from']
+            : $product?->featured_from;
+        $featuredUntil = array_key_exists('featured_until', $data)
+            ? $data['featured_until']
+            : $product?->featured_until;
+
+        if ($featuredFrom !== null && $featuredUntil !== null
+            && Carbon::parse($featuredUntil)->lt(Carbon::parse($featuredFrom))) {
+            throw ValidationException::withMessages([
+                'featured_until' => 'The featured end time must be on or after the featured start time.',
+            ]);
+        }
+
+        return $data;
     }
 
     private function assertComparePrice(array $data, ?Product $product = null): void

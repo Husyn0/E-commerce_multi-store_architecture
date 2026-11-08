@@ -22,6 +22,9 @@ export default defineComponent({
           <div class="field"><label for="product-compare">Compare-at price</label><input id="product-compare" v-model.number="productForm.compare_at_price" type="number" min="0" step="0.01" /><small>Optional original price shown crossed out. It must be higher than the selling price.</small></div>
           <div class="field"><label for="product-category">Category</label><select id="product-category" v-model="productForm.category_id"><option value="">Uncategorized</option><option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option></select></div>
           <div class="field"><label for="product-published-at">Publish date/time</label><div class="publish-date-control"><input id="product-published-at" :value="formatLocalDateTime(productForm.published_at)" type="datetime-local" @input="productForm.published_at = $event.target.value ? new Date($event.target.value).toISOString() : ''" /><button class="button button--secondary button--small" type="button" :disabled="busy || !productForm.published_at" @click="productForm.published_at = ''">Clear</button></div><small>Leave blank to keep this product unpublished.</small></div>
+          <label class="checkbox-field"><input v-model="productForm.is_featured" type="checkbox" /> Feature on storefront</label>
+          <div class="field"><label for="product-featured-from">Feature starts</label><div class="publish-date-control"><input id="product-featured-from" :value="formatLocalDateTime(productForm.featured_from)" type="datetime-local" :disabled="!productForm.is_featured" @input="productForm.featured_from = $event.target.value ? new Date($event.target.value).toISOString() : ''" /><button class="button button--secondary button--small" type="button" :disabled="busy || !productForm.featured_from" @click="productForm.featured_from = ''">Clear</button></div></div>
+          <div class="field"><label for="product-featured-until">Feature ends</label><div class="publish-date-control"><input id="product-featured-until" :value="formatLocalDateTime(productForm.featured_until)" type="datetime-local" :disabled="!productForm.is_featured" @input="productForm.featured_until = $event.target.value ? new Date($event.target.value).toISOString() : ''" /><button class="button button--secondary button--small" type="button" :disabled="busy || !productForm.featured_until" @click="productForm.featured_until = ''">Clear</button></div><small>Optional. Leave either date blank for an open-ended feature period.</small></div>
           <div class="field field--wide"><label for="product-description">Description</label><textarea id="product-description" v-model="productForm.description" required /></div>
           <div class="field field--wide variant-editor">
             <div class="variant-editor__heading">
@@ -49,7 +52,7 @@ export default defineComponent({
       <div v-if="loading" class="loading">Loading products…</div>
       <div v-else-if="rows.length === 0" class="empty-state">{{ filters.product_q ? 'No products match your search.' : 'No products in this tenant yet.' }}</div>
       <div v-else class="table-scroll"><table class="data-table">
-        <thead><tr><th>Product</th><th>SKU</th><th>Price</th><th>Stock</th><th>Status</th><th></th></tr></thead>
+        <thead><tr><th>Product</th><th>SKU</th><th>Price</th><th>Stock</th><th>Status</th><th>Featured</th><th></th></tr></thead>
         <tbody><tr v-for="product in rows" :key="product.id">
           <td><div class="primary-cell">{{ product.title }}</div><div class="secondary-cell">/{{ product.slug }}</div></td>
           <td>{{ product.sku || '—' }}</td><td>{{ money(product.price_cents, product.currency) }}</td>
@@ -67,7 +70,8 @@ export default defineComponent({
             </form>
           </td>
           <td><span class="status-pill" :class="`status-pill--${productVisibility(product)}`">{{ productVisibility(product) }}</span></td>
-          <td><div class="inline-actions"><button class="text-button" type="button" @click="editProduct(product)">Edit</button><button v-if="product.published_at" class="text-button" type="button" :disabled="busy" @click="clearProductPublishDate(product)">Unpublish</button><button class="text-button text-button--danger" type="button" :disabled="busy" @click="removeProduct(product)">Delete</button></div></td>
+          <td><span class="status-pill" :class="`status-pill--${productFeatureVisibility(product).replace(' ', '-')}`">{{ productFeatureVisibility(product) }}</span></td>
+          <td><div class="inline-actions"><button class="text-button" type="button" :disabled="busy" @click="toggleProductFeatured(product)">{{ product.is_featured ? 'Unfeature' : 'Feature' }}</button><button class="text-button" type="button" @click="editProduct(product)">Edit</button><button v-if="product.published_at" class="text-button" type="button" :disabled="busy" @click="clearProductPublishDate(product)">Unpublish</button><button class="text-button text-button--danger" type="button" :disabled="busy" @click="removeProduct(product)">Delete</button></div></td>
         </tr></tbody>
       </table></div>
       <div class="pagination"><span>Page {{ page }} of {{ lastPage }}</span><div class="inline-actions"><button class="button button--secondary button--small" :disabled="page <= 1 || loading" @click="loadSection(page - 1)">Previous</button><button class="button button--secondary button--small" :disabled="page >= lastPage || loading" @click="loadSection(page + 1)">Next</button></div></div>

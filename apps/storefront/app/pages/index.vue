@@ -45,6 +45,7 @@ const homeContent = computed(() => ({
   hero_cta_label: 'Explore the collection',
   hero_image_url: null,
   hero_product_id: null,
+  featured_products_title: 'Featured products',
   story_title: 'Less, but better.',
   story_emphasis: 'Always.',
   story_caption: 'Thoughtful design, made to be lived with.',
@@ -67,6 +68,27 @@ const featuredProductImage = computed(() =>
   featuredProduct.value?.images.find((image) => image.media_type !== 'video' && image.url)?.url || null
 )
 const heroImageUrl = computed(() => featuredProductImage.value || homeContent.value.hero_image_url)
+const { data: homepageFeaturedProducts, error: featuredProductsError } = await useAsyncData(
+  'storefront-home-featured-products',
+  async () => {
+    const products: Product[] = []
+    let page = 1
+    let lastPage = 1
+    do {
+      const response = await api.get<{ data: Product[]; meta?: { last_page?: number } }>(
+        'catalog/featured-products',
+        { per_page: 100, page },
+      )
+      products.push(...unwrapResource(response))
+      lastPage = response.meta?.last_page || 1
+      page += 1
+    } while (page <= lastPage)
+    return products
+  },
+)
+if (featuredProductsError.value) {
+  throw createError({ statusCode: 503, statusMessage: 'Featured products could not be loaded.' })
+}
 useSeoMeta({
   title: () => `${catalog.value?.categories[0]?.name || 'Objects for everyday'} — ${tenant.value?.name || 'Store'}`,
   description: 'Explore the latest collection from your neighborhood store.'
@@ -86,10 +108,10 @@ useSeoMeta({
         v-if="featuredProduct && featuredProductImage"
         class="hero__art hero__art--image hero__art--featured"
         :to="`/products/${featuredProduct.slug}`"
-        :aria-label="`View featured product: ${featuredProduct.title}`"
+        :aria-label="`View hero product: ${featuredProduct.title}`"
       >
         <img :src="heroImageUrl || ''" :alt="featuredProduct.title" />
-        <span class="hero-featured-label">Featured product · {{ featuredProduct.title }}</span>
+        <span class="hero-featured-label">Hero product · {{ featuredProduct.title }}</span>
       </NuxtLink>
       <div v-else-if="heroImageUrl" class="hero__art hero__art--image" aria-hidden="true">
         <img :src="heroImageUrl" alt="" />
@@ -100,6 +122,19 @@ useSeoMeta({
         <div class="hero-vase hero-vase--small" />
         <div class="hero-table" />
         <span class="hero-note">Objects<br>with purpose</span>
+      </div>
+    </section>
+
+    <section v-if="homepageFeaturedProducts?.length" class="section featured-products-section">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Picked for you</span>
+          <h2>{{ homeContent.featured_products_title }}</h2>
+        </div>
+        <NuxtLink class="underlined-link" to="/search">View all products <span>↗</span></NuxtLink>
+      </div>
+      <div class="product-grid">
+        <ProductCard v-for="product in homepageFeaturedProducts" :key="product.id" :product="product" />
       </div>
     </section>
 

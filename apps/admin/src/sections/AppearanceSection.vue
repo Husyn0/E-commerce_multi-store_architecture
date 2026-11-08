@@ -155,7 +155,7 @@ export default defineComponent({
                 :aria-expanded="featuredProductMenuOpen"
                 @click="openFeaturedProductMenu"
               >
-                <span>{{ selectedFeaturedProduct?.title || (themeForm.content.hero_product_id ? 'Unavailable product — clear selection' : 'No featured product') }}</span>
+                <span>{{ selectedFeaturedProduct?.title || (themeForm.content.hero_product_id ? 'Unavailable hero product — clear selection' : 'No hero product') }}</span>
                 <span aria-hidden="true">⌄</span>
               </button>
               <div v-else class="featured-product-picker">
@@ -174,14 +174,14 @@ export default defineComponent({
                   />
                   <button class="featured-product-close" type="button" aria-label="Close product list" @click="closeFeaturedProductMenu">×</button>
                 </div>
-                <div id="featured-product-options" class="featured-product-options" role="listbox" aria-label="Published products with images">
+                <div id="featured-product-options" class="featured-product-options" role="listbox"                 aria-label="Published hero products with images">
                   <button
                     class="featured-product-option"
                     type="button"
                     role="option"
                     :aria-selected="!themeForm.content.hero_product_id"
                     @click="chooseFeaturedProduct('')"
-                  >No featured product</button>
+                  >No hero product</button>
                   <button
                     v-if="themeForm.content.hero_product_id && !selectedFeaturedProduct"
                     class="featured-product-option"
@@ -189,7 +189,7 @@ export default defineComponent({
                     role="option"
                     aria-selected="true"
                     @click="chooseFeaturedProduct('')"
-                  >Unavailable product — clear selection</button>
+                  >Unavailable hero product — clear selection</button>
                   <button
                     v-for="product in filteredFeaturedProducts"
                     :key="product.id"
@@ -206,9 +206,9 @@ export default defineComponent({
                   <p v-if="!filteredFeaturedProducts.length && !(themeForm.content.hero_product_id && !selectedFeaturedProduct)" class="featured-product-empty">No matching products.</p>
                 </div>
               </div>
-              <small>Choose a published product with a photo to show it in the hero. Its image links to the product page.</small>
+              <small>Choose a published product with a photo for the hero image. Its image links to the product page.</small>
             </div>
-            <label class="field"><span>Default hero image <small>Optional</small></span><input type="file" accept="image/jpeg,image/png,image/webp,image/avif" :disabled="busy" @change="uploadHeroImage" /><small>Choose a JPG, PNG, WebP, or AVIF image up to 10 MB. It appears when no featured product is selected.</small></label>
+            <label class="field"><span>Default hero image <small>Optional</small></span><input type="file" accept="image/jpeg,image/png,image/webp,image/avif" :disabled="busy" @change="uploadHeroImage" /><small>Choose a JPG, PNG, WebP, or AVIF image up to 10 MB. It appears when no hero product is selected.</small></label>
             <div v-if="themeForm.content.hero_image_url" class="hero-image-preview-wrap">
               <img class="hero-image-preview" :src="themeForm.content.hero_image_url" alt="Hero image preview" />
               <button class="text-button text-button--danger" type="button" :disabled="busy" @click="themeForm.content.hero_image_url = ''">Remove hero image</button>
@@ -218,6 +218,12 @@ export default defineComponent({
             <label class="field"><span>Emphasized heading line</span><input v-model.trim="themeForm.content.hero_emphasis" maxlength="100" required /></label>
             <label class="field"><span>Description</span><textarea v-model.trim="themeForm.content.hero_description" maxlength="320" rows="3" required /></label>
             <label class="field"><span>Button label</span><input v-model.trim="themeForm.content.hero_cta_label" maxlength="60" required /></label>
+          </fieldset>
+
+          <fieldset class="appearance-group homepage-content-fields">
+            <legend>Homepage featured section</legend>
+            <label class="field"><span>Section heading</span><input v-model.trim="themeForm.content.featured_products_title" maxlength="120" required /></label>
+            <small>Products are marked as featured individually from the Products page.</small>
           </fieldset>
 
           <fieldset class="appearance-group homepage-content-fields">
@@ -245,7 +251,7 @@ export default defineComponent({
           </div>
           <div v-if="selectedFeaturedProductImage || themeForm.content.hero_image_url" class="theme-preview-hero-image">
             <img :src="selectedFeaturedProductImage || themeForm.content.hero_image_url" :alt="selectedFeaturedProduct?.title || 'Default hero image preview'" />
-            <span v-if="selectedFeaturedProduct">Featured: {{ selectedFeaturedProduct.title }}</span>
+            <span v-if="selectedFeaturedProduct">Hero image: {{ selectedFeaturedProduct.title }}</span>
           </div>
           <div class="theme-preview-story">
             <p>{{ themeForm.content.story_title }}<br /><em>{{ themeForm.content.story_emphasis }}</em></p>

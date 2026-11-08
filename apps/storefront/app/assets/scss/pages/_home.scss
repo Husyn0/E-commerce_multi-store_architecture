@@ -39,6 +39,7 @@
 .hero-note { position: absolute; z-index: 2; right: 20px; bottom: 20px; color: #fff; font-family: var(--serif); font-size: 15px; font-style: italic; line-height: 1.4; text-align: right; }
 
 .section, .page-section, .category-strip { width: min(var(--page), 100%); margin: 0 auto; padding: 91px 6.5vw; }
+.featured-products-section { padding-bottom: 30px; }
 .section-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin-bottom: 30px; }
 .section-heading h2 { margin: 9px 0 0; font-family: var(--serif); font-size: 34px; font-weight: 500; letter-spacing: -.04em; }
 .underlined-link, .continue-link, .back-link { display: inline-flex; align-items: center; gap: 10px; color: #645348; font-size: 11px; }

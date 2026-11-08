@@ -7,6 +7,7 @@ import { auth } from '../stores/auth'
 const sections = [
   ['dashboard', 'Overview'],
   ['products', 'Products'],
+  ['variants', 'Variants'],
   ['categories', 'Categories'],
   ['orders', 'Orders'],
   ['customers', 'Customers'],

@@ -1,6 +1,7 @@
 export const adminSections = {
   dashboard: ['Overview', 'A quick view of your store activity.'],
   products: ['Products', 'Manage the catalog for this tenant.'],
+  variants: ['Product variants', 'Manage option combinations, pricing, SKUs, and inventory across your catalog.'],
   categories: ['Categories', 'Organize products into storefront categories.'],
   orders: ['Orders', 'Review orders and update their fulfillment status.'],
   customers: ['Customers', 'Search and manage customer accounts for this store.'],

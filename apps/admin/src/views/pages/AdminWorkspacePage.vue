@@ -2,6 +2,7 @@
 import { computed, provide, reactive, ref, watch } from 'vue'
 import OverviewSection from '../../sections/OverviewSection.vue'
 import ProductsSection from '../../sections/ProductsSection.vue'
+import VariantsSection from '../../sections/VariantsSection.vue'
 import CategoriesSection from '../../sections/CategoriesSection.vue'
 import OrdersSection from '../../sections/OrdersSection.vue'
 import CustomersSection from '../../sections/CustomersSection.vue'
@@ -24,6 +25,12 @@ const loading = ref(false)
 const error = ref('')
 const notice = ref('')
 const rows = ref([])
+const variantRows = ref([])
+const variantProducts = ref([])
+const variantSearch = ref('')
+const newVariant = reactive({ product_id: '', sku: '', name: '', color: '', size: '', extraAttributes: [], price: 0, stock: 0 })
+const editingVariantId = ref('')
+const variantDraft = reactive({ sku: '', name: '', color: '', size: '', extraAttributes: [], price: 0, stock: 0 })
 const page = ref(1)
 const lastPage = ref(1)
 const settings = ref(null)
@@ -47,6 +54,7 @@ const themeForm = reactive({
     hero_cta_label: 'Explore the collection',
     hero_image_url: '',
     hero_product_id: '',
+    featured_products_title: 'Featured products',
     story_title: 'Less, but better.',
     story_emphasis: 'Always.',
     story_caption: 'Thoughtful design, made to be lived with.',
@@ -91,6 +99,9 @@ const productForm = reactive({
   category_id: '',
   is_active: true,
   published_at: '',
+  is_featured: false,
+  featured_from: '',
+  featured_until: '',
   media_files: [],
   images: [],
 })
@@ -113,6 +124,14 @@ const auditLimit = ref(25)
 function resetFeedback() {
   error.value = ''
   notice.value = ''
+}
+
+function productFeatureVisibility(product) {
+  if (!product.is_featured) return 'not featured'
+  const now = Date.now()
+  if (product.featured_from && new Date(product.featured_from).getTime() > now) return 'scheduled'
+  if (product.featured_until && new Date(product.featured_until).getTime() < now) return 'expired'
+  return 'featured'
 }
 
 async function loadSection(nextPage = 1, preserveFeedback = false) {
@@ -139,6 +158,20 @@ async function loadSection(nextPage = 1, preserveFeedback = false) {
       }
       page.value = response.meta?.current_page || nextPage
       lastPage.value = response.meta?.last_page || 1
+    } else if (section.value === 'variants') {
+      const firstPage = await api.get('/admin/products', { query: { per_page: 100, page: 1 } })
+      const products = [...(firstPage.data || [])]
+      for (let nextPage = 2; nextPage <= (firstPage.meta?.last_page || 1); nextPage += 1) {
+        const response = await api.get('/admin/products', { query: { per_page: 100, page: nextPage } })
+        products.push(...(response.data || []))
+      }
+      variantProducts.value = products
+      variantRows.value = products.flatMap((product) => (product.variants || []).map((variant) => ({
+        ...variant,
+        product_id: product.id,
+        product_title: product.title,
+        currency: product.currency,
+      })))
     } else if (section.value === 'categories') {
       const [response, categoryResponse] = await Promise.all([
         api.get('/admin/categories', { query: { page: nextPage, per_page: pageSizes.categories, q: filters.category_q } }),
@@ -202,6 +235,7 @@ async function loadSection(nextPage = 1, preserveFeedback = false) {
       Object.assign(themeForm.content, config.content || {})
       themeForm.content.hero_image_url = config.content?.hero_image_url || ''
       themeForm.content.hero_product_id = config.content?.hero_product_id || ''
+      delete themeForm.content.featured_product_ids
     } else if (section.value === 'audit') {
       const response = await api.get('/admin/audit-logs', {
         query: {
@@ -225,6 +259,100 @@ async function loadSection(nextPage = 1, preserveFeedback = false) {
   }
 }
 
+function beginVariantEdit(variant) {
+  editingVariantId.value = variant.id
+  const attributes = variant.attributes || {}
+  const colorKey = Object.keys(attributes).find((key) => key.toLowerCase() === 'color')
+  const sizeKey = Object.keys(attributes).find((key) => key.toLowerCase() === 'size')
+  Object.assign(variantDraft, {
+    sku: variant.sku || '', name: variant.name || '',
+    color: colorKey ? attributes[colorKey] : '',
+    size: sizeKey ? attributes[sizeKey] : '',
+    extraAttributes: Object.entries(attributes)
+      .filter(([key]) => key !== colorKey && key !== sizeKey)
+      .map(([label, value]) => ({ label, value })),
+    price: priceFromMinorUnits(variant.price_cents), stock: variant.stock,
+  })
+}
+
+function variantPayload(source) {
+  const attributes = {}
+  if (source.color.trim()) attributes.Color = source.color.trim()
+  if (source.size.trim()) attributes.Size = source.size.trim()
+  for (const attribute of source.extraAttributes) {
+    const label = attribute.label.trim()
+    const value = attribute.value.trim()
+    if (!label && !value) continue
+    if (!label || !value) throw new Error('Enter both a label and value for each additional option.')
+    if (Object.keys(attributes).some((key) => key.toLowerCase() === label.toLowerCase())) {
+      throw new Error(`The option “${label}” is repeated.`)
+    }
+    attributes[label] = value
+  }
+  if (!Object.keys(attributes).length) throw new Error('Add at least one option, such as a color or size.')
+  const stock = Number(source.stock)
+  const price = Number(source.price)
+  if (!Number.isInteger(stock) || stock < 0 || !Number.isFinite(price) || price < 0) {
+    throw new Error('Price must be non-negative and stock must be a whole number of zero or more.')
+  }
+  return { sku: source.sku.trim(), name: source.name.trim(), attributes, price_cents: priceToMinorUnits(price), stock }
+}
+
+async function saveVariant(variant = null) {
+  busy.value = true
+  resetFeedback()
+  try {
+    if (variant) {
+      const body = variantPayload(variantDraft)
+      await api.patch(`/admin/products/${variant.product_id}/variants/${variant.id}`, body)
+      editingVariantId.value = ''
+      notice.value = 'Variant updated.'
+    } else {
+      if (!newVariant.product_id) throw new Error('Choose a product for this variant.')
+      const body = variantPayload(newVariant)
+      await api.post(`/admin/products/${newVariant.product_id}/variants`, body)
+      Object.assign(newVariant, { product_id: '', sku: '', name: '', color: '', size: '', extraAttributes: [], price: 0, stock: 0 })
+      notice.value = 'Variant created.'
+    }
+    await loadSection(1, true)
+  } catch (requestError) {
+    error.value = requestError.message
+  } finally {
+    busy.value = false
+  }
+}
+
+async function deleteVariant(variant) {
+  if (!window.confirm(`Delete variant ${variant.sku}?`)) return
+  busy.value = true
+  resetFeedback()
+  try {
+    await api.delete(`/admin/products/${variant.product_id}/variants/${variant.id}`)
+    notice.value = 'Variant deleted.'
+    await loadSection(1, true)
+  } catch (requestError) {
+    error.value = requestError.message
+  } finally {
+    busy.value = false
+  }
+}
+
+async function saveVariantInventory(variant) {
+  busy.value = true
+  resetFeedback()
+  try {
+    const stock = Number(variant.stock)
+    if (!Number.isInteger(stock) || stock < 0) throw new Error('Stock must be a non-negative whole number.')
+    await api.patch(`/admin/products/${variant.product_id}/variants/${variant.id}/inventory`, { stock })
+    notice.value = `${variant.sku} stock updated.`
+    await loadSection(1, true)
+  } catch (requestError) {
+    error.value = requestError.message
+  } finally {
+    busy.value = false
+  }
+}
+
 async function removeProduct(product) {
   if (!window.confirm(`Delete "${product.title}"? Products with cart or order history must be deactivated instead.`)) return
   busy.value = true
@@ -233,6 +361,20 @@ async function removeProduct(product) {
     await api.delete(`/admin/products/${product.id}`)
     await loadSection(1, true)
     notice.value = 'Product deleted.'
+  } catch (requestError) {
+    error.value = requestError.message
+  } finally {
+    busy.value = false
+  }
+}
+
+async function toggleProductFeatured(product) {
+  busy.value = true
+  resetFeedback()
+  try {
+    await api.patch(`/admin/products/${product.id}`, { is_featured: !product.is_featured })
+    await loadSection(page.value, true)
+    notice.value = product.is_featured ? 'Product removed from featured products.' : 'Product added to featured products.'
   } catch (requestError) {
     error.value = requestError.message
   } finally {
@@ -308,6 +450,9 @@ function editProduct(product) {
     category_id: product.category_id || '',
     is_active: product.is_active,
     published_at: product.published_at || '',
+    is_featured: product.is_featured,
+    featured_from: product.featured_from || '',
+    featured_until: product.featured_until || '',
     media_files: [],
     images: product.images || [],
   })
@@ -317,7 +462,8 @@ function editProduct(product) {
 function newProduct() {
   Object.assign(productForm, {
     id: '', title: '', slug: '', description: '', sku: '', price: 0,
-    compare_at_price: '', variants: [], removed_variant_ids: [], category_id: '', is_active: true, published_at: '', media_files: [], images: [],
+    compare_at_price: '', variants: [], removed_variant_ids: [], category_id: '', is_active: true, published_at: '',
+    is_featured: false, featured_from: '', featured_until: '', media_files: [], images: [],
   })
   showProductForm.value = true
 }
@@ -364,6 +510,11 @@ async function saveProduct() {
     error.value = 'Each variant needs a SKU and at least one option, such as a color or size.'
     return
   }
+  if (productForm.featured_from && productForm.featured_until
+    && new Date(productForm.featured_until).getTime() < new Date(productForm.featured_from).getTime()) {
+    error.value = 'The featured end time must be on or after the featured start time.'
+    return
+  }
 
   busy.value = true
   resetFeedback()
@@ -379,6 +530,13 @@ async function saveProduct() {
       is_active: productForm.is_active,
       published_at: productForm.published_at
         ? new Date(productForm.published_at).toISOString()
+        : null,
+      is_featured: productForm.is_featured,
+      featured_from: productForm.featured_from
+        ? new Date(productForm.featured_from).toISOString()
+        : null,
+      featured_until: productForm.featured_until
+        ? new Date(productForm.featured_until).toISOString()
         : null,
     }
     if (productForm.id) {
@@ -788,16 +946,18 @@ watch(section, () => {
 
 provide('adminWorkspace', {
   route, router, section, busy, loading, error, notice, rows, page, lastPage, settings,
+  variantRows, variantProducts, variantSearch, newVariant, editingVariantId, variantDraft,
   themeForm, themeProducts, showProductForm, showCategoryForm, refundingOrder, refundAmount,
   refundReason, refundAttempt, categories, stockDrafts, dashboard, selectedOrder,
   selectedCustomer, filters, pageSizes, productForm, categoryForm, settingsForm, title,
   description, previewColors, auditCursor, nextAuditCursor, auditPage, auditLimit, resetFeedback,
-  loadSection, searchTable, changePageSize, removeProduct, clearProductPublishDate, removeProductImage, openOrder, openCustomer, editProduct, newProduct,
+  loadSection, searchTable, changePageSize, removeProduct, toggleProductFeatured, clearProductPublishDate, removeProductImage, openOrder, openCustomer, editProduct, newProduct,
   newCategory, editCategory, saveProduct, saveCategory, removeCategory,
   addProductVariant, removeProductVariant,
+  beginVariantEdit, saveVariant, deleteVariant, saveVariantInventory,
   saveSettings, saveTheme, uploadHeroImage, formatLocalDateTime, updateOrderStatus, startRefund,
   submitRefund, updateInventory, toggleCustomer, searchCustomers, filterAudit, previousAuditPage, changeAuditLimit,
-  nextAuditPage, resetAuditFilters, money, formatAddress, productVisibility,
+  nextAuditPage, resetAuditFilters, money, formatAddress, productVisibility, productFeatureVisibility,
   orderStatusOptions,
 })
 
@@ -810,6 +970,7 @@ provide('adminWorkspace', {
 
   <OverviewSection v-if="section === 'dashboard'" />
   <ProductsSection v-if="section === 'products'" />
+  <VariantsSection v-if="section === 'variants'" />
   <CategoriesSection v-if="section === 'categories'" />
   <OrdersSection v-if="section === 'orders'" />
   <CustomersSection v-if="section === 'customers'" />
@@ -819,4 +980,3 @@ provide('adminWorkspace', {
   <AppearanceSection v-if="section === 'appearance'" />
   <AuditSection v-if="section === 'audit'" />
 </template>
-

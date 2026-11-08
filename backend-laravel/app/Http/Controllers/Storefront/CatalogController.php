@@ -59,6 +59,34 @@ class CatalogController extends TenantApiController
         return ProductResource::collection($products);
     }
 
+    public function featured(Request $request)
+    {
+        $filters = $request->validate([
+            'page' => ['sometimes', 'integer', 'min:1'],
+            'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
+        ]);
+        $now = now();
+
+        $products = Product::query()
+            ->forTenant($this->tenantId())
+            ->with(['images', 'variants'])
+            ->where('is_featured', true)
+            ->where('is_active', true)
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', $now)
+            ->where(fn ($query) => $query
+                ->whereNull('featured_from')
+                ->orWhere('featured_from', '<=', $now))
+            ->where(fn ($query) => $query
+                ->whereNull('featured_until')
+                ->orWhere('featured_until', '>=', $now))
+            ->orderByDesc('published_at')
+            ->orderByDesc('id')
+            ->paginate($filters['per_page'] ?? 100);
+
+        return ProductResource::collection($products);
+    }
+
     public function show(string $slug): ProductResource
     {
         $product = Product::query()

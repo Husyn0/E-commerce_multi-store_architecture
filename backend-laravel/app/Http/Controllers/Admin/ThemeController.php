@@ -94,7 +94,7 @@ class ThemeController extends TenantApiController
             'theme_config.fonts.body' => ['sometimes', 'string', 'max:80'],
             'theme_config.logo_url' => ['sometimes', 'nullable', 'url', 'max:2048'],
             'theme_config.layout_variant' => ['sometimes', 'string', 'max:40'],
-            'theme_config.content' => ['sometimes', 'array:hero_eyebrow,hero_title,hero_emphasis,hero_description,hero_cta_label,hero_image_url,hero_product_id,story_title,story_emphasis,story_caption'],
+            'theme_config.content' => ['sometimes', 'array:hero_eyebrow,hero_title,hero_emphasis,hero_description,hero_cta_label,hero_image_url,hero_product_id,featured_products_title,story_title,story_emphasis,story_caption'],
             'theme_config.content.hero_eyebrow' => ['sometimes', 'string', 'min:1', 'max:100'],
             'theme_config.content.hero_title' => ['sometimes', 'string', 'min:1', 'max:120'],
             'theme_config.content.hero_emphasis' => ['sometimes', 'string', 'min:1', 'max:100'],
@@ -111,6 +111,7 @@ class ThemeController extends TenantApiController
                     ->whereNotNull('published_at')
                     ->where('published_at', '<=', now())),
             ],
+            'theme_config.content.featured_products_title' => ['sometimes', 'string', 'min:1', 'max:120'],
             'theme_config.content.story_title' => ['sometimes', 'string', 'min:1', 'max:120'],
             'theme_config.content.story_emphasis' => ['sometimes', 'string', 'min:1', 'max:100'],
             'theme_config.content.story_caption' => ['sometimes', 'string', 'min:1', 'max:240'],

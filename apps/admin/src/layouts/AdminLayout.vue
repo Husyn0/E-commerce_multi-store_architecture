@@ -13,6 +13,7 @@ const isLoading = ref(true)
 const navigation = [
   { label: 'Overview', name: 'dashboard', icon: '⌂', group: 'STORE' },
   { label: 'Products', name: 'products', icon: '▦' },
+  { label: 'Variants', name: 'variants', icon: '◇' },
   { label: 'Categories', name: 'categories', icon: '◇' },
   { label: 'Orders', name: 'orders', icon: '▤' },
   { label: 'Customers', name: 'customers', icon: '♙' },

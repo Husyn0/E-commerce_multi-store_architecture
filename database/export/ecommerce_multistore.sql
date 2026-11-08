@@ -492,6 +492,9 @@ CREATE TABLE `products` (
   `weight_grams` int DEFAULT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT '1',
   `published_at` timestamp NULL DEFAULT NULL,
+  `is_featured` tinyint(1) NOT NULL DEFAULT '0',
+  `featured_from` timestamp NULL DEFAULT NULL,
+  `featured_until` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -951,6 +954,7 @@ ALTER TABLE `products`
   ADD UNIQUE KEY `uq_products_tenant_slug` (`tenant_id`,`slug`),
   ADD UNIQUE KEY `uq_products_tenant_sku` (`tenant_id`,`sku`),
   ADD KEY `ix_products_catalog` (`tenant_id`,`category_id`,`is_active`,`published_at`),
+  ADD KEY `ix_products_featured_period` (`tenant_id`,`is_featured`,`featured_from`,`featured_until`),
   ADD KEY `fk_products_tenant_currency` (`tenant_id`,`currency`);
 
 --

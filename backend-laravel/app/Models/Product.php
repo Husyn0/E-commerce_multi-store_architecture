@@ -11,7 +11,10 @@ class Product extends TenantModel
     {
         return [
             'is_active' => 'boolean',
+            'is_featured' => 'boolean',
             'published_at' => 'datetime',
+            'featured_from' => 'datetime',
+            'featured_until' => 'datetime',
         ];
     }
 
