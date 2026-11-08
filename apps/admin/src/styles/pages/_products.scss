@@ -1,3 +1,5 @@
+.publish-date-control { display: flex; align-items: center; gap: 8px; }
+.publish-date-control input { min-width: 0; flex: 1; }
 .variant-editor { gap: 12px; }
 .variant-editor__heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
 .variant-editor__heading > div { display: grid; gap: 4px; }

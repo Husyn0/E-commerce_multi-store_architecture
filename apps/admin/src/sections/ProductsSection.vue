@@ -21,7 +21,7 @@ export default defineComponent({
           <div class="field"><label for="product-price">Selling price</label><input id="product-price" v-model.number="productForm.price" type="number" min="0" step="0.01" required /><small>Enter a normal price with up to two decimal places, for example 12.99.</small></div>
           <div class="field"><label for="product-compare">Compare-at price</label><input id="product-compare" v-model.number="productForm.compare_at_price" type="number" min="0" step="0.01" /><small>Optional original price shown crossed out. It must be higher than the selling price.</small></div>
           <div class="field"><label for="product-category">Category</label><select id="product-category" v-model="productForm.category_id"><option value="">Uncategorized</option><option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option></select></div>
-          <div class="field"><label for="product-published-at">Publish date/time</label><input id="product-published-at" :value="formatLocalDateTime(productForm.published_at)" type="datetime-local" @input="productForm.published_at = $event.target.value ? new Date($event.target.value).toISOString() : ''" /><small>Leave blank to keep this product unpublished.</small></div>
+          <div class="field"><label for="product-published-at">Publish date/time</label><div class="publish-date-control"><input id="product-published-at" :value="formatLocalDateTime(productForm.published_at)" type="datetime-local" @input="productForm.published_at = $event.target.value ? new Date($event.target.value).toISOString() : ''" /><button class="button button--secondary button--small" type="button" :disabled="busy || !productForm.published_at" @click="productForm.published_at = ''">Clear</button></div><small>Leave blank to keep this product unpublished.</small></div>
           <div class="field field--wide"><label for="product-description">Description</label><textarea id="product-description" v-model="productForm.description" required /></div>
           <div class="field field--wide variant-editor">
             <div class="variant-editor__heading">
@@ -67,7 +67,7 @@ export default defineComponent({
             </form>
           </td>
           <td><span class="status-pill" :class="`status-pill--${productVisibility(product)}`">{{ productVisibility(product) }}</span></td>
-          <td><div class="inline-actions"><button class="text-button" type="button" @click="editProduct(product)">Edit</button><button class="text-button text-button--danger" type="button" :disabled="busy" @click="removeProduct(product)">Delete</button></div></td>
+          <td><div class="inline-actions"><button class="text-button" type="button" @click="editProduct(product)">Edit</button><button v-if="product.published_at" class="text-button" type="button" :disabled="busy" @click="clearProductPublishDate(product)">Unpublish</button><button class="text-button text-button--danger" type="button" :disabled="busy" @click="removeProduct(product)">Delete</button></div></td>
         </tr></tbody>
       </table></div>
       <div class="pagination"><span>Page {{ page }} of {{ lastPage }}</span><div class="inline-actions"><button class="button button--secondary button--small" :disabled="page <= 1 || loading" @click="loadSection(page - 1)">Previous</button><button class="button button--secondary button--small" :disabled="page >= lastPage || loading" @click="loadSection(page + 1)">Next</button></div></div>

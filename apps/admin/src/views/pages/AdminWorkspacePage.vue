@@ -240,6 +240,21 @@ async function removeProduct(product) {
   }
 }
 
+async function clearProductPublishDate(product) {
+  if (!product.published_at) return
+  busy.value = true
+  resetFeedback()
+  try {
+    await api.patch(`/admin/products/${product.id}`, { published_at: null })
+    await loadSection(page.value, true)
+    notice.value = 'Product unpublished.'
+  } catch (requestError) {
+    error.value = requestError.message
+  } finally {
+    busy.value = false
+  }
+}
+
 async function openOrder(order) {
   busy.value = true
   resetFeedback()
@@ -777,7 +792,7 @@ provide('adminWorkspace', {
   refundReason, refundAttempt, categories, stockDrafts, dashboard, selectedOrder,
   selectedCustomer, filters, pageSizes, productForm, categoryForm, settingsForm, title,
   description, previewColors, auditCursor, nextAuditCursor, auditPage, auditLimit, resetFeedback,
-  loadSection, searchTable, changePageSize, removeProduct, removeProductImage, openOrder, openCustomer, editProduct, newProduct,
+  loadSection, searchTable, changePageSize, removeProduct, clearProductPublishDate, removeProductImage, openOrder, openCustomer, editProduct, newProduct,
   newCategory, editCategory, saveProduct, saveCategory, removeCategory,
   addProductVariant, removeProductVariant,
   saveSettings, saveTheme, uploadHeroImage, formatLocalDateTime, updateOrderStatus, startRefund,
@@ -804,5 +819,4 @@ provide('adminWorkspace', {
   <AppearanceSection v-if="section === 'appearance'" />
   <AuditSection v-if="section === 'audit'" />
 </template>
-
 
