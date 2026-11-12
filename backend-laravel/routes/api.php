@@ -71,6 +71,7 @@ Route::middleware([
     'auth:tenant-jwt',
     'tenant.admin',
 ])->prefix('admin')->group(function (): void {
+    Route::get('/auth/session', [AdminAuthController::class, 'session'])->name('admin.auth.session');
     Route::get('/dashboard', AdminDashboardController::class)->name('admin.dashboard');
     Route::apiResource('products', AdminProductController::class);
     Route::post('/products/{productId}/images', [AdminProductImageController::class, 'store'])

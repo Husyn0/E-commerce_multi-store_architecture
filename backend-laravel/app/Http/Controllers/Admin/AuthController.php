@@ -15,6 +15,18 @@ use Illuminate\Support\Str;
 
 class AuthController extends TenantApiController
 {
+    public function session(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        return response()->json(['user' => [
+            'id' => $user->id,
+            'email' => $user->email,
+            'first_name' => $user->first_name,
+            'last_name' => $user->last_name,
+            'role' => $user->role,
+        ]])->header('Cache-Control', 'no-store');
+    }
+
     public function login(
         Request $request,
         TenantAccessToken $accessTokens,
@@ -52,7 +64,7 @@ class AuthController extends TenantApiController
         return response()->json([
             'access_token' => $accessTokens->issue($user, $this->tenantContext()),
             'token_type' => 'Bearer',
-            'expires_in' => (int) config('auth.access_token_ttl', 5400),
+            'expires_in' => (int) config('auth.access_token_ttl', 7200),
             'user' => [
                 'id' => $user->id,
                 'email' => $user->email,
@@ -62,8 +74,8 @@ class AuthController extends TenantApiController
             ],
         ])
             ->header('Cache-Control', 'no-store')
-            ->withCookie(cookie('admin_refresh', $refreshToken, 60 * 24 * 30, '/', null, app()->isProduction(), true, false, 'lax'))
-            ->withCookie(cookie('admin_csrf', $csrfToken, 60 * 24 * 30, '/', null, app()->isProduction(), false, false, 'lax'));
+            ->withCookie(cookie('admin_refresh', $refreshToken, 120, '/', null, app()->isProduction(), true, false, 'lax'))
+            ->withCookie(cookie('admin_csrf', $csrfToken, 120, '/', null, app()->isProduction(), false, false, 'lax'));
     }
 
     public function refresh(
@@ -90,6 +102,7 @@ class AuthController extends TenantApiController
                 ->where('session_type', 'admin_refresh')
                 ->where('token_hash', $tokenHasher->hash($rawToken))
                 ->whereNull('revoked_at')
+                ->where('created_at', '>', now()->subHours(2))
                 ->where('expires_at', '>', now())
                 ->lockForUpdate()
                 ->first();
@@ -108,13 +121,15 @@ class AuthController extends TenantApiController
                 return null;
             }
 
+            $createdAt = $session->created_at->copy();
+            $expiresAt = $createdAt->copy()->addHours(2);
             $session->revoked_at = now();
             $session->save();
 
             $newRefreshToken = bin2hex(random_bytes(32));
-            $this->createRefreshSession($user, $request, $tokenHasher, $newRefreshToken);
+            $this->createRefreshSession($user, $request, $tokenHasher, $newRefreshToken, $expiresAt, $createdAt);
 
-            return [$user, $newRefreshToken];
+            return [$user, $newRefreshToken, $expiresAt];
         });
 
         if ($result === null) {
@@ -123,17 +138,18 @@ class AuthController extends TenantApiController
                 ->withCookie(cookie()->forget('admin_csrf'));
         }
 
-        [$user, $newRefreshToken] = $result;
+        [$user, $newRefreshToken, $expiresAt] = $result;
         $csrfToken = Str::random(48);
+        $cookieMinutes = max(1, now()->diffInMinutes($expiresAt, false));
 
         return response()->json([
             'access_token' => $accessTokens->issue($user, $this->tenantContext()),
             'token_type' => 'Bearer',
-            'expires_in' => (int) config('auth.access_token_ttl', 5400),
+            'expires_in' => (int) config('auth.access_token_ttl', 7200),
         ])
             ->header('Cache-Control', 'no-store')
-            ->withCookie(cookie('admin_refresh', $newRefreshToken, 60 * 24 * 30, '/', null, app()->isProduction(), true, false, 'lax'))
-            ->withCookie(cookie('admin_csrf', $csrfToken, 60 * 24 * 30, '/', null, app()->isProduction(), false, false, 'lax'));
+            ->withCookie(cookie('admin_refresh', $newRefreshToken, $cookieMinutes, '/', null, app()->isProduction(), true, false, 'lax'))
+            ->withCookie(cookie('admin_csrf', $csrfToken, $cookieMinutes, '/', null, app()->isProduction(), false, false, 'lax'));
     }
 
     public function logout(Request $request, SessionTokenHasher $tokenHasher): JsonResponse
@@ -163,6 +179,8 @@ class AuthController extends TenantApiController
         Request $request,
         SessionTokenHasher $tokenHasher,
         string $rawToken,
+        ?\Illuminate\Support\Carbon $expiresAt = null,
+        ?\Illuminate\Support\Carbon $createdAt = null,
     ): void {
         $session = new UserSession;
         $session->tenant_id = $user->tenant_id;
@@ -171,7 +189,10 @@ class AuthController extends TenantApiController
         $session->token_hash = $tokenHasher->hash($rawToken);
         $session->user_agent = Str::limit((string) $request->userAgent(), 512, '');
         $session->ip_address = $request->ip();
-        $session->expires_at = now()->addDays(30);
+        if ($createdAt !== null) {
+            $session->created_at = $createdAt;
+        }
+        $session->expires_at = $expiresAt ?? now()->addHours(2);
         $session->last_used_at = now();
         $session->save();
     }

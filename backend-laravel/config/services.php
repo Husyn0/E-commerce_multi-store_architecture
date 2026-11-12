@@ -4,7 +4,7 @@ return [
 
     'session_token_pepper' => env('SESSION_TOKEN_PEPPER'),
     'verification_code_pepper' => env('VERIFICATION_CODE_PEPPER'),
-    'session_idle_ttl' => (int) env('SESSION_IDLE_TTL', 1209600),
+    'session_idle_ttl' => (int) env('SESSION_IDLE_TTL', 86400),
     'webhook_payload_retention_days' => (int) env('WEBHOOK_PAYLOAD_RETENTION_DAYS', 30),
     'demo_webhook_secret' => env('DEMO_WEBHOOK_SECRET'),
     'turnstile' => [

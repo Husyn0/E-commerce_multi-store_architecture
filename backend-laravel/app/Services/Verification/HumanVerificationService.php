@@ -31,7 +31,7 @@ class HumanVerificationService
         }
         $payload = Crypt::encryptString(json_encode([
             'answer' => $answer,
-            'session' => $this->tokenHasher->hash($sessionToken),
+            'session' => bin2hex($this->tokenHasher->hash($sessionToken)),
             'action' => $action,
             'expires' => now()->addMinutes(3)->timestamp,
         ], JSON_THROW_ON_ERROR));
@@ -68,7 +68,7 @@ class HumanVerificationService
             }
             if (! is_array($challenge)
                 || ($challenge['action'] ?? null) !== $action
-                || ($challenge['session'] ?? null) !== $this->tokenHasher->hash($sessionToken)
+                || ($challenge['session'] ?? null) !== bin2hex($this->tokenHasher->hash($sessionToken))
                 || ! is_int($challenge['expires'] ?? null)
                 || $challenge['expires'] < now()->timestamp
                 || ! is_string($answer)

@@ -18,7 +18,7 @@ class TenantAccessToken
             'tid' => $context->tenant->id,
             'role' => $user->role,
             'iat' => $now,
-            'exp' => $now + (int) config('auth.access_token_ttl', 5400),
+            'exp' => $now + (int) config('auth.access_token_ttl', 7200),
         ];
         $header = $this->encode(['alg' => 'HS256', 'typ' => 'JWT']);
         $body = $this->encode($payload);

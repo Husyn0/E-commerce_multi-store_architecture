@@ -58,6 +58,16 @@ const form = reactive({
   postal_code: '',
   country_code: 'LB',
 })
+const countryQuery = ref('Lebanon')
+const countryOpen = ref(false)
+const countryCodes = 'AW AF AO AI AX AL AD AE AR AM AS AQ TF AG AU AT AZ BI BE BJ BQ BF BD BG BH BS BA BL BY BZ BM BO BR BB BN BT BV BW CF CA CC CH CL CN CI CM CD CG CK CO KM CV CR CU CW CX KY CY CZ DE DJ DM DK DO DZ EC EG ER EH ES EE ET FI FJ FK FR FO FM GA GB GE GG GH GI GN GP GM GW GQ GR GD GL GT GF GU GY HK HM HN HR HT HU ID IM IN IO IE IR IQ IS IL IT JM JE JO JP KZ KE KG KH KI KN KR KW LA LB LR LY LC LI LK LS LT LU LV MO MF MA MC MD MG MV MX MH MK ML MT MM ME MN MP MZ MR MS MQ MU MW MY YT NA NC NE NF NG NI NU NL NO NP NR NZ OM PK PA PN PE PH PW PG PL PR KP PT PY PS PF QA RE RO RU RW SA SD SN SG GS SH SJ SB SL SV SM SO PM RS SS ST SR SK SI SE SZ SX SC SY TC TD TG TH TJ TK TM TL TO TT TN TR TV TW TZ UG UA UM UY US UZ VA VC VE VG VI VN VU WF WS YE ZA ZM ZW'.split(' ')
+const countryNames = new Intl.DisplayNames(['en'], { type: 'region' })
+const countryOptions = countryCodes.map((code) => ({ code, name: countryNames.of(code) || code }))
+  .sort((first, second) => first.name.localeCompare(second.name))
+const filteredCountries = computed(() => {
+  const query = countryQuery.value.trim().toLocaleLowerCase()
+  return countryOptions.filter(({ code, name }) => !query || name.toLocaleLowerCase().includes(query) || code.toLocaleLowerCase().includes(query)).slice(0, 30)
+})
 const paymentConfig = ref<PaymentConfiguration | null>(null)
 const customer = ref<CheckoutCustomer | null>(null)
 const paymentMethod = ref<'cash_on_delivery' | 'online'>('cash_on_delivery')
@@ -73,6 +83,8 @@ const humanToken = ref('')
 const captchaAnswer = ref('')
 const captchaToken = ref('')
 const captchaImage = ref('')
+const humanVerified = ref(false)
+const checkingHuman = ref(false)
 const humanError = ref('')
 const accountLoading = ref(true)
 let humanWidgetId = ''
@@ -117,6 +129,10 @@ async function startCheckout() {
     error.value = 'Your bag is empty.'
     return
   }
+  if (!form.country_code) {
+    error.value = 'Choose a country from the country list.'
+    return
+  }
   if (paymentMethod.value === 'online' && !onlineAvailable.value) {
     error.value = 'Online card payment is not configured for this store yet. Choose cash on delivery.'
     return
@@ -125,12 +141,7 @@ async function startCheckout() {
   pending.value = true
   error.value = ''
   try {
-    const responseToken = humanDriver.value === 'demo' ? captchaToken.value : humanToken.value
-    if (humanDriver.value === 'demo' && (!responseToken || !captchaAnswer.value.trim())) throw new Error('Complete the CAPTCHA before placing your order.')
-    if (humanDriver.value !== 'demo' && !responseToken) {
-      throw new Error('Complete the human verification challenge before placing your order.')
-    }
-    await api.send('verification/human', 'POST', { action: 'checkout', response_token: responseToken, ...(humanDriver.value === 'demo' ? { answer: captchaAnswer.value } : {}) })
+    if (!humanVerified.value) throw new Error('Verify the CAPTCHA before placing your order.')
 
     if (!checkoutKey.value) checkoutKey.value = crypto.randomUUID()
     const result = await api.send<CheckoutResponse>('checkout', 'POST', {
@@ -163,9 +174,45 @@ async function startCheckout() {
   } catch (failure) {
     error.value = apiErrorMessage(failure)
     humanToken.value = ''
+    humanVerified.value = false
     resetHumanChallenge()
   } finally {
     pending.value = false
+  }
+}
+
+function selectCountry(country: { code: string; name: string }) {
+  form.country_code = country.code
+  countryQuery.value = country.name
+  countryOpen.value = false
+}
+
+function chooseFirstCountry() {
+  const country = filteredCountries.value[0]
+  if (country) selectCountry(country)
+}
+
+function closeCountryList() {
+  window.setTimeout(() => { countryOpen.value = false }, 150)
+}
+
+async function verifyHuman() {
+  const responseToken = humanDriver.value === 'demo' ? captchaToken.value : humanToken.value
+  if (!responseToken || (humanDriver.value === 'demo' && !captchaAnswer.value.trim())) return
+  checkingHuman.value = true
+  humanError.value = ''
+  try {
+    await api.send('verification/human', 'POST', {
+      action: 'checkout',
+      response_token: responseToken,
+      ...(humanDriver.value === 'demo' ? { answer: captchaAnswer.value } : {}),
+    })
+    humanVerified.value = true
+  } catch (failure) {
+    humanVerified.value = false
+    humanError.value = apiErrorMessage(failure)
+  } finally {
+    checkingHuman.value = false
   }
 }
 
@@ -191,9 +238,9 @@ function loadHumanChallenge() {
     humanWidgetId = widget.render('#checkout-human-check', {
       sitekey: siteKey,
       ...(isTurnstile ? { action: 'checkout' } : {}),
-      callback: (token: string) => { humanToken.value = token; humanError.value = '' },
-      'expired-callback': () => { humanToken.value = '' },
-      'error-callback': () => { humanToken.value = '' },
+      callback: (token: string) => { humanToken.value = token; humanVerified.value = false; humanError.value = '' },
+      'expired-callback': () => { humanToken.value = ''; humanVerified.value = false },
+      'error-callback': () => { humanToken.value = ''; humanVerified.value = false },
     })
   }
 
@@ -332,13 +379,21 @@ useSeoMeta({ title: 'Checkout', description: 'Enter delivery details and choose 
           </div>
           <div class="checkout-form__row">
             <label class="form-field"><span>Postal code</span><input v-model.trim="form.postal_code" autocomplete="postal-code" required maxlength="32"></label>
-            <label class="form-field"><span>Country code</span><input v-model.trim="form.country_code" autocomplete="country" required minlength="2" maxlength="2" placeholder="LB"></label>
+            <div class="country-picker">
+              <label class="form-field"><span>Country</span><input v-model="countryQuery" role="combobox" aria-autocomplete="list" :aria-expanded="countryOpen" aria-controls="checkout-country-options" autocomplete="off" required placeholder="Search countries" @focus="countryOpen = true" @input="form.country_code = ''; countryOpen = true" @keydown.enter.prevent="chooseFirstCountry" @keydown.esc="countryOpen = false" @blur="closeCountryList"></label>
+              <div v-if="countryOpen" id="checkout-country-options" class="country-picker__options" role="listbox">
+                <button v-for="country in filteredCountries" :key="country.code" class="country-picker__option" type="button" role="option" :aria-selected="form.country_code === country.code" @mousedown.prevent="selectCountry(country)">{{ country.name }} <span>{{ country.code }}</span></button>
+                <p v-if="!filteredCountries.length" class="country-picker__empty">No matching countries</p>
+              </div>
+            </div>
           </div>
         </section>
         <section class="checkout-panel">
           <h2>Human verification</h2>
-          <div v-if="humanDriver === 'demo'" class="register-human-demo"><img v-if="captchaImage" :src="captchaImage" alt="CAPTCHA word challenge"><label class="form-field"><span>Enter the letters shown</span><input v-model="captchaAnswer" autocomplete="off" autocapitalize="characters" maxlength="6" required></label></div>
+          <div v-if="humanDriver === 'demo'" class="register-human-demo"><img v-if="captchaImage" :src="captchaImage" alt="CAPTCHA word challenge"><label class="form-field"><span>Enter the letters shown</span><input v-model="captchaAnswer" autocomplete="off" autocapitalize="characters" maxlength="6" required :disabled="humanVerified"></label></div>
           <div v-else id="checkout-human-check" class="register-human-check" />
+          <button class="button button--outline code-button" type="button" :disabled="checkingHuman || humanVerified || (humanDriver === 'demo' && (!captchaToken || !captchaAnswer.trim())) || (humanDriver !== 'demo' && !humanToken)" @click="verifyHuman">{{ checkingHuman ? 'Checking…' : humanVerified ? 'Verified ✓' : 'Verify code' }}</button>
+          <p v-if="humanVerified" class="success-box" role="status">Human verification complete.</p>
           <p v-if="humanError" class="error-box" role="alert">{{ humanError }}</p>
           <p class="checkout-small-print">Complete this check to protect the store from automated orders.</p>
         </section>
@@ -365,7 +420,7 @@ useSeoMeta({ title: 'Checkout', description: 'Enter delivery details and choose 
         <span>{{ checkout ? 'Order total' : `${cart?.items.length} item${cart?.items.length === 1 ? '' : 's'}` }}</span>
         <strong>{{ checkout ? formatMoney(checkout.order.total_cents, checkout.order.currency) : formatMoney(cart?.subtotal_cents ?? 0, cart?.currency ?? 'USD') }}</strong>
       </aside>
-      <button class="button button--dark button--wide" type="submit" :disabled="pending || (stage === 'details' && (!cart?.items.length || !accountVerified || accountLoading || (humanDriver === 'demo' && (!captchaToken || !captchaAnswer.trim())) || (humanDriver !== 'demo' && !humanToken)))">
+      <button class="button button--dark button--wide" type="submit" :disabled="pending || (stage === 'details' && (!cart?.items.length || !accountVerified || accountLoading || !humanVerified))">
         {{ pending ? (stage === 'payment' ? 'Processing payment…' : 'Placing order…') : stage === 'payment' ? 'Pay securely' : paymentMethod === 'cash_on_delivery' ? 'Place order' : 'Continue to payment' }}
       </button>
     </form>

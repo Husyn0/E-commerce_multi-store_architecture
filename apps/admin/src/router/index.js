@@ -36,7 +36,14 @@ export const router = createRouter({
   ],
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
+  if ((to.meta.requiresAuth || to.meta.guestOnly) && !auth.isAuthenticated) {
+    try {
+      await auth.restore()
+    } catch {
+      // A missing or expired refresh session should continue to the login route.
+    }
+  }
   if (to.meta.requiresAuth && !auth.isAuthenticated) return { name: 'login' }
   if (to.meta.guestOnly && auth.isAuthenticated) return { name: 'dashboard' }
 })

@@ -34,14 +34,6 @@ async function loadTenant() {
 onMounted(async () => {
   await loadTenant()
 
-  if (tenant.value?.host_type === 'admin' && tenant.value.status === 'active') {
-    try {
-      await auth.restore()
-    } catch (error) {
-      appError.value = error.message
-    }
-  }
-
   statusTimer = window.setInterval(loadTenant, 30_000)
   isLoading.value = false
 })

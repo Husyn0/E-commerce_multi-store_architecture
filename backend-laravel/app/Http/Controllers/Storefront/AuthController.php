@@ -172,7 +172,7 @@ class AuthController extends TenantApiController
         $session->token_hash = $tokenHasher->hash($token);
         $session->user_agent = mb_substr((string) $request->userAgent(), 0, 512);
         $session->ip_address = $request->ip();
-        $session->expires_at = now()->addDays(30);
+        $session->expires_at = now()->addHours(24);
         $session->save();
 
         return $token;

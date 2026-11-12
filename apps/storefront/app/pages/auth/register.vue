@@ -29,6 +29,8 @@ const codeSent = ref(false)
 const captchaAnswer = ref('')
 const captchaToken = ref('')
 const captchaImage = ref('')
+const humanVerified = ref(false)
+const checkingHuman = ref(false)
 const humanToken = ref('')
 const humanError = ref('')
 const error = ref('')
@@ -74,10 +76,11 @@ async function loadChallengeWidget() {
       ...(isTurnstile ? { action: 'register' } : {}),
       callback: (token: string) => {
         humanToken.value = token
+        humanVerified.value = false
         humanError.value = ''
       },
-      'expired-callback': () => { humanToken.value = '' },
-      'error-callback': () => { humanToken.value = '' },
+      'expired-callback': () => { humanToken.value = ''; humanVerified.value = false },
+      'error-callback': () => { humanToken.value = ''; humanVerified.value = false },
     })
   }
 
@@ -102,6 +105,26 @@ async function loadChallengeWidget() {
   script.onload = render
   script.onerror = () => { humanError.value = 'The human verification challenge could not be loaded.' }
   document.head.appendChild(script)
+}
+
+async function verifyHuman() {
+  const responseToken = humanDriver.value === 'demo' ? captchaToken.value : humanToken.value
+  if (!responseToken || (humanDriver.value === 'demo' && !captchaAnswer.value.trim())) return
+  checkingHuman.value = true
+  humanError.value = ''
+  try {
+    await api.send('verification/human', 'POST', {
+      action: 'register',
+      response_token: responseToken,
+      ...(humanDriver.value === 'demo' ? { answer: captchaAnswer.value } : {}),
+    })
+    humanVerified.value = true
+  } catch (failure) {
+    humanVerified.value = false
+    humanError.value = apiErrorMessage(failure)
+  } finally {
+    checkingHuman.value = false
+  }
 }
 
 async function sendEmailCode() {
@@ -131,17 +154,7 @@ async function register() {
   try {
     if (!cart.value) await refresh()
 
-    const responseToken = humanDriver.value === 'demo' ? captchaToken.value : humanToken.value
-    if (humanDriver.value === 'demo' && (!responseToken || !captchaAnswer.value.trim())) throw new Error('Complete the CAPTCHA before continuing.')
-    if (humanDriver.value !== 'demo' && !responseToken) {
-      throw new Error('Complete the human verification challenge before continuing.')
-    }
-
-    await api.send('verification/human', 'POST', {
-      action: 'register',
-      response_token: responseToken,
-      ...(humanDriver.value === 'demo' ? { answer: captchaAnswer.value } : {}),
-    })
+    if (!humanVerified.value) throw new Error('Verify the CAPTCHA before continuing.')
 
     const result = await api.send<{ user: Customer }>('auth/register', 'POST', {
       email: email.value.trim(),
@@ -205,12 +218,14 @@ onMounted(loadChallengeWidget)
         <label class="form-field"><span>Password</span><input v-model="password" type="password" autocomplete="new-password" minlength="8" maxlength="255" required placeholder="At least 8 characters" /></label>
         <label class="form-field"><span>Confirm password</span><input v-model="passwordConfirmation" type="password" autocomplete="new-password" minlength="8" maxlength="255" required placeholder="Enter your password again" /></label>
 
-        <div v-if="humanDriver === 'demo'" class="register-human-demo"><img v-if="captchaImage" :src="captchaImage" alt="CAPTCHA word challenge" /><label class="form-field"><span>Enter the letters shown</span><input v-model="captchaAnswer" autocomplete="off" autocapitalize="characters" maxlength="6" required /></label></div>
+        <div v-if="humanDriver === 'demo'" class="register-human-demo"><img v-if="captchaImage" :src="captchaImage" alt="CAPTCHA word challenge" /><label class="form-field"><span>Enter the letters shown</span><input v-model="captchaAnswer" autocomplete="off" autocapitalize="characters" maxlength="6" required :disabled="humanVerified" /></label></div>
         <div v-else id="register-human-check" class="register-human-check" />
+        <button class="button button--outline code-button" type="button" :disabled="checkingHuman || humanVerified || (humanDriver === 'demo' && (!captchaToken || !captchaAnswer.trim())) || (humanDriver !== 'demo' && !humanToken)" @click="verifyHuman">{{ checkingHuman ? 'Checking…' : humanVerified ? 'Verified ✓' : 'Verify code' }}</button>
+        <p v-if="humanVerified" class="success-box" role="status">Human verification complete.</p>
         <p v-if="humanError" class="error-box" role="alert">{{ humanError }}</p>
         <p v-if="notice" class="success-box" role="status">{{ notice }}</p>
         <p v-if="error" class="error-box" role="alert">{{ error }}</p>
-        <button class="button button--dark button--wide" type="submit" :disabled="busy || Boolean(humanError)">
+        <button class="button button--dark button--wide" type="submit" :disabled="busy || Boolean(humanError) || !humanVerified">
           {{ busy ? 'Creating account…' : 'Create account' }} <span v-if="!busy">→</span>
         </button>
       </form>

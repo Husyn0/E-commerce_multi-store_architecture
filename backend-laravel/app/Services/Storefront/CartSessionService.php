@@ -56,7 +56,7 @@ class CartSessionService
                 $cart->tenant_id = $context->tenant->id;
                 $cart->session_token_hash = $hash;
                 $cart->currency = $context->tenant->default_currency;
-                $cart->expires_at = now()->addDays(30);
+                $cart->expires_at = now()->addHours(24);
                 $cart->save();
             } catch (QueryException $exception) {
                 $cart = Cart::query()
@@ -76,7 +76,7 @@ class CartSessionService
 
     public function refreshExpiry(Cart $cart): void
     {
-        $cart->expires_at = now()->addDays(30);
+        $cart->expires_at = now()->addHours(24);
         $cart->save();
     }
 
@@ -85,14 +85,14 @@ class CartSessionService
         $secure = $request->isSecure() || app()->isProduction();
         $cookies = $session->token === null
             ? [cookie('storefront_cart', '', -1, '/', null, $secure, true, false, 'lax')]
-            : [cookie('storefront_cart', $session->token, 60 * 24 * 30, '/', null, $secure, true, false, 'lax')];
+            : [cookie('storefront_cart', $session->token, 60 * 24, '/', null, $secure, true, false, 'lax')];
 
         $csrf = $request->cookie('storefront_csrf');
         if (! $this->csrf->isValid(is_string($csrf) ? $csrf : null)) {
             $csrf = $this->csrf->issue();
         }
 
-        $cookies[] = cookie('storefront_csrf', $csrf, 60 * 24 * 30, '/', null, $secure, false, false, 'lax');
+        $cookies[] = cookie('storefront_csrf', $csrf, 60 * 24, '/', null, $secure, false, false, 'lax');
 
         return $cookies;
     }
@@ -130,7 +130,7 @@ class CartSessionService
             } elseif ($guestCart !== null && $cart === null) {
                 $guestCart->user_id = $lockedUser->id;
                 $guestCart->session_token_hash = null;
-                $guestCart->expires_at = now()->addDays(30);
+                $guestCart->expires_at = now()->addHours(24);
                 $guestCart->save();
                 $cart = $guestCart;
                 $this->auditLogger->web(
@@ -149,10 +149,10 @@ class CartSessionService
                 $cart->tenant_id = $context->tenant->id;
                 $cart->user_id = $lockedUser->id;
                 $cart->currency = $context->tenant->default_currency;
-                $cart->expires_at = now()->addDays(30);
+                $cart->expires_at = now()->addHours(24);
                 $cart->save();
             } else {
-                $cart->expires_at = now()->addDays(30);
+                $cart->expires_at = now()->addHours(24);
                 $cart->save();
             }
 

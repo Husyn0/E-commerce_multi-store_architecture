@@ -14,8 +14,8 @@ class StorefrontSessionCookies
         $secure = $request->isSecure() || app()->isProduction();
 
         return $response
-            ->withCookie(cookie('storefront_session', $token, 60 * 24 * 30, '/', null, $secure, true, false, 'lax'))
-            ->withCookie(cookie('storefront_csrf', $this->csrf->issue(), 60 * 24 * 30, '/', null, $secure, false, false, 'lax'))
+            ->withCookie(cookie('storefront_session', $token, 60 * 24, '/', null, $secure, true, false, 'lax'))
+            ->withCookie(cookie('storefront_csrf', $this->csrf->issue(), 60 * 24, '/', null, $secure, false, false, 'lax'))
             ->header('Cache-Control', 'no-store');
     }
 
@@ -25,7 +25,7 @@ class StorefrontSessionCookies
 
         return $response
             ->withCookie(cookie('storefront_session', '', -1, '/', null, $secure, true, false, 'lax'))
-            ->withCookie(cookie('storefront_csrf', $this->csrf->issue(), 60 * 24 * 30, '/', null, $secure, false, false, 'lax'))
+            ->withCookie(cookie('storefront_csrf', $this->csrf->issue(), 60 * 24, '/', null, $secure, false, false, 'lax'))
             ->header('Cache-Control', 'no-store');
     }
 }

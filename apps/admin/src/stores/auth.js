@@ -15,8 +15,14 @@ export const auth = reactive({
   async restore() {
     try {
       const restored = await refreshAccessToken()
-      if (!restored) this.clear()
-      return restored
+      if (!restored) {
+        this.clear()
+        return false
+      }
+      const session = await api.get('/admin/auth/session')
+      this.user = session.user
+      this.isAuthenticated = true
+      return true
     } catch (error) {
       this.clear()
       throw error
