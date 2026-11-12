@@ -12,6 +12,25 @@ interface CheckoutCustomer {
   phone_verified: boolean
 }
 
+interface SavedAddress {
+  id: string
+  label: string | null
+  recipient_name: string
+  phone: string | null
+  line1: string
+  line2: string | null
+  city: string
+  state: string | null
+  postal_code: string
+  country_code: string
+  is_default_shipping: boolean
+}
+
+interface CheckoutAccount {
+  user: CheckoutCustomer
+  addresses: SavedAddress[]
+}
+
 interface ChallengeWidget {
   render(target: string, options: Record<string, unknown>): string
   reset?(widgetId?: string): void
@@ -70,6 +89,8 @@ const filteredCountries = computed(() => {
 })
 const paymentConfig = ref<PaymentConfiguration | null>(null)
 const customer = ref<CheckoutCustomer | null>(null)
+const savedAddresses = ref<SavedAddress[]>([])
+const selectedAddressId = ref('')
 const paymentMethod = ref<'cash_on_delivery' | 'online'>('cash_on_delivery')
 const stage = ref<'details' | 'payment' | 'complete'>('details')
 const checkout = ref<CheckoutResponse | null>(null)
@@ -99,9 +120,10 @@ onMounted(async () => {
     api.get<PaymentConfiguration>('payment-config')
       .then((config) => { paymentConfig.value = config })
       .catch(() => { paymentConfig.value = null }),
-    api.get<{ user: CheckoutCustomer }>('account')
+    api.get<CheckoutAccount>('account')
       .then((account) => {
         customer.value = account.user
+        savedAddresses.value = account.addresses
         form.email = account.user.email
         form.phone = account.user.phone || ''
       })
@@ -185,6 +207,23 @@ function selectCountry(country: { code: string; name: string }) {
   form.country_code = country.code
   countryQuery.value = country.name
   countryOpen.value = false
+}
+
+function applySavedAddress() {
+  const address = savedAddresses.value.find((item) => item.id === selectedAddressId.value)
+  if (!address) return
+
+  Object.assign(form, {
+    recipient_name: address.recipient_name,
+    phone: address.phone || customer.value?.phone || '',
+    line1: address.line1,
+    line2: address.line2 || '',
+    city: address.city,
+    state: address.state || '',
+    postal_code: address.postal_code,
+    country_code: address.country_code,
+  })
+  countryQuery.value = countryOptions.find((country) => country.code === address.country_code)?.name || address.country_code
 }
 
 function chooseFirstCountry() {
@@ -370,6 +409,7 @@ useSeoMeta({ title: 'Checkout', description: 'Enter delivery details and choose 
         </section>
         <section class="checkout-panel">
           <h2>Delivery address</h2>
+          <label v-if="savedAddresses.length" class="form-field"><span>Use a saved address</span><select v-model="selectedAddressId" @change="applySavedAddress"><option value="">Enter address manually</option><option v-for="address in savedAddresses" :key="address.id" :value="address.id">{{ address.label || address.recipient_name }} · {{ address.line1 }}, {{ address.city }}</option></select></label>
           <label class="form-field"><span>Recipient name</span><input v-model.trim="form.recipient_name" autocomplete="name" required maxlength="160"></label>
           <label class="form-field"><span>Address</span><input v-model.trim="form.line1" autocomplete="address-line1" required maxlength="255"></label>
           <label class="form-field"><span>Apartment, suite or unit <small>Optional</small></span><input v-model.trim="form.line2" autocomplete="address-line2" maxlength="255"></label>
