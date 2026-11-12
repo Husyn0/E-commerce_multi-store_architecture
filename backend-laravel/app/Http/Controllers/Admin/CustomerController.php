@@ -44,6 +44,13 @@ class CustomerController extends TenantApiController
         $customer = User::query()
             ->where('tenant_id', $this->tenantId())
             ->where('role', 'customer')
+            ->with([
+                'addresses' => fn ($query) => $query->forTenant($this->tenantId())->orderByDesc('is_default_shipping')->orderByDesc('created_at'),
+                'orders' => fn ($query) => $query->forTenant($this->tenantId())
+                    ->withSum(['refunds as refunded_total_cents' => fn ($refunds) => $refunds->where('status', 'succeeded')], 'amount_cents')
+                    ->orderByDesc('created_at')
+                    ->limit(25),
+            ])
             ->findOrFail($customerId);
 
         return new CustomerResource($customer);

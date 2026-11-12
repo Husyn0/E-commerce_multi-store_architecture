@@ -2,4 +2,8 @@
 .clickable-row:hover td { background: #f6f7f3 !important; }
 .detail-card, .customer-detail { margin-bottom: 17px; }
 .detail-section { margin-top: 23px; }
+.customer-address-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+.customer-address-card { display: grid; gap: 6px; padding: 13px; border: 1px solid var(--line); background: #fff; }
+.customer-address-card p { margin: 0; color: #5e5c57; font-size: 12px; line-height: 1.6; }
+.customer-address-card small { color: #89847b; font-size: 11px; }
 .subheading { margin: 0 0 10px; color: #44453e; font-size: 13px; font-weight: 680; }

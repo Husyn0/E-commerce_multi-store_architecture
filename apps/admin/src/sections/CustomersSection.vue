@@ -24,6 +24,25 @@ export default defineComponent({
           <div class="detail-item"><div class="detail-label">Phone verified</div><div class="detail-value">{{ selectedCustomer.phone_verified_at ? new Date(selectedCustomer.phone_verified_at).toLocaleString() : 'Not verified' }}</div></div>
           <div class="detail-item"><div class="detail-label">Customer since</div><div class="detail-value">{{ new Date(selectedCustomer.created_at).toLocaleString() }}</div></div>
         </div>
+        <div class="detail-section">
+          <h2 class="subheading">Saved addresses</h2>
+          <div v-if="!selectedCustomer.addresses?.length" class="empty-state">No saved addresses.</div>
+          <div v-else class="customer-address-list">
+            <article v-for="address in selectedCustomer.addresses" :key="address.id" class="customer-address-card">
+              <strong>{{ address.label || address.recipient_name }}</strong>
+              <span v-if="address.is_default_shipping || address.is_default_billing" class="secondary-cell">{{ [address.is_default_shipping ? 'Default shipping' : '', address.is_default_billing ? 'Default billing' : ''].filter(Boolean).join(' · ') }}</span>
+              <p>{{ formatAddress(address) }}</p>
+              <small>{{ address.phone || 'No phone on this address' }}</small>
+            </article>
+          </div>
+        </div>
+        <div class="detail-section">
+          <h2 class="subheading">Order history</h2>
+          <div v-if="!selectedCustomer.orders?.length" class="empty-state">No orders for this customer.</div>
+          <div v-else class="table-scroll"><table class="data-table"><thead><tr><th>Order</th><th>Date</th><th>Fulfillment</th><th>Payment</th><th>Total</th></tr></thead><tbody>
+            <tr v-for="order in selectedCustomer.orders" :key="order.id"><td class="primary-cell">{{ order.order_number }}</td><td>{{ new Date(order.created_at).toLocaleDateString() }}</td><td><span class="status-pill">{{ order.status }}</span></td><td>{{ order.payment_provider === 'cash_on_delivery' ? 'Due on delivery' : order.payment_status.replaceAll('_', ' ') }}</td><td>{{ money(order.total_cents, order.currency) }}</td></tr>
+          </tbody></table></div>
+        </div>
       </div>
     </div>
     <div class="card-head"><span class="card-title">Customer accounts</span><div class="filter-row">
