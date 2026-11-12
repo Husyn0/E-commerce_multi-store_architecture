@@ -186,6 +186,9 @@ Route::middleware([
     Route::post('/verification/email', [VerificationController::class, 'issueEmail'])
         ->middleware([VerifyStorefrontCsrf::class, 'throttle:5,1'])
         ->name('storefront.verification.email');
+    Route::post('/verification/human/challenge', [VerificationController::class, 'issueHumanChallenge'])
+        ->middleware([VerifyStorefrontCsrf::class, 'throttle:20,1'])
+        ->name('storefront.verification.human.challenge');
     Route::post('/verification/human', [VerificationController::class, 'verifyHuman'])
         ->middleware([VerifyStorefrontCsrf::class, 'throttle:10,1'])
         ->name('storefront.verification.human');

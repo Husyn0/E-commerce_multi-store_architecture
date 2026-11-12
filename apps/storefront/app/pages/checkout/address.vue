@@ -70,7 +70,9 @@ const stripe = ref<StripeClient | null>(null)
 const elements = ref<StripeElements | null>(null)
 const checkoutKey = ref('')
 const humanToken = ref('')
-const demoHumanConfirmed = ref(false)
+const captchaAnswer = ref('')
+const captchaToken = ref('')
+const captchaImage = ref('')
 const humanError = ref('')
 const accountLoading = ref(true)
 let humanWidgetId = ''
@@ -123,14 +125,12 @@ async function startCheckout() {
   pending.value = true
   error.value = ''
   try {
-    const responseToken = humanDriver.value === 'demo' ? 'demo-pass' : humanToken.value
-    if (humanDriver.value === 'demo' && !demoHumanConfirmed.value) {
-      throw new Error('Complete the human verification check before placing your order.')
-    }
+    const responseToken = humanDriver.value === 'demo' ? captchaToken.value : humanToken.value
+    if (humanDriver.value === 'demo' && (!responseToken || !captchaAnswer.value.trim())) throw new Error('Complete the CAPTCHA before placing your order.')
     if (humanDriver.value !== 'demo' && !responseToken) {
       throw new Error('Complete the human verification challenge before placing your order.')
     }
-    await api.send('verification/human', 'POST', { action: 'checkout', response_token: responseToken })
+    await api.send('verification/human', 'POST', { action: 'checkout', response_token: responseToken, ...(humanDriver.value === 'demo' ? { answer: captchaAnswer.value } : {}) })
 
     if (!checkoutKey.value) checkoutKey.value = crypto.randomUUID()
     const result = await api.send<CheckoutResponse>('checkout', 'POST', {
@@ -170,7 +170,13 @@ async function startCheckout() {
 }
 
 function loadHumanChallenge() {
-  if (import.meta.server || humanDriver.value === 'demo') return
+  if (import.meta.server) return
+  if (humanDriver.value === 'demo') {
+    api.send<{ challenge_token: string; image: string }>('verification/human/challenge', 'POST', { action: 'checkout' })
+      .then((challenge) => { captchaToken.value = challenge.challenge_token; captchaImage.value = challenge.image })
+      .catch((failure) => { humanError.value = apiErrorMessage(failure) })
+    return
+  }
 
   const isTurnstile = humanDriver.value === 'turnstile'
   const siteKey = isTurnstile ? runtimeConfig.public.turnstileSiteKey : runtimeConfig.public.hcaptchaSiteKey
@@ -331,7 +337,7 @@ useSeoMeta({ title: 'Checkout', description: 'Enter delivery details and choose 
         </section>
         <section class="checkout-panel">
           <h2>Human verification</h2>
-          <label v-if="humanDriver === 'demo'" class="register-human-demo"><input v-model="demoHumanConfirmed" type="checkbox"> I’m human and ready to place this order</label>
+          <div v-if="humanDriver === 'demo'" class="register-human-demo"><img v-if="captchaImage" :src="captchaImage" alt="CAPTCHA word challenge"><label class="form-field"><span>Enter the letters shown</span><input v-model="captchaAnswer" autocomplete="off" autocapitalize="characters" maxlength="6" required></label></div>
           <div v-else id="checkout-human-check" class="register-human-check" />
           <p v-if="humanError" class="error-box" role="alert">{{ humanError }}</p>
           <p class="checkout-small-print">Complete this check to protect the store from automated orders.</p>
@@ -359,7 +365,7 @@ useSeoMeta({ title: 'Checkout', description: 'Enter delivery details and choose 
         <span>{{ checkout ? 'Order total' : `${cart?.items.length} item${cart?.items.length === 1 ? '' : 's'}` }}</span>
         <strong>{{ checkout ? formatMoney(checkout.order.total_cents, checkout.order.currency) : formatMoney(cart?.subtotal_cents ?? 0, cart?.currency ?? 'USD') }}</strong>
       </aside>
-      <button class="button button--dark button--wide" type="submit" :disabled="pending || (stage === 'details' && (!cart?.items.length || !accountVerified || accountLoading || (humanDriver === 'demo' && !demoHumanConfirmed) || (humanDriver !== 'demo' && !humanToken)))">
+      <button class="button button--dark button--wide" type="submit" :disabled="pending || (stage === 'details' && (!cart?.items.length || !accountVerified || accountLoading || (humanDriver === 'demo' && (!captchaToken || !captchaAnswer.trim())) || (humanDriver !== 'demo' && !humanToken)))">
         {{ pending ? (stage === 'payment' ? 'Processing payment…' : 'Placing order…') : stage === 'payment' ? 'Pay securely' : paymentMethod === 'cash_on_delivery' ? 'Place order' : 'Continue to payment' }}
       </button>
     </form>

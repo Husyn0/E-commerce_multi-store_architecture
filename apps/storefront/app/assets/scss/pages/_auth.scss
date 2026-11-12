@@ -36,8 +36,9 @@
 .verification-code-row { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 9px; }
 .code-button { min-height: 44px; padding-inline: 13px; white-space: nowrap; }
 .register-notice { margin: 0 0 17px; padding: 11px 13px; border: 1px solid #e5ddcc; color: #645642; background: #fbf8f0; font-size: 10px; line-height: 1.6; }
-.register-human-demo { display: flex; align-items: center; gap: 9px; color: #5e5850; font-size: 10px; }
-.register-human-demo input { width: 15px; height: 15px; accent-color: var(--accent); }
+.register-human-demo { display: flex; align-items: end; gap: 12px; color: #5e5850; font-size: 10px; }
+.register-human-demo img { width: 180px; height: 54px; border: 1px solid #d8d1c6; border-radius: 6px; }
+.register-human-demo .form-field { flex: 1; min-width: 0; }
 .register-human-check { min-height: 66px; }
 .recovery-channel { display: flex; gap: 19px; margin: 0; padding: 0; border: 0; color: #5e5850; font-size: 10px; }
 .recovery-channel legend { margin-bottom: 9px; color: #5e5850; font-size: 10px; font-weight: 600; }

@@ -12,16 +12,24 @@ use RuntimeException;
 
 class VerificationController extends TenantApiController
 {
+    public function issueHumanChallenge(Request $request, HumanVerificationService $humanVerification): JsonResponse
+    {
+        $input = $request->validate(['action' => ['required', 'in:register,checkout']]);
+        return response()->json($humanVerification->issueChallenge($request, $input['action']))
+            ->header('Cache-Control', 'no-store');
+    }
+
     public function verifyHuman(Request $request, HumanVerificationService $humanVerification): JsonResponse
     {
         $input = $request->validate([
             'action' => ['required', 'in:register,checkout'],
             'response_token' => ['required', 'string', 'max:4096'],
+            'answer' => ['sometimes', 'string', 'size:6'],
         ]);
         $settings = TenantSettings::query()->forTenant($this->tenantId())->firstOrFail();
 
         try {
-            $humanVerification->verify($request, $settings, $input['action'], $input['response_token']);
+            $humanVerification->verify($request, $settings, $input['action'], $input['response_token'], $input['answer'] ?? null);
         } catch (RuntimeException $exception) {
             report($exception);
 

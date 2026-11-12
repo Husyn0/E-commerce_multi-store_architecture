@@ -26,7 +26,9 @@ const password = ref('')
 const passwordConfirmation = ref('')
 const emailCode = ref('')
 const codeSent = ref(false)
-const demoHumanConfirmed = ref(false)
+const captchaAnswer = ref('')
+const captchaToken = ref('')
+const captchaImage = ref('')
 const humanToken = ref('')
 const humanError = ref('')
 const error = ref('')
@@ -45,8 +47,15 @@ declare global {
   }
 }
 
-function loadChallengeWidget() {
-  if (import.meta.server || humanDriver.value === 'demo') return
+async function loadChallengeWidget() {
+  if (import.meta.server) return
+  if (humanDriver.value === 'demo') {
+    await refresh().catch(() => undefined)
+    api.send<{ challenge_token: string; image: string }>('verification/human/challenge', 'POST', { action: 'register' })
+      .then((challenge) => { captchaToken.value = challenge.challenge_token; captchaImage.value = challenge.image })
+      .catch((failure) => { humanError.value = apiErrorMessage(failure) })
+    return
+  }
 
   const isTurnstile = humanDriver.value === 'turnstile'
   const siteKey = isTurnstile
@@ -122,10 +131,8 @@ async function register() {
   try {
     if (!cart.value) await refresh()
 
-    const responseToken = humanDriver.value === 'demo' ? 'demo-pass' : humanToken.value
-    if (humanDriver.value === 'demo' && !demoHumanConfirmed.value) {
-      throw new Error('Confirm that you are ready to create an account.')
-    }
+    const responseToken = humanDriver.value === 'demo' ? captchaToken.value : humanToken.value
+    if (humanDriver.value === 'demo' && (!responseToken || !captchaAnswer.value.trim())) throw new Error('Complete the CAPTCHA before continuing.')
     if (humanDriver.value !== 'demo' && !responseToken) {
       throw new Error('Complete the human verification challenge before continuing.')
     }
@@ -133,6 +140,7 @@ async function register() {
     await api.send('verification/human', 'POST', {
       action: 'register',
       response_token: responseToken,
+      ...(humanDriver.value === 'demo' ? { answer: captchaAnswer.value } : {}),
     })
 
     const result = await api.send<{ user: Customer }>('auth/register', 'POST', {
@@ -197,7 +205,7 @@ onMounted(loadChallengeWidget)
         <label class="form-field"><span>Password</span><input v-model="password" type="password" autocomplete="new-password" minlength="8" maxlength="255" required placeholder="At least 8 characters" /></label>
         <label class="form-field"><span>Confirm password</span><input v-model="passwordConfirmation" type="password" autocomplete="new-password" minlength="8" maxlength="255" required placeholder="Enter your password again" /></label>
 
-        <label v-if="humanDriver === 'demo'" class="register-human-demo"><input v-model="demoHumanConfirmed" type="checkbox" /> I’m ready to create my account</label>
+        <div v-if="humanDriver === 'demo'" class="register-human-demo"><img v-if="captchaImage" :src="captchaImage" alt="CAPTCHA word challenge" /><label class="form-field"><span>Enter the letters shown</span><input v-model="captchaAnswer" autocomplete="off" autocapitalize="characters" maxlength="6" required /></label></div>
         <div v-else id="register-human-check" class="register-human-check" />
         <p v-if="humanError" class="error-box" role="alert">{{ humanError }}</p>
         <p v-if="notice" class="success-box" role="status">{{ notice }}</p>
