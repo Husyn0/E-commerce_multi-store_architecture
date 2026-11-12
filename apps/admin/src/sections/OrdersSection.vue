@@ -31,6 +31,7 @@ export default defineComponent({
     <div class="card-body">
       <div class="detail-list">
         <div class="detail-item"><div class="detail-label">Customer</div><div class="detail-value">{{ selectedOrder.customer_email }}</div></div>
+        <div class="detail-item"><div class="detail-label">Customer phone</div><div class="detail-value">{{ selectedOrder.customer_phone || '—' }}</div></div>
         <div class="detail-item"><div class="detail-label">Payment status</div><div class="detail-value">{{ selectedOrder.payment_provider === 'cash_on_delivery' ? 'Due on delivery' : selectedOrder.payment_status.replaceAll('_', ' ') }}</div></div>
         <div class="detail-item"><div class="detail-label">Payment method</div><div class="detail-value">{{ selectedOrder.payment_provider === 'cash_on_delivery' ? 'Cash on delivery' : selectedOrder.payment_provider }}</div></div>
         <div class="detail-item"><div class="detail-label">Total / refunded</div><div class="detail-value">{{ money(selectedOrder.total_cents, selectedOrder.currency) }} / {{ money(selectedOrder.refunded_total_cents, selectedOrder.currency) }}</div></div>
@@ -40,7 +41,7 @@ export default defineComponent({
       <div class="detail-section">
         <h2 class="subheading">Items</h2>
         <div v-if="!selectedOrder.items?.length" class="empty-state">No item details returned.</div>
-        <div v-else class="table-scroll"><table class="data-table"><thead><tr><th>Item snapshot</th><th>Quantity</th><th>Unit price</th><th>Total</th></tr></thead><tbody><tr v-for="item in selectedOrder.items" :key="item.id"><td class="primary-cell">{{ item.product_snapshot?.title || item.product_snapshot?.name || 'Historical item' }}</td><td>{{ item.quantity }}</td><td>{{ money(item.unit_price_cents, selectedOrder.currency) }}</td><td>{{ money(item.total_cents, selectedOrder.currency) }}</td></tr></tbody></table></div>
+        <div v-else class="table-scroll"><table class="data-table"><thead><tr><th>Product</th><th>SKU</th><th>Variant</th><th>Quantity</th><th>Unit price</th><th>Line total</th></tr></thead><tbody><tr v-for="item in selectedOrder.items" :key="item.id"><td class="primary-cell">{{ item.product_snapshot?.title || item.product_snapshot?.name || 'Historical item' }}</td><td>{{ item.product_snapshot?.variant?.sku || item.product_snapshot?.sku || '—' }}</td><td>{{ item.product_snapshot?.variant?.name || formatVariant(item.product_snapshot?.variant) }}</td><td>{{ item.quantity }}</td><td>{{ money(item.unit_price_cents, selectedOrder.currency) }}</td><td>{{ money(item.total_cents, selectedOrder.currency) }}</td></tr></tbody></table></div>
       </div>
       <div class="detail-section">
         <h2 class="subheading">Refund requests</h2>
@@ -65,7 +66,7 @@ export default defineComponent({
     <div class="card-head"><span class="card-title">Recent orders</span><button class="text-button" type="button" @click="loadSection(page)">Refresh</button></div>
     <div v-if="loading" class="loading">Loading orders…</div>
     <div v-else-if="rows.length === 0" class="empty-state">No orders found.</div>
-    <div v-else class="table-scroll"><table class="data-table"><thead><tr><th>Order</th><th>Customer</th><th>Total / refunded</th><th>Payment</th><th>Fulfillment</th><th>Update status</th><th></th></tr></thead><tbody>
+    <div v-else class="table-scroll"><table class="data-table"><thead><tr><th>Order</th><th>Customer</th><th>Total / refunded</th><th>Payment</th><th>Fulfillment</th><th>Update status</th><th>Actions</th></tr></thead><tbody>
       <tr v-for="order in rows" :key="order.id">
         <td><button class="text-button primary-cell" type="button" @click="openOrder(order)">{{ order.order_number }}</button><div class="secondary-cell">{{ new Date(order.created_at).toLocaleString() }}</div></td>
         <td>{{ order.customer_email || 'Guest' }}</td>
@@ -73,7 +74,7 @@ export default defineComponent({
         <td><span class="status-pill" :class="`status-pill--${order.payment_status}`">{{ order.payment_provider === 'cash_on_delivery' ? 'Due on delivery' : order.payment_status.replaceAll('_', ' ') }}</span></td>
         <td><span class="status-pill">{{ order.status }}</span></td>
         <td><select class="search-input order-status-select" :value="order.status" :disabled="busy" :aria-label="orderStatusOptions(order).length === 1 ? `Order status: ${order.status}; no further changes are available` : 'Update order status'" :title="orderStatusOptions(order).length === 1 ? `This order is ${order.status}; its status cannot be changed further.` : 'Update order status'" @change="orderStatusOptions(order).length === 1 ? showWarning(`This order is ${order.status}; its status cannot be changed further.`, 'Status update unavailable') : updateOrderStatus(order, $event.target.value)"><option v-for="status in orderStatusOptions(order)" :key="status" :value="status">{{ status }}</option></select></td>
-        <td><button v-if="order.payment_status === 'succeeded' && order.total_cents > order.refunded_total_cents" class="text-button" type="button" :disabled="busy" @click="startRefund(order)">Refund</button></td>
+        <td><div class="inline-actions"><button class="text-button" type="button" :disabled="busy" @click="openOrder(order)">View details</button><button v-if="order.payment_status === 'succeeded' && order.total_cents > order.refunded_total_cents" class="text-button" type="button" :disabled="busy" @click="startRefund(order)">Refund</button></div></td>
       </tr>
     </tbody></table></div>
     <div class="pagination"><span>Page {{ page }} of {{ lastPage }}</span><div class="inline-actions"><button class="button button--secondary button--small" :disabled="page <= 1" @click="loadSection(page - 1)">Previous</button><button class="button button--secondary button--small" :disabled="page >= lastPage" @click="loadSection(page + 1)">Next</button></div></div>

@@ -940,10 +940,18 @@ function formatAddress(address) {
     address.line1,
     address.line2,
     address.city,
-    address.region,
+    address.state || address.region,
     address.postal_code,
     address.country_code,
   ].filter(Boolean).join(', ') || '—'
+}
+
+function formatVariant(variant) {
+  if (!variant || typeof variant !== 'object') return '—'
+  if (variant.name) return variant.name
+  const attributes = variant.attributes
+  if (!attributes || typeof attributes !== 'object') return '—'
+  return Object.entries(attributes).map(([name, value]) => `${name}: ${value}`).join(' · ') || '—'
 }
 
 function productVisibility(product) {
@@ -993,7 +1001,7 @@ provide('adminWorkspace', {
   beginVariantEdit, saveVariant, deleteVariant, saveVariantInventory,
   saveSettings, saveTheme, uploadHeroImage, formatLocalDateTime, updateOrderStatus, startRefund,
   submitRefund, updateInventory, toggleCustomer, searchCustomers, filterAudit, previousAuditPage, changeAuditLimit,
-  nextAuditPage, resetAuditFilters, money, formatAddress, productVisibility, productFeatureVisibility,
+  nextAuditPage, resetAuditFilters, money, formatAddress, formatVariant, productVisibility, productFeatureVisibility,
   orderStatusOptions,
 })
 
