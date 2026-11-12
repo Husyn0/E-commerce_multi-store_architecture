@@ -89,7 +89,7 @@ const humanError = ref('')
 const accountLoading = ref(true)
 let humanWidgetId = ''
 const humanDriver = computed(() => tenant.value?.registration?.human_check_driver || 'demo')
-const accountVerified = computed(() => Boolean(customer.value?.email_verified && customer.value?.phone_verified))
+const accountVerified = computed(() => Boolean(customer.value?.email_verified))
 const onlineAvailable = computed(() => paymentConfig.value?.provider === 'stripe'
   && Boolean(paymentConfig.value.publishable_key && paymentConfig.value.connected_account_id))
 
@@ -122,7 +122,7 @@ async function startCheckout() {
     return
   }
   if (!accountVerified.value) {
-    error.value = 'Verify your email address and phone number in account settings before placing an order.'
+    error.value = 'Verify your email address in account settings before placing an order.'
     return
   }
   if (!cart.value?.items.length) {
@@ -344,13 +344,13 @@ useSeoMeta({ title: 'Checkout', description: 'Enter delivery details and choose 
 
     <div v-if="stage === 'details' && !accountLoading && !customer" class="checkout-verification-note" role="status">
       <strong>Sign in to place your order</strong>
-      <p>Orders require a customer account with a verified email address and phone number.</p>
+      <p>Orders require a customer account with a verified email address.</p>
       <div><NuxtLink class="button button--dark" to="/auth/login?redirect=%2Fcheckout%2Faddress">Sign in</NuxtLink><NuxtLink class="underlined-link" to="/auth/register?redirect=%2Fcheckout%2Faddress">Create account</NuxtLink></div>
     </div>
     <div v-else-if="stage === 'details' && customer && !accountVerified" class="checkout-verification-note" role="status">
       <strong>Verify your account before ordering</strong>
-      <p>Email: {{ customer.email_verified ? 'verified' : 'needs verification' }} · Phone: {{ customer.phone_verified ? 'verified' : customer.phone ? 'needs verification' : 'add a number first' }}</p>
-      <NuxtLink class="button button--dark" to="/account/settings">Verify email and phone</NuxtLink>
+      <p>Email: {{ customer.email_verified ? 'verified' : 'needs verification' }}</p>
+      <NuxtLink class="button button--dark" to="/account/settings">Verify email</NuxtLink>
     </div>
 
     <div v-if="stage === 'complete' && checkout" class="checkout-complete">

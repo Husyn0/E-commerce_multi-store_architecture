@@ -96,12 +96,11 @@ class CheckoutController extends TenantApiController
         if ($session->user === null) {
             return response()->json(['message' => 'Sign in and verify your account before checkout.', 'code' => 'account_verification_required'], 401);
         }
-        if ($session->user->email_verified_at === null || $session->user->phone_verified_at === null) {
+        if ($session->user->email_verified_at === null) {
             return response()->json([
-                'message' => 'Verify your email address and phone number before placing an order.',
+                'message' => 'Verify your email address before placing an order.',
                 'code' => 'account_verification_required',
                 'email_verified' => $session->user->email_verified_at !== null,
-                'phone_verified' => $session->user->phone_verified_at !== null,
             ], 403);
         }
 
