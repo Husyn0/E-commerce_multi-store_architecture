@@ -28,7 +28,9 @@ use App\Http\Middleware\AuthenticateStorefrontSession;
 use App\Http\Middleware\EnforceConfiguredVerification;
 use App\Http\Middleware\VerifyStorefrontCsrf;
 use App\Models\TenantSettings;
+use App\Support\TenantReadCache;
 use App\Tenancy\TenantManager;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['tenant.resolve', 'tenant.host:admin'])
@@ -134,33 +136,37 @@ Route::middleware([
     'tenant.resolve',
     'tenant.host:storefront',
     'tenant.active',
-])->get('/storefront/tenant', function (TenantManager $tenantManager) {
+])->get('/storefront/tenant', function (TenantManager $tenantManager, TenantReadCache $cache, Request $request) {
     $context = $tenantManager->current();
     $tenant = $context->tenant;
-    $settings = TenantSettings::query()->forTenant($tenant->id)->firstOrFail();
+    $data = $cache->remember($tenant->id, $request->getHost(), 'storefront-tenant', [], function () use ($tenant, $context): array {
+        $settings = TenantSettings::query()->forTenant($tenant->id)->firstOrFail();
 
-    return response()->json([
-        'id' => $tenant->id,
-        'name' => $tenant->name,
-        'status' => $tenant->status,
-        'default_locale' => $tenant->default_locale,
-        'default_currency' => $tenant->default_currency,
-        'theme_config' => $settings->theme_config ?? [],
-        'registration' => [
-            'require_email_verification' => (bool) $settings->require_email_verification,
-            'require_phone_verification' => (bool) $settings->require_phone_verification,
-            'human_check_driver' => $settings->human_check_driver,
-        ],
-        'password_recovery' => [
-            'email_enabled' => in_array($settings->email_provider, ['smtp', 'postmark', 'ses'], true)
-                && config('mail.mailers.'.$settings->email_provider.'.transport') === $settings->email_provider,
-            'phone_enabled' => (bool) ($settings->sms_provider === 'twilio'
-                && config('services.twilio.account_sid')
-                && config('services.twilio.auth_token')
-                && config('services.twilio.from_number')),
-        ],
-        'host_type' => $context->hostType,
-    ]);
+        return [
+            'id' => $tenant->id,
+            'name' => $tenant->name,
+            'status' => $tenant->status,
+            'default_locale' => $tenant->default_locale,
+            'default_currency' => $tenant->default_currency,
+            'theme_config' => $settings->theme_config ?? [],
+            'registration' => [
+                'require_email_verification' => (bool) $settings->require_email_verification,
+                'require_phone_verification' => (bool) $settings->require_phone_verification,
+                'human_check_driver' => $settings->human_check_driver,
+            ],
+            'password_recovery' => [
+                'email_enabled' => in_array($settings->email_provider, ['smtp', 'postmark', 'ses'], true)
+                    && config('mail.mailers.'.$settings->email_provider.'.transport') === $settings->email_provider,
+                'phone_enabled' => (bool) ($settings->sms_provider === 'twilio'
+                    && config('services.twilio.account_sid')
+                    && config('services.twilio.auth_token')
+                    && config('services.twilio.from_number')),
+            ],
+            'host_type' => $context->hostType,
+        ];
+    });
+
+    return response()->json($data);
 });
 
 Route::middleware([

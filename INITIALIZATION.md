@@ -68,6 +68,7 @@ TRUSTED_PROXIES=
 SESSION_DRIVER=file
 CACHE_STORE=file
 QUEUE_CONNECTION=sync
+# Use CACHE_STORE=redis with shared Redis in production or multi-instance deployments.
 
 SESSION_TOKEN_PEPPER=
 VERIFICATION_CODE_PEPPER=
@@ -82,7 +83,8 @@ DEFAULT_HUMAN_CHECK_DRIVER=demo
 DEFAULT_EMAIL_PROVIDER=log
 DEFAULT_SMS_PROVIDER=log
 WEBHOOK_PAYLOAD_RETENTION_DAYS=30
-SESSION_IDLE_TTL=1209600
+SESSION_IDLE_TTL=86400
+ADMIN_ACCESS_TOKEN_TTL=7200
 TENANT_LIFECYCLE_CLI_ENABLED=false
 TENANT_CLI_OPERATOR_REF=
 ```
@@ -96,6 +98,13 @@ payment driver and its webhook secret are configured. `SESSION_IDLE_TTL` is
 expressed in seconds.
 Use an empty allowlist in local development unless custom-domain routing is
 specifically being tested.
+
+Storefront tenant bootstrap, categories, and product catalog responses use a
+60-second tenant- and host-scoped application cache. Saving or deleting a
+tenant, settings, category, product, product image, or variant invalidates that
+tenant's cached storefront data after the database transaction commits. Keep
+`CACHE_STORE=file` for local development; use `CACHE_STORE=redis` with shared
+Redis for production deployments with multiple app instances.
 
 Implemented API routes:
 

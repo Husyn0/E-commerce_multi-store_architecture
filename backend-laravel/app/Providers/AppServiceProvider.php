@@ -3,7 +3,14 @@
 namespace App\Providers;
 
 use App\Models\User;
+use App\Models\Category;
+use App\Models\Product;
+use App\Models\ProductImage;
+use App\Models\ProductVariant;
+use App\Models\Tenant;
+use App\Models\TenantSettings;
 use App\Support\TenantAccessToken;
+use App\Support\TenantReadCache;
 use App\Tenancy\EloquentTenantHostLocator;
 use App\Tenancy\TenantHostLocator;
 use App\Tenancy\TenantManager;
@@ -11,6 +18,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use LogicException;
@@ -31,6 +39,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        foreach ([Tenant::class, TenantSettings::class, Category::class, Product::class, ProductImage::class, ProductVariant::class] as $modelClass) {
+            $invalidateTenantReadCache = function ($model): void {
+                $tenantId = $model instanceof Tenant ? $model->getKey() : $model->tenant_id;
+                DB::afterCommit(fn () => app(TenantReadCache::class)->invalidateTenant((string) $tenantId));
+            };
+            $modelClass::saved($invalidateTenantReadCache);
+            $modelClass::deleted($invalidateTenantReadCache);
+        }
+
         RateLimiter::for('payment-webhook', function (Request $request): Limit {
             $provider = $request->header('Stripe-Signature') !== null ? 'stripe' : 'demo';
 
