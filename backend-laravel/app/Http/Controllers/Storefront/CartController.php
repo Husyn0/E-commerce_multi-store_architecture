@@ -89,7 +89,7 @@ class CartController extends TenantApiController
             $line->unit_price_cents = $price;
             $line->save();
             $sessions->refreshExpiry($cart);
-        });
+        }, 3);
 
         return $this->respond($request, $session, $sessions);
     }
@@ -115,8 +115,8 @@ class CartController extends TenantApiController
                 ->lockForUpdate()
                 ->firstOrFail();
             $stock = $line->variant_id !== null
-                ? (int) ProductVariant::query()->forTenant($tenantId)->whereKey($line->variant_id)->value('stock')
-                : (int) Product::query()->forTenant($tenantId)->whereKey($line->product_id)->value('stock');
+                ? (int) ProductVariant::query()->forTenant($tenantId)->whereKey($line->variant_id)->lockForUpdate()->value('stock')
+                : (int) Product::query()->forTenant($tenantId)->whereKey($line->product_id)->lockForUpdate()->value('stock');
             if ((int) $input['quantity'] > $stock) {
                 throw ValidationException::withMessages(['quantity' => 'Requested quantity exceeds available stock.']);
             }
@@ -124,7 +124,7 @@ class CartController extends TenantApiController
             $line->quantity = $input['quantity'];
             $line->save();
             $sessions->refreshExpiry($cart);
-        });
+        }, 3);
 
         return $this->respond($request, $session, $sessions);
     }
@@ -135,11 +135,19 @@ class CartController extends TenantApiController
         if ($session instanceof JsonResponse) {
             return $session;
         }
-        CartItem::query()
-            ->forTenant($this->tenantId())
-            ->where('cart_id', $session->cart->id)
-            ->whereKey($itemId)
-            ->delete();
+        DB::transaction(function () use ($itemId, $session): void {
+            Cart::query()
+                ->forTenant($this->tenantId())
+                ->whereKey($session->cart->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            CartItem::query()
+                ->forTenant($this->tenantId())
+                ->where('cart_id', $session->cart->id)
+                ->whereKey($itemId)
+                ->delete();
+        }, 3);
 
         return $this->respond($request, $session, $sessions);
     }

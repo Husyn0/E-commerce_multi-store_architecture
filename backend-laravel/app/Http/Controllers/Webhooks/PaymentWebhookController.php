@@ -116,7 +116,12 @@ class PaymentWebhookController
                             $event,
                         );
                     });
-                } catch (QueryException) {
+                } catch (QueryException $exception) {
+                    if (in_array((int) ($exception->errorInfo[1] ?? 0), [1205, 1213], true)
+                        || $exception->getCode() === '40001') {
+                        throw $exception;
+                    }
+
                     $event->status = 'failed';
                     $event->last_error = 'Payment event processing failed.';
                     $event->locked_at = null;
@@ -131,7 +136,7 @@ class PaymentWebhookController
                 $event->save();
 
                 return $event;
-            });
+            }, 3);
         } catch (QueryException $exception) {
             if (($exception->errorInfo[1] ?? null) !== 1062) {
                 throw $exception;

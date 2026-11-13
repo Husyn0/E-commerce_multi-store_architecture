@@ -41,7 +41,7 @@ class ProductVariantController extends TenantApiController
             );
 
             return $variant;
-        });
+        }, 3);
 
         return (new ProductResource($variant->product->load(['images', 'variants'])))
             ->response()
@@ -90,7 +90,7 @@ class ProductVariantController extends TenantApiController
                     $request,
                 );
             }
-        });
+        }, 3);
 
         return new ProductResource($product->fresh()->load(['images', 'variants']));
     }
@@ -132,7 +132,7 @@ class ProductVariantController extends TenantApiController
             );
 
             return false;
-        });
+        }, 3);
         if ($blocked) {
             return response()->json([
                 'message' => 'This variant is in an active cart and cannot be removed.',

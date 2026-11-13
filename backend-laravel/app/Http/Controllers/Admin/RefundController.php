@@ -120,7 +120,7 @@ class RefundController extends TenantApiController
             );
 
             return ['refund' => $refund, 'order' => $order, 'created' => true];
-        });
+        }, 3);
 
         if (isset($result['not_found'])) {
             return response()->json(['message' => 'Order not found.'], 404);
@@ -171,7 +171,7 @@ class RefundController extends TenantApiController
             $refund->save();
 
             return $refund;
-        });
+        }, 3);
 
         return response()->json([
             'id' => $refund->id,

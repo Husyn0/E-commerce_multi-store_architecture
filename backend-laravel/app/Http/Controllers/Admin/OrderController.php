@@ -146,7 +146,7 @@ class OrderController extends TenantApiController
             );
 
             return $order;
-        });
+        }, 3);
 
         if ($result instanceof JsonResponse) {
             return $result;
@@ -173,6 +173,9 @@ class OrderController extends TenantApiController
         $items = OrderItem::query()
             ->forTenant($order->tenant_id)
             ->where('order_id', $order->id)
+            ->orderBy('product_id')
+            ->orderBy('variant_id')
+            ->orderBy('id')
             ->lockForUpdate()
             ->get();
 

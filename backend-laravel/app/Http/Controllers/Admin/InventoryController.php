@@ -48,7 +48,7 @@ class InventoryController extends TenantApiController
             );
 
             return response()->json(['product_id' => $product->id, 'stock' => (int) $product->stock]);
-        });
+        }, 3);
     }
 
     public function updateVariant(
@@ -87,6 +87,6 @@ class InventoryController extends TenantApiController
                 'variant_id' => $variant->id,
                 'stock' => (int) $variant->stock,
             ]);
-        });
+        }, 3);
     }
 }

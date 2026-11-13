@@ -322,7 +322,7 @@ class CheckoutController extends TenantApiController
                 $cart->items()->delete();
 
                 return ['record' => $record, 'order' => $order, 'created' => true];
-            });
+            }, 3);
         } catch (QueryException $exception) {
             $winner = CheckoutIdempotencyRecord::query()
                 ->forTenant($tenantId)
@@ -403,7 +403,7 @@ class CheckoutController extends TenantApiController
             $order->save();
 
             return ['order' => $order, 'cancelled' => false];
-        });
+        }, 3);
         if ($paymentState['cancelled']) {
             $cancelOrder = $paymentState['order'];
             $cancelOrder->payment_intent_id = $intent->id;
@@ -423,7 +423,7 @@ class CheckoutController extends TenantApiController
                 $order->payment_intent_id ??= $intent->id;
                 $order->payment_status = 'failed';
                 $order->save();
-            });
+            }, 3);
 
             return response()->json(['message' => 'This order was cancelled before payment started.'], 409);
         }

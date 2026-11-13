@@ -2,7 +2,6 @@
 
 namespace App\Services\Verification;
 
-use App\Models\HumanVerification;
 use App\Models\TenantSettings;
 use App\Support\SessionTokenHasher;
 use Illuminate\Http\Client\ConnectionException;
@@ -11,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class HumanVerificationService
@@ -79,26 +79,19 @@ class HumanVerificationService
             $this->verifyWithProvider($request, $provider, $action, $responseToken);
         }
 
-        $tokenHash = $this->tokenHasher->hash($sessionToken);
-        DB::transaction(function () use ($action, $provider, $request, $settings, $tokenHash): void {
-            $verification = HumanVerification::query()
-                ->forTenant($settings->tenant_id)
-                ->where('session_token_hash', $tokenHash)
-                ->lockForUpdate()
-                ->first();
-
-            if ($verification === null) {
-                $verification = new HumanVerification;
-                $verification->tenant_id = $settings->tenant_id;
-                $verification->session_token_hash = $tokenHash;
-            }
-            $verification->provider = $provider;
-            $verification->action = $action;
-            $verification->passed = true;
-            $verification->ip_address = $request->ip();
-            $verification->expires_at = now()->addMinutes(5);
-            $verification->save();
-        });
+        DB::table('human_verifications')->upsert([[
+            'id' => (string) Str::uuid(),
+            'tenant_id' => $settings->tenant_id,
+            'session_token_hash' => $this->tokenHasher->hash($sessionToken),
+            'provider' => $provider,
+            'action' => $action,
+            'passed' => true,
+            'ip_address' => $request->ip(),
+            'expires_at' => now()->addMinutes(5),
+            'created_at' => now(),
+        ]], ['tenant_id', 'session_token_hash'], [
+            'provider', 'action', 'passed', 'ip_address', 'expires_at',
+        ]);
     }
 
     private function captchaSvg(string $answer): string

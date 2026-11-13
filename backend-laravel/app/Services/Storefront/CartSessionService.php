@@ -157,7 +157,7 @@ class CartSessionService
             }
 
             return new CartSession($cart, null, false, $lockedUser);
-        });
+        }, 3);
     }
 
     private function findGuestCart(Request $request, TenantContext $context): ?Cart
@@ -202,6 +202,27 @@ class CartSessionService
                 : $userLineQuery->where('variant_id', $guestLine->variant_id);
             $userLine = $userLineQuery->lockForUpdate()->first();
 
+            if ($guestLine->variant_id !== null) {
+                $stock = ProductVariant::query()
+                    ->forTenant($tenantId)
+                    ->where('product_id', $guestLine->product_id)
+                    ->whereKey($guestLine->variant_id)
+                    ->lockForUpdate()
+                    ->value('stock');
+            } else {
+                $stock = Product::query()
+                    ->forTenant($tenantId)
+                    ->whereKey($guestLine->product_id)
+                    ->lockForUpdate()
+                    ->value('stock');
+            }
+
+            if ($stock === null || (int) $guestLine->quantity > (int) $stock) {
+                throw ValidationException::withMessages([
+                    'cart' => 'Sign-in cart merge exceeds current stock; adjust quantities and retry.',
+                ]);
+            }
+
             if ($userLine === null) {
                 $guestLine->cart_id = $userCart->id;
                 $guestLine->save();
@@ -209,19 +230,6 @@ class CartSessionService
                 continue;
             }
 
-            if ($guestLine->variant_id !== null) {
-                $stock = (int) ProductVariant::query()
-                    ->forTenant($tenantId)
-                    ->whereKey($guestLine->variant_id)
-                    ->lockForUpdate()
-                    ->value('stock');
-            } else {
-                $stock = (int) Product::query()
-                    ->forTenant($tenantId)
-                    ->whereKey($guestLine->product_id)
-                    ->lockForUpdate()
-                    ->value('stock');
-            }
             $quantity = (int) $userLine->quantity + (int) $guestLine->quantity;
             if ($quantity > $stock) {
                 throw ValidationException::withMessages([
