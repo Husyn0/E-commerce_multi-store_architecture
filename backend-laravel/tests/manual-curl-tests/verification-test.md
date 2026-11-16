@@ -79,7 +79,7 @@ export VERIFY_FRESH_CSRF="$(awk '$6 == "storefront_csrf" {print $7}' "$VERIFY_FR
 curl -i -b "$VERIFY_FRESH_JAR" -c "$VERIFY_FRESH_JAR" \
   -H 'Content-Type: application/json' \
   -H "X-CSRF-TOKEN: $VERIFY_FRESH_CSRF" \
-  -d '{"email":"new-customer@example.test","password":"Customer-Password-2026","password_confirmation":"Customer-Password-2026"}' \
+  -d "{\"email\":\"$CUSTOMER_EMAIL\",\"password\":\"$CUSTOMER_PASSWORD\",\"password_confirmation\":\"$CUSTOMER_PASSWORD\"}" \
   "$STORE_BASE/api/storefront/auth/register"
 ```
 
@@ -94,7 +94,7 @@ verification is required, a valid `email_verification_code` is also required.
 curl -i -b "$STORE_JAR" \
   -H 'Content-Type: application/json' \
   -H "X-CSRF-TOKEN: $STORE_CSRF" \
-  -d '{"email":"new-customer@example.test"}' \
+  -d "{\"email\":\"$CUSTOMER_EMAIL\"}" \
   "$STORE_BASE/api/storefront/verification/email"
 ```
 
@@ -110,7 +110,7 @@ code:
 curl -i -b "$STORE_JAR" -c "$STORE_JAR" \
   -H 'Content-Type: application/json' \
   -H "X-CSRF-TOKEN: $STORE_CSRF" \
-  -d '{"email":"new-customer@example.test","password":"Customer-Password-2026","password_confirmation":"Customer-Password-2026","email_verification_code":"123456"}' \
+  -d "{\"email\":\"$CUSTOMER_EMAIL\",\"password\":\"$CUSTOMER_PASSWORD\",\"password_confirmation\":\"$CUSTOMER_PASSWORD\",\"email_verification_code\":\"123456\"}" \
   "$STORE_BASE/api/storefront/auth/register"
 ```
 

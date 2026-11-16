@@ -14,25 +14,31 @@ two-minor-unit currencies.
 ## X1. Submit guest checkout
 
 ```sh
-export CHECKOUT_KEY="manual-checkout-$(date +%s)"
-curl -i -b "$STORE_JAR" -c "$STORE_JAR" \
+export CHECKOUT_KEY="manual-checkout-$TEST_RUN_ID"
+curl -sS -o "/tmp/checkout-$TEST_RUN_ID.json" -w 'HTTP %{http_code}\n' \
+  -b "$STORE_JAR" -c "$STORE_JAR" \
   -H 'Content-Type: application/json' \
   -H "X-CSRF-TOKEN: $STORE_CSRF" \
   -H "Idempotency-Key: $CHECKOUT_KEY" \
-  -d '{"shipping_address":{"recipient_name":"Test Shopper","line1":"1 Test Street","city":"Test City","postal_code":"10000","country_code":"US"},"currency":"USD","customer_email":"shopper@example.test"}' \
+  -d "{\"shipping_address\":{\"recipient_name\":\"Test Shopper\",\"line1\":\"1 Test Street\",\"city\":\"Test City\",\"postal_code\":\"10000\",\"country_code\":\"US\"},\"currency\":\"USD\",\"customer_email\":\"$CUSTOMER_EMAIL\"}" \
   "$STORE_BASE/api/storefront/checkout"
+jq 'del(.payment.client_secret)' "/tmp/checkout-$TEST_RUN_ID.json" > "/tmp/checkout-safe-$TEST_RUN_ID.json" && mv "/tmp/checkout-safe-$TEST_RUN_ID.json" "/tmp/checkout-$TEST_RUN_ID.json"
+export ORDER_ID="$(jq -er '.order.id' "/tmp/checkout-$TEST_RUN_ID.json")"
+export ORDER_NUMBER="$(jq -er '.order.order_number' "/tmp/checkout-$TEST_RUN_ID.json")"
+export PAYMENT_INTENT_ID="$(jq -er '.payment.payment_intent_id' "/tmp/checkout-$TEST_RUN_ID.json")"
+printf 'Created ORDER_ID=%s\nORDER_NUMBER=%s\nPAYMENT_INTENT_ID=%s\n' \
+  "$ORDER_ID" "$ORDER_NUMBER" "$PAYMENT_INTENT_ID"
 ```
 
 **Expect:** `200`, an order plus payment intent/client secret; order has a
-tenant-scoped ULID order number. Do not share the client secret. Save the
-returned IDs for the Orders tests.
+tenant-scoped ULID order number. Do not share the client secret. The command exports the order and payment-intent IDs for the Orders and webhook flows.
 
 ### X2. Require Idempotency-Key and reject malformed key
 
 ```sh
 curl -i -b "$STORE_JAR" -H 'Content-Type: application/json' \
   -H "X-CSRF-TOKEN: $STORE_CSRF" \
-  -d '{"shipping_address":{"recipient_name":"Test Shopper","line1":"1 Test Street","city":"Test City","postal_code":"10000","country_code":"US"},"currency":"USD","customer_email":"shopper@example.test"}' \
+  -d "{\"shipping_address\":{\"recipient_name\":\"Test Shopper\",\"line1\":\"1 Test Street\",\"city\":\"Test City\",\"postal_code\":\"10000\",\"country_code\":\"US\"},\"currency\":\"USD\",\"customer_email\":\"$CUSTOMER_EMAIL\"}" \
   "$STORE_BASE/api/storefront/checkout"
 ```
 
@@ -59,8 +65,8 @@ tenant's configured currency):
 ```sh
 curl -i -b "$STORE_JAR" -H 'Content-Type: application/json' \
   -H "X-CSRF-TOKEN: $STORE_CSRF" \
-  -H 'Idempotency-Key: manual-invalid-currency' \
-  -d '{"shipping_address":{"recipient_name":"Test Shopper","line1":"1 Test Street","city":"Test City","postal_code":"10000","country_code":"US"},"currency":"JPY","customer_email":"shopper@example.test"}' \
+  -H "Idempotency-Key: manual-invalid-currency-$TEST_RUN_ID" \
+  -d "{\"shipping_address\":{\"recipient_name\":\"Test Shopper\",\"line1\":\"1 Test Street\",\"city\":\"Test City\",\"postal_code\":\"10000\",\"country_code\":\"US\"},\"currency\":\"JPY\",\"customer_email\":\"$CUSTOMER_EMAIL\"}" \
   "$STORE_BASE/api/storefront/checkout"
 ```
 

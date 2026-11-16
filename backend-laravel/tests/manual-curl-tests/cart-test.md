@@ -20,11 +20,15 @@ export STORE_CSRF="$(awk '$6 == "storefront_csrf" {print $7}' "$STORE_JAR")"
 ### G2. Add a published product
 
 ```sh
-curl -i -b "$STORE_JAR" -c "$STORE_JAR" \
+curl -sS -o "/tmp/cart-add-$TEST_RUN_ID.json" -w 'HTTP %{http_code}\n' \
+  -b "$STORE_JAR" -c "$STORE_JAR" \
   -H 'Content-Type: application/json' \
   -H "X-CSRF-TOKEN: $STORE_CSRF" \
   -d "{\"product_id\":\"$PRODUCT_ID\",\"quantity\":2}" \
   "$STORE_BASE/api/storefront/cart/items"
+jq . "/tmp/cart-add-$TEST_RUN_ID.json"
+export CART_ITEM_ID="$(jq -er '.items[0].id' "/tmp/cart-add-$TEST_RUN_ID.json")"
+printf 'Created CART_ITEM_ID=%s\n' "$CART_ITEM_ID"
 ```
 
 **Expect:** `200`; item has server-set `unit_price_cents`, quantity 2, and
@@ -46,8 +50,9 @@ curl -i -b "$STORE_JAR" \
 
 Set the `item_id` from G2's response:
 
+G2 exports `CART_ITEM_ID` from the item just added. Keep this shell open for G4-G6.
+
 ```sh
-export CART_ITEM_ID='paste-cart-item-id'
 curl -i -b "$STORE_JAR" -X PATCH \
   -H 'Content-Type: application/json' \
   -H "X-CSRF-TOKEN: $STORE_CSRF" \
@@ -84,7 +89,7 @@ curl -i -b "$STORE_JAR" "$STORE_BASE/api/storefront/cart"
 ```
 
 **Expect:** first read shows the line; delete returns `200` with empty cart;
-final read remains empty.
+final read remains empty. After confirming the final read, run `unset CART_ITEM_ID`.
 
 ## G7. Guest cart is isolated by tenant and cookie
 

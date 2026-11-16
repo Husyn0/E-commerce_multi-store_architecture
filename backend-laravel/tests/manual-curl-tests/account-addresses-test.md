@@ -25,25 +25,32 @@ new names. An unauthenticated request must return `401`.
 ## A2. Add address with default flags
 
 ```sh
-curl -i -b "$STORE_JAR" \
-  -H 'Content-Type: application/json' \
+curl -sS -o "/tmp/address-$TEST_RUN_ID.json" -w 'HTTP %{http_code}\n' \
+  -b "$STORE_JAR" -c "$STORE_JAR" -H 'Content-Type: application/json' \
   -H "X-CSRF-TOKEN: $STORE_CSRF" \
-  -d '{"label":"Home","recipient_name":"Manual Shopper","line1":"1 Test Street","city":"Test City","postal_code":"10000","country_code":"US","is_default_shipping":true,"is_default_billing":true}' \
+  -d "{\"label\":\"Home\",\"recipient_name\":\"Manual Shopper\",\"line1\":\"1 Test Street\",\"city\":\"Test City\",\"postal_code\":\"10000\",\"country_code\":\"US\",\"is_default_shipping\":true,\"is_default_billing\":true}" \
   "$STORE_BASE/api/storefront/account/addresses"
+jq . "/tmp/address-$TEST_RUN_ID.json"
+export ADDRESS_ID="$(jq -er '.id' "/tmp/address-$TEST_RUN_ID.json")"
+printf 'Created ADDRESS_ID=%s\n' "$ADDRESS_ID"
 ```
 
-**Expect:** `201`; save the returned `id`:
-
-```sh
-export ADDRESS_ID='paste-address-id'
-```
+**Expect:** `201`; the command prints the response and exports the created address ID as `ADDRESS_ID`. Keep this shell open for follow-up and cleanup.
 
 ### A3. Make another address default and verify only one per kind
 
-Create a second address with `is_default_shipping=true` and
-`is_default_billing=true`. Then read the account:
+Create a second address and capture its ID separately so A4 still targets the
+first object. Then read the account:
 
 ```sh
+curl -sS -o "/tmp/address-second-$TEST_RUN_ID.json" -w 'HTTP %{http_code}\n' \
+  -b "$STORE_JAR" -c "$STORE_JAR" -H 'Content-Type: application/json' \
+  -H "X-CSRF-TOKEN: $STORE_CSRF" \
+  -d "{\"label\":\"Work\",\"recipient_name\":\"Manual Shopper\",\"line1\":\"2 Test Street\",\"city\":\"Test City\",\"postal_code\":\"10000\",\"country_code\":\"US\",\"is_default_shipping\":true,\"is_default_billing\":true}" \
+  "$STORE_BASE/api/storefront/account/addresses"
+jq . "/tmp/address-second-$TEST_RUN_ID.json"
+export SECOND_ADDRESS_ID="$(jq -er '.id' "/tmp/address-second-$TEST_RUN_ID.json")"
+printf 'Created SECOND_ADDRESS_ID=%s\n' "$SECOND_ADDRESS_ID"
 curl -i -b "$STORE_JAR" "$STORE_BASE/api/storefront/account"
 ```
 
@@ -64,7 +71,17 @@ curl -i -b "$STORE_JAR" -X DELETE \
 ```
 
 **Expect:** `200` for update and `200 {"deleted":true}` for delete. An address
-owned by another user/tenant must not be readable or mutable.
+owned by another user/tenant must not be readable or mutable. Delete the
+second address created in A3 too, using its run-specific ID:
+
+```sh
+curl -i -b "$STORE_JAR" -X DELETE \
+  -H "X-CSRF-TOKEN: $STORE_CSRF" \
+  "$STORE_BASE/api/storefront/account/addresses/$SECOND_ADDRESS_ID"
+```
+
+After each successful delete, clear that variable (`unset ADDRESS_ID` or
+`unset SECOND_ADDRESS_ID`) so the same shell cannot accidentally reuse it.
 
 ## Result record
 

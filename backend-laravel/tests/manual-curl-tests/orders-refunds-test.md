@@ -1,13 +1,10 @@
 # Orders and refunds manual tests
 
-Use the common setup in [manual-api-tests.md](./manual-api-tests.md). Create
-an order with [checkout-test.md](./checkout-test.md), then set these values
-from its response:
-
-```sh
-export ORDER_ID='paste-order-id'
-export ORDER_NUMBER='paste-order-number'
-```
+Use the common setup in [manual-api-tests.md](./manual-api-tests.md), then
+create an order with [checkout-test.md](./checkout-test.md). X1 exports
+`ORDER_ID`, `ORDER_NUMBER`, and `PAYMENT_INTENT_ID` from the response in this
+same shell. The display omits the client secret; keep the saved IDs for these
+requests.
 
 Admin calls require a valid `$ADMIN_ACCESS_TOKEN`; Storefront account-order
 calls require a valid customer session in `$STORE_JAR`.
@@ -62,7 +59,7 @@ by a valid payment provider/webhook event. Demo checkout can require a manually
 signed demo webhook; see [webhook-test.md](./webhook-test.md).
 
 ```sh
-export REFUND_KEY="manual-refund-$(date +%s)"
+export REFUND_KEY="manual-refund-$TEST_RUN_ID"
 curl -i -X POST -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN" \
   -H 'Content-Type: application/json' \
   -H "Idempotency-Key: $REFUND_KEY" \
@@ -82,7 +79,7 @@ order that is not paid:
 ```sh
 curl -i -X POST -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN" \
   -H 'Content-Type: application/json' \
-  -H 'Idempotency-Key: manual-refund-too-large' \
+  -H "Idempotency-Key: manual-refund-too-large-$TEST_RUN_ID" \
   -d '{"amount_cents":999999999}' \
   "$ADMIN_BASE/api/admin/orders/$ORDER_ID/refunds"
 ```

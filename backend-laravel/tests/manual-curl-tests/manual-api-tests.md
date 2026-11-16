@@ -29,9 +29,13 @@ sent by this guide.
    verification only for an isolated local test.
 6. Admin login requires an existing active tenant Admin. For initial
    provisioning, use the protected CLI flow documented in `INITIALIZATION.md`.
-7. Most commands require `jq` only for convenient JSON value extraction. If
-   unavailable, copy IDs/tokens from the response body and set the variables
-   manually.
+7. Install `jq` for the response-to-variable commands below. Keep one terminal
+   open for the whole flow: exported values and cookie jars are reused by later
+   commands. Commands print each HTTP response; only extraction commands are
+   silent.
+8. Run the create steps before any delete step. The notes capture each newly
+   created ID into a variable, and cleanup commands use only that variable. Do
+   not replace it with an ID copied from an older run.
 
 Start a shell and set the test values (replace example values as needed):
 
@@ -40,15 +44,29 @@ export ADMIN_BASE='http://shop.admin.localhost:8000'
 export STORE_BASE='http://shop.storefront.localhost:8000'
 export ADMIN_EMAIL='admin@example.test'
 export ADMIN_PASSWORD='@password123'
-export CUSTOMER_EMAIL='customer@example.test'
-export CUSTOMER_PASSWORD='replace-with-customer-password'
-export ADMIN_JAR='/tmp/shop-admin.cookies'
-export STORE_JAR='/tmp/shop-store.cookies'
+export CUSTOMER_PASSWORD='Customer-Password-2026'
+export TEST_RUN_ID="$(date +%Y%m%d%H%M%S)-$$"
+export CUSTOMER_EMAIL="manual-$TEST_RUN_ID@example.test"
+export ADMIN_JAR="/tmp/shop-admin-$TEST_RUN_ID.cookies"
+export STORE_JAR="/tmp/shop-store-$TEST_RUN_ID.cookies"
+export ADMIN_ACCESS_TOKEN=''
+export ADMIN_CSRF=''
+export STORE_CSRF=''
+
+# Confirm the selected tenant hosts before using this shell.
+printf 'Run: %s\nAdmin: %s\nStorefront: %s\n' \
+  "$TEST_RUN_ID" "$ADMIN_BASE" "$STORE_BASE"
 ```
 
-For each request, compare the response with the expected result in that topic's
-file. Record **PASS**, **FAIL**, or **BLOCKED** and include the actual HTTP
-status and a redacted response excerpt.
+If a command creates an object, it prints the response and stores the body in a
+run-specific `/tmp` file; the next command extracts and exports that response's
+ID. Keep IDs in this shell for follow-up, especially deletes. If you open a new
+shell, rerun this setup and repeat the create request before cleanup. Never
+delete using a stale ID copied from an old run.
+
+For each request, inspect the printed HTTP status/body and compare it with the
+expected result in that topic's file. Record **PASS**, **FAIL**, or **BLOCKED**
+and include the actual HTTP status and a redacted response excerpt.
 
 ## Topics
 

@@ -15,7 +15,8 @@ ADMIN_LOGIN_RESPONSE="$(curl -fsS -c "$ADMIN_JAR" \
   "$ADMIN_BASE/api/admin/auth/login")" &&
 ADMIN_ACCESS_TOKEN="$(printf '%s' "$ADMIN_LOGIN_RESPONSE" | jq -er '.access_token')" &&
 export ADMIN_ACCESS_TOKEN &&
-unset ADMIN_LOGIN_RESPONSE
+unset ADMIN_LOGIN_RESPONSE &&
+printf 'Admin login succeeded; ADMIN_ACCESS_TOKEN is exported.\n'
 ```
 
 **Expect:** `200`; JSON includes `access_token`, `token_type: Bearer`, expiry,
@@ -136,8 +137,7 @@ Initialize a fresh cookie jar and obtain the CSRF token. Keep using this same
 jar for the registration human-check, email OTP request, and registration:
 
 ```sh
-export STORE_JAR='/tmp/shop-new-customer.cookies'
-rm -f "$STORE_JAR"
+export STORE_JAR="/tmp/shop-register-$TEST_RUN_ID.cookies"
 curl -i -c "$STORE_JAR" -b "$STORE_JAR" \
   "$STORE_BASE/api/storefront/cart"
 export STORE_CSRF="$(awk '$6 == "storefront_csrf" {print $7}' "$STORE_JAR")"
@@ -162,7 +162,7 @@ curl -i -b "$STORE_JAR" -c "$STORE_JAR" \
 (the schema defaults `require_email_verification` to true), request a code:
 
 ```sh
-export CUSTOMER_EMAIL='new-customer@example.test'
+export CUSTOMER_EMAIL="manual-$TEST_RUN_ID@example.test"
 curl -i -b "$STORE_JAR" -c "$STORE_JAR" \
   -H 'Content-Type: application/json' -H "X-CSRF-TOKEN: $STORE_CSRF" \
   -d "{\"email\":\"$CUSTOMER_EMAIL\"}" \

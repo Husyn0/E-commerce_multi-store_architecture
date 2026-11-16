@@ -24,7 +24,7 @@ curl -i -b "$STORE_JAR" \
   -H 'Content-Type: application/json' \
   -H "X-CSRF-TOKEN: $STORE_CSRF" \
   -H 'Idempotency-Key: manual-payment-method-probe' \
-  -d '{"payment_method_id":"test-payment-method","shipping_address":{"recipient_name":"Test Shopper","line1":"1 Test Street","city":"Test City","postal_code":"10000","country_code":"US"},"currency":"USD","customer_email":"shopper@example.test"}' \
+  -d "{\"payment_method_id\":\"test-payment-method\",\"shipping_address\":{\"recipient_name\":\"Test Shopper\",\"line1\":\"1 Test Street\",\"city\":\"Test City\",\"postal_code\":\"10000\",\"country_code\":\"US\"},\"currency\":\"USD\",\"customer_email\":\"$CUSTOMER_EMAIL\"}" \
   "$STORE_BASE/api/storefront/checkout"
 ```
 

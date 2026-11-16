@@ -32,7 +32,8 @@ Sign the exact raw body below with HMAC-SHA-256 and
 `DEMO_WEBHOOK_SECRET`. Do not send unsigned event JSON.
 
 ```sh
-export WEBHOOK_BODY='{"id":"TENANT_UUID:manual-platform-event","type":"customer.subscription.created","tenant_id":"TENANT_UUID"}'
+export TENANT_UUID='paste-tenant-uuid-from-tenant-lookup'
+export WEBHOOK_BODY="{\"id\":\"$TENANT_UUID:manual-platform-event-$TEST_RUN_ID\",\"type\":\"customer.subscription.created\",\"tenant_id\":\"$TENANT_UUID\"}"
 export WEBHOOK_SIGNATURE="$(printf '%s' "$WEBHOOK_BODY" | openssl dgst -sha256 -hmac "$DEMO_WEBHOOK_SECRET" -hex | sed 's/^.*= //')"
 curl -i -X POST -H 'Content-Type: application/json' \
   -H "X-Demo-Signature: $WEBHOOK_SIGNATURE" \
@@ -40,7 +41,7 @@ curl -i -X POST -H 'Content-Type: application/json' \
   'http://127.0.0.1:8000/api/webhooks/payment'
 ```
 
-Replace both `TENANT_UUID` occurrences with the tenant UUID. **Expect:** `400`
+Set `TENANT_UUID` from the tenant lookup first. **Expect:** `400`
 unsupported payment event. No webhook row should be inserted.
 
 ## W4. Signed demo PaymentIntent event (disposable test order only)
@@ -50,10 +51,11 @@ Use an existing unpaid demo order. Set the order's ID and use its current
 tenant ID is included inside the HMAC-signed body.
 
 ```sh
-export TENANT_UUID='paste-tenant-uuid'
-export ORDER_ID='paste-unpaid-order-id'
-export PAYMENT_INTENT_ID='paste-demo-payment-intent-id'
-export WEBHOOK_BODY="{\"id\":\"$TENANT_UUID:manual-payment-succeeded-001\",\"type\":\"payment_intent.succeeded\",\"tenant_id\":\"$TENANT_UUID\",\"data\":{\"object\":{\"id\":\"$PAYMENT_INTENT_ID\",\"metadata\":{\"order_id\":\"$ORDER_ID\"}}}}"
+export TENANT_UUID='paste-tenant-uuid-from-tenant-lookup'
+# Use ORDER_ID and PAYMENT_INTENT_ID exported by X1 in checkout-test.md.
+: "${ORDER_ID:?Run X1 in this shell first}"
+: "${PAYMENT_INTENT_ID:?Run X1 in this shell first}"
+export WEBHOOK_BODY="{\"id\":\"$TENANT_UUID:manual-payment-succeeded-$TEST_RUN_ID\",\"type\":\"payment_intent.succeeded\",\"tenant_id\":\"$TENANT_UUID\",\"data\":{\"object\":{\"id\":\"$PAYMENT_INTENT_ID\",\"metadata\":{\"order_id\":\"$ORDER_ID\"}}}}"
 export WEBHOOK_SIGNATURE="$(printf '%s' "$WEBHOOK_BODY" | openssl dgst -sha256 -hmac "$DEMO_WEBHOOK_SECRET" -hex | sed 's/^.*= //')"
 curl -i -X POST -H 'Content-Type: application/json' \
   -H "X-Demo-Signature: $WEBHOOK_SIGNATURE" \
