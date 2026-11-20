@@ -1,0 +1,915 @@
+{
+  "info": {
+    "_postman_id": "f86c33c0-d01e-4e70-8d77-6c194fcc9064",
+    "name": "E-commerce Multi-store \u2014 Admin API",
+    "description": "Admin-only API automation. Use the Admin tenant hostname and the Local Admin environment. Requests run in order; CRUD requests create unique test records and delete only their captured IDs.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{adminAccessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "adminAccessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adminCsrf",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tenantId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "runId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "createdProductId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "createdProductSlug",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "createdCategoryId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 Tenant and authentication",
+      "description": "Run sequentially. Login exports the access token used by later requests.",
+      "item": [
+        {
+          "name": "Tenant resolves on Admin host",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/tenant",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "tenant"
+              ],
+              "query": []
+            },
+            "description": "Public tenant/host smoke test. This collection must use the Admin tenant hostname."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Admin tenant resolves', () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "pm.test('Request used the Admin host', () => pm.expect(data.host_type).to.eql('admin'));",
+                  "pm.test('Tenant is active', () => pm.expect(data.status).to.eql('active'));",
+                  "pm.collectionVariables.set('tenantId', data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reject protected request without token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "products"
+              ],
+              "query": []
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Confirms Admin resources reject unauthenticated requests."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Protected Admin endpoint requires authentication', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Admin login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "auth",
+                "login"
+              ],
+              "query": []
+            },
+            "description": "Uses adminEmail/adminPassword from the selected Admin environment. The access token is kept in collection variables.",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{adminEmail}}\",\"password\":\"{{adminPassword}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login succeeds', () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "pm.test('Response includes a Bearer token', () => {",
+                  "  pm.expect(data.access_token).to.be.a('string').and.not.empty;",
+                  "  pm.expect(data.token_type).to.eql('Bearer');",
+                  "});",
+                  "pm.collectionVariables.set('adminAccessToken', data.access_token);",
+                  "const setCookies = pm.response.headers.all().filter(h => h.key.toLowerCase() === 'set-cookie').map(h => h.value);",
+                  "const csrf = setCookies.map(v => v.match(/(?:^|;\\s*)admin_csrf=([^;]+)/i)).find(Boolean);",
+                  "if (csrf) pm.collectionVariables.set('adminCsrf', decodeURIComponent(csrf[1]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Authenticated Admin session",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/auth/session",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "auth",
+                "session"
+              ],
+              "query": []
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Session is authenticated', () => pm.response.to.have.status(200));",
+                  "pm.test('Session returns JSON', () => pm.expect(pm.response.json()).to.be.an('object'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dashboard summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "dashboard"
+              ],
+              "query": []
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Dashboard loads', () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "pm.test('Dashboard includes period and sales summary', () => {",
+                  "  pm.expect(data.period).to.be.an('object');",
+                  "  pm.expect(data.sales).to.be.an('object');",
+                  "  pm.expect(data.sales.order_count).to.be.a('number');",
+                  "});",
+                  "pm.test('Dashboard is not cacheable', () => pm.expect(pm.response.headers.get('Cache-Control') || '').to.include('no-store'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 Catalog read and isolated product lifecycle",
+      "description": "Creates and deletes only unique objects created during this collection run. A failed cleanup should be handled using the captured collection variable, never an ID from another run.",
+      "item": [
+        {
+          "name": "List products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/products?per_page=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "5",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Product list loads', () => pm.response.to.have.status(200));",
+                  "pm.test('Product list has a data array', () => pm.expect(pm.response.json().data).to.be.an('array'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create this run product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "products"
+              ],
+              "query": []
+            },
+            "description": "Creates an inactive, unpublished product with a run-unique slug/SKU. Only this captured product is used by the following requests.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"Postman Product {{runId}}\",\"slug\":\"postman-{{runId}}\",\"description\":\"Created by the Admin Postman collection.\",\"sku\":\"PM-{{runId}}\",\"price_cents\":2599,\"is_active\":false,\"published_at\":null}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const runId = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);",
+                  "pm.collectionVariables.set('runId', runId);",
+                  "pm.collectionVariables.unset('createdProductId');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Product created', () => pm.response.to.have.status(201));",
+                  "const data = pm.response.json().data;",
+                  "pm.test('Created product has an ID', () => pm.expect(data.id).to.be.a('string').and.not.empty);",
+                  "pm.collectionVariables.set('createdProductId', data.id);",
+                  "pm.collectionVariables.set('createdProductSlug', data.slug);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read this run product",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/products/{{createdProductId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "products",
+                "{{createdProductId}}"
+              ],
+              "query": []
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Created product can be read', () => pm.response.to.have.status(200));",
+                  "pm.test('Response ID matches this run', () => pm.expect(pm.response.json().data.id).to.eql(pm.collectionVariables.get('createdProductId')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update this run product",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/products/{{createdProductId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "products",
+                "{{createdProductId}}"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"description\":\"Updated by the Admin Postman collection.\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Created product updates', () => pm.response.to.have.status(200));",
+                  "pm.test('Updated field is returned', () => pm.expect(pm.response.json().data.description).to.eql('Updated by the Admin Postman collection.'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete this run product",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/products/{{createdProductId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "products",
+                "{{createdProductId}}"
+              ],
+              "query": []
+            },
+            "description": "Cleanup targets createdProductId captured from Create this run product. If the Runner stops before this request, use that collection variable to clean up manually."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Only the created product is deleted', () => pm.response.to.have.status(204));",
+                  "if (pm.response.code === 204) {",
+                  "  pm.collectionVariables.unset('createdProductId');",
+                  "  pm.collectionVariables.unset('createdProductSlug');",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/categories?per_page=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "categories"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "5",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Category list loads', () => pm.response.to.have.status(200));",
+                  "pm.test('Category list has a data array', () => pm.expect(pm.response.json().data).to.be.an('array'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create this run category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "categories"
+              ],
+              "query": []
+            },
+            "description": "Uses the runId created by the product lifecycle above, so run the collection in order.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Postman Category {{runId}}\",\"slug\":\"postman-category-{{runId}}\",\"position\":999,\"is_active\":false}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.unset('createdCategoryId');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Category created', () => pm.response.to.have.status(201));",
+                  "const data = pm.response.json().data;",
+                  "pm.test('Created category has an ID', () => pm.expect(data.id).to.be.a('string').and.not.empty);",
+                  "pm.collectionVariables.set('createdCategoryId', data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read this run category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/categories/{{createdCategoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "categories",
+                "{{createdCategoryId}}"
+              ],
+              "query": []
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Created category can be read', () => pm.response.to.have.status(200));",
+                  "pm.test('Response ID matches this run', () => pm.expect(pm.response.json().data.id).to.eql(pm.collectionVariables.get('createdCategoryId')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update this run category",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/categories/{{createdCategoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "categories",
+                "{{createdCategoryId}}"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Updated Postman Category {{runId}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Created category updates', () => pm.response.to.have.status(200));",
+                  "pm.test('Updated name is returned', () => pm.expect(pm.response.json().data.name).to.eql('Updated Postman Category ' + pm.collectionVariables.get('runId')));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete this run category",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/categories/{{createdCategoryId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "categories",
+                "{{createdCategoryId}}"
+              ],
+              "query": []
+            },
+            "description": "Cleanup targets the ID captured by Create this run category. If the Runner stops early, use that collection variable to clean up manually."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Only the created category is deleted', () => pm.response.to.have.status(204));",
+                  "if (pm.response.code === 204) pm.collectionVariables.unset('createdCategoryId');"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 Admin read-only smoke",
+      "description": "Read-only smoke requests followed by logout.",
+      "item": [
+        {
+          "name": "List orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/orders?per_page=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "orders"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "5",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Orders endpoint is available', () => pm.response.to.have.status(200));",
+                  "pm.test('Orders response is JSON', () => pm.expect(pm.response.json()).to.be.an('object'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List customers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/customers?per_page=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "customers"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "5",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Customers endpoint is available', () => pm.response.to.have.status(200));",
+                  "pm.test('Customers response is JSON', () => pm.expect(pm.response.json()).to.be.an('object'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read tenant settings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "settings"
+              ],
+              "query": []
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Settings endpoint is available', () => pm.response.to.have.status(200));",
+                  "const raw = pm.response.text();",
+                  "pm.test('Settings response does not expose obvious secrets', () => {",
+                  "  pm.expect(raw).not.to.match(/(?:secret_key|webhook_secret|password_hash)\\s*[\":=]/i);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read audit logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/audit-logs?limit=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "audit-logs"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "5",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Audit log endpoint is available', () => pm.response.to.have.status(200));",
+                  "pm.test('Audit response includes data', () => pm.expect(pm.response.json().data).to.be.an('array'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Admin logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{adminCsrf}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "auth",
+                "logout"
+              ],
+              "query": []
+            },
+            "description": "Last request: invalidates the current refresh session. Postman retains its own cookie jar; clear cookies for the Admin host after the run if desired."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Admin logout succeeds', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.collectionVariables.unset('adminAccessToken');"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const setCookies = pm.response.headers.all().filter(h => h.key.toLowerCase() === 'set-cookie').map(h => h.value);",
+          "const csrf = setCookies.map(v => v.match(/(?:^|;\\s*)admin_csrf=([^;]+)/i)).find(Boolean);",
+          "if (csrf && csrf[1]) pm.collectionVariables.set('adminCsrf', decodeURIComponent(csrf[1]));"
+        ]
+      }
+    }
+  ]
+}

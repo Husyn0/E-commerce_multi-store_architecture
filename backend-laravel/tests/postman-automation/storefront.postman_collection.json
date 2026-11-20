@@ -1,0 +1,819 @@
+{
+  "info": {
+    "_postman_id": "6a6715a7-8ef1-4dd6-ad6a-e1a70cd5016c",
+    "name": "E-commerce Multi-store \u2014 Storefront API",
+    "description": "Storefront-only API automation. Use the Storefront tenant hostname and Local Storefront environment. Public catalog and guest cart tests are followed by an optional existing-customer flow.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "variable": [
+    {
+      "key": "storeCsrf",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tenantId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "cartId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "createdCartItemId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "createdAddressId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "runId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 Tenant and public catalog",
+      "description": "Public requests; no login is needed.",
+      "item": [
+        {
+          "name": "Storefront tenant resolves",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storefront/tenant",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storefront",
+                "tenant"
+              ],
+              "query": []
+            },
+            "description": "Uses the Storefront tenant hostname. Confirms the host resolves to the intended tenant."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Storefront tenant resolves', () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "pm.test('Request used the Storefront host', () => pm.expect(data.host_type).to.eql('storefront'));",
+                  "pm.test('Tenant is active', () => pm.expect(data.status).to.eql('active'));",
+                  "pm.collectionVariables.set('tenantId', data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List catalog categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storefront/catalog/categories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storefront",
+                "catalog",
+                "categories"
+              ],
+              "query": []
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Storefront categories load', () => pm.response.to.have.status(200));",
+                  "pm.test('Categories response is JSON', () => pm.expect(pm.response.json()).to.be.an('object'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List catalog products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storefront/catalog/products?per_page=10&page=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storefront",
+                "catalog",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "10",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Storefront products load', () => pm.response.to.have.status(200));",
+                  "pm.test('Product list has a data array', () => pm.expect(pm.response.json().data).to.be.an('array'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List featured products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storefront/catalog/featured-products?per_page=10&page=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storefront",
+                "catalog",
+                "featured-products"
+              ],
+              "query": [
+                {
+                  "key": "per_page",
+                  "value": "10",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Featured products endpoint loads', () => pm.response.to.have.status(200));",
+                  "pm.test('Featured product response is JSON', () => pm.expect(pm.response.json()).to.be.an('object'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 Guest cart (requires productId)",
+      "description": "Run before customer login to exercise a guest session. Requires a configured published product UUID.",
+      "item": [
+        {
+          "name": "Initialize guest cart and CSRF cookie",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storefront/cart",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storefront",
+                "cart"
+              ],
+              "query": []
+            },
+            "description": "Postman stores the session cookies for the Storefront host. The CSRF cookie value is saved for subsequent mutation requests."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Guest cart initializes', () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "pm.test('Cart has an item list', () => pm.expect(data.items).to.be.an('array'));",
+                  "const setCookies = pm.response.headers.all().filter(h => h.key.toLowerCase() === 'set-cookie').map(h => h.value);",
+                  "const csrf = setCookies.map(v => v.match(/(?:^|;\\s*)storefront_csrf=([^;]+)/i)).find(Boolean);",
+                  "if (csrf) pm.collectionVariables.set('storeCsrf', decodeURIComponent(csrf[1]));",
+                  "pm.collectionVariables.set('cartId', data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add configured published product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{storeCsrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storefront/cart/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storefront",
+                "cart",
+                "items"
+              ],
+              "query": []
+            },
+            "description": "Set productId in the Storefront environment to a published, in-stock product without required variants.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"product_id\":\"{{productId}}\",\"quantity\":1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.unset('createdCartItemId');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Product is added to cart', () => pm.response.to.have.status(200));",
+                  "const items = pm.response.json().items;",
+                  "pm.test('Cart contains the configured product', () => pm.expect(items.some(item => item.product_id === pm.environment.get('productId'))).to.eql(true));",
+                  "pm.collectionVariables.set('createdCartItemId', items.find(item => item.product_id === pm.environment.get('productId')).id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reject client-supplied cart price",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{storeCsrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storefront/cart/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storefront",
+                "cart",
+                "items"
+              ],
+              "query": []
+            },
+            "description": "Expected validation failure; does not create a cart line.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"product_id\":\"{{productId}}\",\"quantity\":1,\"unit_price_cents\":1}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Client cannot set cart price', () => pm.response.to.have.status(422));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete this run cart line",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{storeCsrf}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storefront/cart/items/{{createdCartItemId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storefront",
+                "cart",
+                "items",
+                "{{createdCartItemId}}"
+              ],
+              "query": []
+            },
+            "description": "Deletes the line captured from Add configured published product. If the Runner stops early, use createdCartItemId from collection variables."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Only the created cart line is deleted', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) pm.collectionVariables.unset('createdCartItemId');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Verify guest cart is empty",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storefront/cart",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storefront",
+                "cart"
+              ],
+              "query": []
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Guest cart remains available', () => pm.response.to.have.status(200));",
+                  "pm.test('This run cart has no lines', () => pm.expect(pm.response.json().items).to.have.length(0));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 Existing customer account (requires credentials)",
+      "description": "Run after the guest cart folder. Credentials are read from the selected Storefront environment. Mutating address requests only update/delete the address created here.",
+      "item": [
+        {
+          "name": "Customer login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{storeCsrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storefront/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storefront",
+                "auth",
+                "login"
+              ],
+              "query": []
+            },
+            "description": "Uses an existing active customer. Run Initialize guest cart first so Postman has the CSRF cookie.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"{{customerEmail}}\",\"password\":\"{{customerPassword}}\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Customer login succeeds', () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "pm.test('Authenticated user is a customer', () => pm.expect(data.user.email).to.eql(pm.environment.get('customerEmail')));",
+                  "const setCookies = pm.response.headers.all().filter(h => h.key.toLowerCase() === 'set-cookie').map(h => h.value);",
+                  "const csrf = setCookies.map(v => v.match(/(?:^|;\\s*)storefront_csrf=([^;]+)/i)).find(Boolean);",
+                  "if (csrf) pm.collectionVariables.set('storeCsrf', decodeURIComponent(csrf[1]));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read customer account",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storefront/account",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storefront",
+                "account"
+              ],
+              "query": []
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Customer account loads', () => pm.response.to.have.status(200));",
+                  "pm.test('Account includes user and addresses', () => {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(data.user).to.be.an('object');",
+                  "  pm.expect(data.addresses).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create this run address",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{storeCsrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storefront/account/addresses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storefront",
+                "account",
+                "addresses"
+              ],
+              "query": []
+            },
+            "description": "Creates an address under the logged-in customer. A unique label makes the run easy to identify.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"label\":\"Postman {{runId}}\",\"recipient_name\":\"Postman Test Customer\",\"line1\":\"1 Test Street\",\"city\":\"Test City\",\"postal_code\":\"10000\",\"country_code\":\"US\",\"is_default_shipping\":false,\"is_default_billing\":false}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const runId = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);",
+                  "pm.collectionVariables.set('runId', runId);",
+                  "pm.collectionVariables.unset('createdAddressId');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Address created', () => pm.response.to.have.status(201));",
+                  "const data = pm.response.json();",
+                  "pm.test('Address response has an ID', () => pm.expect(data.id).to.be.a('string').and.not.empty);",
+                  "pm.collectionVariables.set('createdAddressId', data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update this run address",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{storeCsrf}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storefront/account/addresses/{{createdAddressId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storefront",
+                "account",
+                "addresses",
+                "{{createdAddressId}}"
+              ],
+              "query": []
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"city\":\"Updated Test City\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Address update succeeds', () => pm.response.to.have.status(200));",
+                  "pm.test('Updated city is returned', () => pm.expect(pm.response.json().city).to.eql('Updated Test City'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete this run address",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{storeCsrf}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storefront/account/addresses/{{createdAddressId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storefront",
+                "account",
+                "addresses",
+                "{{createdAddressId}}"
+              ],
+              "query": []
+            },
+            "description": "Cleanup targets createdAddressId saved by this run. If execution stops before cleanup, use that collection variable, not an old customer address ID."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Only the created address is deleted', () => pm.response.to.have.status(200));",
+                  "pm.test('Delete response confirms removal', () => pm.expect(pm.response.json().deleted).to.eql(true));",
+                  "if (pm.response.code === 200) pm.collectionVariables.unset('createdAddressId');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List customer orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storefront/account/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storefront",
+                "account",
+                "orders"
+              ],
+              "query": []
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Customer order history loads', () => pm.response.to.have.status(200));",
+                  "pm.test('Order history is JSON', () => pm.expect(pm.response.json()).to.be.an('object'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List saved payment methods",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/storefront/account/payment-methods",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storefront",
+                "account",
+                "payment-methods"
+              ],
+              "query": []
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Saved payment methods load', () => pm.response.to.have.status(200));",
+                  "pm.test('Methods response has a data array', () => pm.expect(pm.response.json().data).to.be.an('array'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Customer logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-CSRF-TOKEN",
+                "value": "{{storeCsrf}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/storefront/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "storefront",
+                "auth",
+                "logout"
+              ],
+              "query": []
+            },
+            "description": "Last request in the authenticated flow."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Customer logout succeeds', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const setCookies = pm.response.headers.all().filter(h => h.key.toLowerCase() === 'set-cookie').map(h => h.value);",
+          "const csrf = setCookies.map(v => v.match(/(?:^|;\\s*)storefront_csrf=([^;]+)/i)).find(Boolean);",
+          "if (csrf && csrf[1]) pm.collectionVariables.set('storeCsrf', decodeURIComponent(csrf[1]));"
+        ]
+      }
+    }
+  ]
+}
