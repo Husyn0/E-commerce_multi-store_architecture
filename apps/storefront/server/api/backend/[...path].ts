@@ -51,7 +51,7 @@ export default defineEventHandler(async (event) => {
       headers,
       body,
       retry: 0,
-      timeout: 2000,
+      timeout: 15000,
       ignoreResponseError: true
     })
 

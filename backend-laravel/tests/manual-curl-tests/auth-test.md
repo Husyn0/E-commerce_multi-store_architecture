@@ -100,56 +100,58 @@ curl -i -b "$ADMIN_JAR" -c "$ADMIN_JAR" \
 refresh using that jar should return `401`.
 
 ## Storefront registration and login
+## 📋 Section A7: "Register a brand-new customer (complete local flow)"
 
-### A7. Register a brand-new customer (complete local flow)
+This section walks through a __complete storefront customer registration flow__. It's designed for local development/testing and requires proper tenant configuration first.
 
-**First fix tenant resolution if any request says `Tenant not found`.** The
-Storefront URL must match `STOREFRONT_BASE_DOMAIN` in `backend-laravel/.env`,
-and its leftmost label must match an existing `tenants.subdomain`. For example,
-the exported `.env` currently sets `STOREFRONT_BASE_DOMAIN=storefront.localhost`;
-with a tenant whose subdomain is `shop`, use
-`http://shop.storefront.localhost:8000`. Do not use `localhost:8000` for
-tenant-scoped API requests. Check the active configuration and tenant row:
+### ⚠️ Key Prerequisites (Critical for Safety)
+
+Before running any A7 commands, you __must__ fix tenant resolution. The documentation explicitly states:
+
+> __First fix tenant resolution if any request says `Tenant not found`.__ The Storefront URL must match `STOREFRONT_BASE_DOMAIN` in `backend-laravel/.env`, and its leftmost label must match an existing `tenants.subdomain`.
+
+### 🔧 Setup Steps (Safe - read-only until you run the final register)
+
+1. __Check your configuration__ (safe, just shows current state):
 
 ```sh
 cd backend-laravel
 php artisan config:clear
-php artisan tinker --execute="dump(config('tenancy.storefront_base_domain')); dump(DB::table('tenants')->select('id','name','subdomain','status')->get());"
+php artisan tinker --execute="
+  dump(config('tenancy.storefront_base_domain'));
+  dump(DB::table('tenants')->select('id','name','subdomain','status')->get());
+"
 ```
 
-For a fresh database created from `database/schema.mysql.sql`, no tenant is
-created automatically. Provision one through the protected CLI flow described
-in `INITIALIZATION.md` (temporarily enable `TENANT_LIFECYCLE_CLI_ENABLED=true`
-and set a non-empty `TENANT_CLI_OPERATOR_REF` in `.env` for this controlled
-local operation). Example:
+- This __only reads__ configuration and database - no data modification
+- Verify `STOREFRONT_BASE_DOMAIN` matches your setup
+- Verify a tenant exists with a matching subdomain
+
+2. __If no tenant exists__, you'll need to provision one (documented in the file):
 
 ```sh
 php artisan tenant:provision "Local Shop" shop USD en --admin-email=admin@example.test
 ```
 
-Use the actual `subdomain` and configured base domain consistently. After
-provisioning, keep `STOREFRONT_BASE_DOMAIN` aligned with the URL you use (the
-exported `.env` value is `storefront.localhost`), run `php artisan config:clear`,
-and confirm `http://shop.storefront.localhost:8000/api/storefront/tenant`
-returns `200`. Do not disable tenant resolution or add a default-tenant fallback.
+- This creates a tenant with subdomain `shop`
+- You can use a __throwaway admin email__ - it doesn't affect your real accounts
 
-Initialize a fresh cookie jar and obtain the CSRF token. Keep using this same
-jar for the registration human-check, email OTP request, and registration:
+### 🛡️ Safe Registration Flow (Step-by-step, minimal risk)
+
+The registration uses a __dedicated cookie jar__ (`/tmp/shop-register-*.cookies`) and __unique test emails__ pattern: `manual-<ID>@example.test`
+
+__Step 1: Initialize cookie jar (safe)__
 
 ```sh
 export STORE_JAR="/tmp/shop-register-$TEST_RUN_ID.cookies"
-curl -i -c "$STORE_JAR" -b "$STORE_JAR" \
-  "$STORE_BASE/api/storefront/cart"
+curl -i -c "$STORE_JAR" -b "$STORE_JAR" "$STORE_BASE/api/storefront/cart"
 export STORE_CSRF="$(awk '$6 == "storefront_csrf" {print $7}' "$STORE_JAR")"
 ```
 
-**Expect:** cart endpoint `200`; both `storefront_cart` and
-`storefront_csrf` cookies are present. If the response is `404 Tenant not
-found`, stop here and fix the host/subdomain configuration rather than retrying
-registration.
+- Only reads cart endpoint, sets up cookie jar
+- __Uses `$TEST_RUN_ID`__ - automatically unique per run
 
-Pass the local-only human check. This works only when `APP_ENV=local` (or
-`testing`) and the tenant setting is `human_check_driver=demo`:
+__Step 2: Human check (safe, local only)__
 
 ```sh
 curl -i -b "$STORE_JAR" -c "$STORE_JAR" \
@@ -158,8 +160,11 @@ curl -i -b "$STORE_JAR" -c "$STORE_JAR" \
   "$STORE_BASE/api/storefront/verification/human"
 ```
 
-**Expect:** `200 {"verified":true}`. If the tenant requires email verification
-(the schema defaults `require_email_verification` to true), request a code:
+- __Only works when `APP_ENV=local`__ (or testing)
+- Uses `human_check_driver=demo` setting
+- No real data affected yet
+
+__Step 3: Request email OTP (safe - configurable risk)__
 
 ```sh
 export CUSTOMER_EMAIL="manual-$TEST_RUN_ID@example.test"
@@ -169,14 +174,11 @@ curl -i -b "$STORE_JAR" -c "$STORE_JAR" \
   "$STORE_BASE/api/storefront/verification/email"
 ```
 
-**Expect:** `202`, with no OTP in the response. Retrieve the six-digit code
-from the configured email delivery channel. The default `log` mailer is not a
-working delivery channel for this flow; configure a real local SMTP/test inbox
-or, for an isolated test only, set the tenant's `require_email_verification`
-to false in the database. Do not guess an OTP or expect it in the HTTP response.
+- __Expects `202` response__ - just requests a code
+- Default uses `log` mailer - __won't deliver to real email__
+- Option: set tenant's `require_email_verification` to `false` in DB for isolated testing
 
-Register using the same cookie jar and a unique email. If email verification
-is required, replace `123456` with the actual delivered code:
+__Step 4: Complete registration (the actual data-creating step)__
 
 ```sh
 curl -i -b "$STORE_JAR" -c "$STORE_JAR" \
@@ -185,11 +187,10 @@ curl -i -b "$STORE_JAR" -c "$STORE_JAR" \
   "$STORE_BASE/api/storefront/auth/register"
 ```
 
-**Expect:** `201`, customer role/data, and an HttpOnly `storefront_session`
-cookie. The password must be at least eight characters and the confirmation
-must match. When `require_email_verification=false`, omit
-`email_verification_code` from the JSON. Registration should not create a
-store/tenant; it creates a customer **inside the tenant resolved from the host**.
+- __Creates a customer account__ inside the tenant resolved from the host
+- Password must be ≥ 8 chars, confirmation must match
+- When `require_email_verification=false`, you can omit `email_verification_code`
+- __Does NOT create a store/tenant__ - creates customer __inside existing tenant__
 
 ### A8. Reject duplicate registration
 
